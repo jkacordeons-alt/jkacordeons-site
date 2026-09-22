@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — JK Acordeons</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--r:#C0392B;--g:#25D366}
+body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
+.login-box{background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:2.5rem;width:380px;max-width:100%;text-align:center}
+.login-logo{font-size:2.5rem;margin-bottom:.5rem}
+.login-title{font-size:1.3rem;font-weight:800;margin-bottom:.3rem}
+.login-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:2rem}
+.login-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:14px;color:#fff;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;text-align:center}
+.login-input:focus{border-color:var(--g)}
+.login-btn{width:100%;background:var(--g);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px}
+.login-btn:hover{background:#1ebe5a}
+.login-erro{color:var(--r);font-size:12px;margin-top:10px;display:none}
+.login-voltar{display:inline-block;margin-top:1.5rem;color:rgba(255,255,255,.3);font-size:12px;text-decoration:none}
+.login-voltar:hover{color:#fff}
+
+.adm-page{display:none;min-height:100vh}
+.adm-page.on{display:block}
+.adm-top{background:#111;border-bottom:2px solid var(--g);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.adm-top h2{font-size:1.1rem;font-weight:800;color:var(--g)}
+.adm-top-btns{display:flex;gap:10px}
+.adm-close{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:7px 16px;color:rgba(255,255,255,.6);font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none}
+.adm-close:hover{border-color:var(--g);color:var(--g)}
+.adm-wrap{max-width:800px;margin:0 auto;padding:2rem}
+.adm-box{background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem}
+.adm-box h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--g)}
+.adm-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.adm-f{margin-bottom:1rem}
+.adm-f label{display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
+.adm-f input,.adm-f textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px 12px;color:#fff;font-size:14px;font-family:inherit;outline:none}
+.adm-f input:focus,.adm-f textarea:focus{border-color:var(--g)}
+.adm-f textarea{min-height:80px;resize:vertical}
+.adm-fotos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.adm-foto-box{text-align:center}
+.adm-foto-box input{margin-bottom:4px;font-size:12px;width:100%}
+.adm-foto-box span{font-size:10px;color:rgba(255,255,255,.25)}
+.adm-prev{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;margin-top:6px;display:none;background:#111}
+.adm-save{background:var(--g);color:#fff;border:none;border-radius:6px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;width:100%;margin-top:.5rem}
+.adm-save:hover{background:#1ebe5a}
+.adm-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:1rem}
+.adm-item{background:#111;border:1px solid rgba(255,255,255,.06);border-radius:8px;overflow:hidden}
+.adm-item img{width:100%;aspect-ratio:1;object-fit:cover}
+.adm-item-info{padding:.6rem}
+.adm-item-info strong{display:block;font-size:12px;margin-bottom:2px;color:#fff}
+.adm-item-info span{font-size:11px;color:var(--r);font-weight:700}
+.adm-item-del{width:100%;padding:6px;background:rgba(192,57,43,.15);border:none;color:var(--r);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:6px;border-radius:4px}
+.adm-item-del:hover{background:rgba(192,57,43,.3)}
+.adm-msg{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.2);border-radius:8px;padding:1rem;font-size:13px;color:var(--g);margin-bottom:1.5rem;line-height:1.7}
+@media(max-width:768px){.adm-row,.adm-fotos{grid-template-columns:1fr}.adm-list{grid-template-columns:1fr 1fr}.adm-wrap{padding:1rem}.adm-top{padding:0 1rem}}
+</style>
+</head>
+<body>
+
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <div class="login-logo">🔐</div>
+    <div class="login-title">Painel Admin</div>
+    <div class="login-sub">JK Acordeons — Área restrita</div>
+    <input class="login-input" type="text" id="loginUser" placeholder="Usuário" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    <input class="login-input" type="password" id="loginPass" placeholder="Senha" onkeydown="if(event.key==='Enter')tentarLogin()">
+    <button class="login-btn" onclick="tentarLogin()">Entrar</button>
+    <div class="login-erro" id="loginErro">Usuário ou senha incorretos</div>
+    <a href="index.html" class="login-voltar">← Voltar ao site</a>
+  </div>
+</div>
+
+<div class="adm-page" id="admPage">
+  <div class="adm-top">
+    <h2>🔧 Painel Admin — JK Acordeons</h2>
+    <div class="adm-top-btns">
+      <a href="index.html" class="adm-close">← Voltar ao site</a>
+      <button class="adm-close" onclick="logout()">Sair</button>
+    </div>
+  </div>
+  <div class="adm-wrap">
+    <div class="adm-msg">
+      ✅ <strong>Bem-vindo ao painel!</strong><br>
+      Adicione, edite e remova acordeons. Os produtos aparecem automaticamente no catálogo do site.<br>
+      Os dados ficam salvos neste navegador.
+    </div>
+    <div class="adm-box">
+      <h3>➕ Adicionar acordeon</h3>
+      <div class="adm-f">
+        <label>Fotos (até 3)</label>
+        <div class="adm-fotos">
+          <div class="adm-foto-box"><input type="file" id="af1" accept="image/*" onchange="prevAdm(1)"><img class="adm-prev" id="ap1"><span>Principal</span></div>
+          <div class="adm-foto-box"><input type="file" id="af2" accept="image/*" onchange="prevAdm(2)"><img class="adm-prev" id="ap2"><span>Foto 2</span></div>
+          <div class="adm-foto-box"><input type="file" id="af3" accept="image/*" onchange="prevAdm(3)"><img class="adm-prev" id="ap3"><span>Foto 3</span></div>
+        </div>
+      </div>
+      <div class="adm-row">
+        <div class="adm-f"><label>Nome do acordeon</label><input id="aN" placeholder="Ex: Scandalli Super VI — 120 Baixos"></div>
+        <div class="adm-f"><label>Preço</label><input id="aP" placeholder="Ex: R$ 8.500"></div>
+      </div>
+      <div class="adm-row">
+        <div class="adm-f"><label>Parcelamento</label><input id="aPa" placeholder="Ex: 12x R$ 708"></div>
+        <div class="adm-f"><label>Marca / Origem</label><input id="aM" placeholder="Ex: Scandalli · Italy"></div>
+      </div>
+      <div class="adm-f"><label>Especificações (uma por linha)</label><textarea id="aS" placeholder="120 baixos&#10;3ª e 5ª de voz&#10;Pronta para tocar"></textarea></div>
+      <button class="adm-save" onclick="salvarProd()">✅ Salvar acordeon</button>
+    </div>
+    <div class="adm-box">
+      <h3>📦 Acordeons cadastrados</h3>
+      <div class="adm-list" id="admList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var ADM_USER='admin';
+var ADM_PASS='jk2026';
+
+function tentarLogin(){
+  var u=document.getElementById('loginUser').value.trim();
+  var p=document.getElementById('loginPass').value.trim();
+  if(u===ADM_USER&&p===ADM_PASS){
+    document.getElementById('loginPage').style.display='none';
+    document.getElementById('admPage').classList.add('on');
+    renderList();
+  }else{
+    document.getElementById('loginErro').style.display='block';
+    document.getElementById('loginPass').value='';
+    document.getElementById('loginPass').focus();
+  }
+}
+
+function logout(){
+  document.getElementById('admPage').classList.remove('on');
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginUser').value='';
+  document.getElementById('loginPass').value='';
+  document.getElementById('loginErro').style.display='none';
+}
+
+function prevAdm(n){
+  var input=document.getElementById('af'+n);
+  var prev=document.getElementById('ap'+n);
+  if(input.files&&input.files[0]){
+    var r=new FileReader();
+    r.onload=function(e){prev.src=e.target.result;prev.style.display='block'};
+    r.readAsDataURL(input.files[0]);
+  }
+}
+
+function getProds(){try{return JSON.parse(localStorage.getItem('jk_prods')||'[]')}catch(e){return[]}}
+function setProds(p){try{localStorage.setItem('jk_prods',JSON.stringify(p))}catch(e){}}
+
+function salvarProd(){
+  var nome=document.getElementById('aN').value.trim();
+  var preco=document.getElementById('aP').value.trim();
+  var parc=document.getElementById('aPa').value.trim();
+  var marca=document.getElementById('aM').value.trim();
+  var specs=document.getElementById('aS').value.trim();
+  if(!nome||!preco){alert('Preencha o nome e o preço!');return}
+  var fotos=[];
+  for(var i=1;i<=3;i++){var p=document.getElementById('ap'+i);if(p.src&&p.src.startsWith('data:image'))fotos.push(p.src)}
+  var prods=getProds();
+  prods.push({
+    id:'p'+Date.now(),nome:nome,preco:preco,parc:parc,marca:marca,
+    foto:fotos[0]||'',fotos:fotos,
+    specs:specs?specs.split('\n').filter(function(s){return s.trim()}):[],
+    wpp:'Olá! Interesse no '+nome+'.'
+  });
+  setProds(prods);
+  document.getElementById('aN').value='';
+  document.getElementById('aP').value='';
+  document.getElementById('aPa').value='';
+  document.getElementById('aM').value='';
+  document.getElementById('aS').value='';
+  for(var j=1;j<=3;j++){document.getElementById('af'+j).value='';document.getElementById('ap'+j).src='';document.getElementById('ap'+j).style.display='none'}
+  renderList();
+  alert('✅ Acordeon salvo!');
+}
+
+function delProd(id){
+  if(!confirm('Remover este acordeon?'))return;
+  var prods=getProds().filter(function(p){return p.id!==id});
+  setProds(prods);
+  renderList();
+}
+
+function renderList(){
+  var prods=getProds();
+  var el=document.getElementById('admList');
+  if(!prods.length){el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:rgba(255,255,255,.15);font-size:13px">Nenhum acordeon cadastrado ainda.<br>Adicione seu primeiro acordeon acima!</div>';return}
+  el.innerHTML=prods.map(function(p){
+    return '<div class="adm-item">'+(p.foto?'<img src="'+p.foto+'" alt="">':'<div style="aspect-ratio:1;background:#0a0a0a;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.1)">🪗</div>')+'<div class="adm-item-info"><strong>'+p.nome+'</strong><span>'+p.preco+'</span><button class="adm-item-del" onclick="delProd(\''+p.id+'\')">🗑 Remover</button></div></div>';
+  }).join('');
+}
+</script>
+</body>
+</html>
