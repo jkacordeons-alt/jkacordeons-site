@@ -232,8 +232,13 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:1.5rem
 @media(max-width:768px){.wpp-cta{padding:14px 28px;font-size:14px}}
 
 .yt-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto;padding:0 2rem}
-.yt-card{position:relative;border-radius:12px;overflow:hidden;background:#111;border:1px solid rgba(255,255,255,.06);aspect-ratio:16/9}
+.yt-card{position:relative;border-radius:12px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.06);aspect-ratio:16/9;cursor:pointer}
+.yt-card img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:filter .2s}
+.yt-card:hover img{filter:brightness(.7)}
 .yt-card iframe{width:100%;height:100%;border:none;position:absolute;inset:0}
+.yt-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;transition:transform .2s}
+.yt-play svg{width:68px;height:48px}
+.yt-card:hover .yt-play{transform:translate(-50%,-50%) scale(1.1)}
 @media(max-width:900px){.yt-grid{grid-template-columns:1fr;max-width:560px}}
 
 .hero-new{position:relative;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow:hidden}
@@ -250,9 +255,6 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:1.5rem
 .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
 @media(max-width:768px){.hero-new{min-height:90vh}.hero-trust{gap:.8rem}.hero-trust-item{font-size:12px}.hero-btns{flex-direction:column;align-items:center}.hero-cta,.hero-cta2{width:100%;max-width:320px;justify-content:center}}
 
-.vid-loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:rgba(255,255,255,.3);font-size:12px;background:#111}
-.vid-spinner{width:30px;height:30px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--r);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -302,9 +304,9 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:1.5rem
 
 <section class="vs" id="videos"><div class="vs-h"><h2>Quem comprou, <span>aprovou!</span></h2><p>Veja depoimentos reais dos nossos clientes</p></div>
 <div class="yt-grid">
-<div class="yt-card"><iframe data-src="https://www.youtube.com/embed/iH2GDajjM_o?rel=0" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe><div class="vid-loading"><div class="vid-spinner"></div><span>Carregando depoimento...</span></div></div>
-<div class="yt-card"><iframe data-src="https://www.youtube.com/embed/OKvT7Mt9ScA?rel=0" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe><div class="vid-loading"><div class="vid-spinner"></div><span>Carregando depoimento...</span></div></div>
-<div class="yt-card"><iframe data-src="https://www.youtube.com/embed/uUVwgT6KO5Q?rel=0" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe><div class="vid-loading"><div class="vid-spinner"></div><span>Carregando depoimento...</span></div></div>
+<div class="yt-card" data-vid="iH2GDajjM_o" onclick="playYT(this)"><img src="https://img.youtube.com/vi/iH2GDajjM_o/hqdefault.jpg" alt="Depoimento cliente JK Acordeons" loading="lazy"><div class="yt-play"><svg viewBox="0 0 68 48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div></div>
+<div class="yt-card" data-vid="OKvT7Mt9ScA" onclick="playYT(this)"><img src="https://img.youtube.com/vi/OKvT7Mt9ScA/hqdefault.jpg" alt="Depoimento cliente JK Acordeons" loading="lazy"><div class="yt-play"><svg viewBox="0 0 68 48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div></div>
+<div class="yt-card" data-vid="uUVwgT6KO5Q" onclick="playYT(this)"><img src="https://img.youtube.com/vi/uUVwgT6KO5Q/hqdefault.jpg" alt="Depoimento cliente JK Acordeons" loading="lazy"><div class="yt-play"><svg viewBox="0 0 68 48"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="red"/><path d="M45 24L27 14v20" fill="#fff"/></svg></div></div>
 </div>
 </section>
 <div style="text-align:center;padding:2rem 5%"><a href="https://wa.me/5542999580017?text=Olá! Vim pelo site da JK Acordeons." class="wpp-cta" target="_blank"><svg viewBox="0 0 24 24" style="width:20px;height:20px;fill:#fff;flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.469A11.932 11.932 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.178-.686-5.823-1.853l-.418-.297-2.735.869.868-2.681-.322-.447A9.778 9.778 0 012.182 12c0-5.42 4.398-9.818 9.818-9.818 5.42 0 9.818 4.398 9.818 9.818 0 5.42-4.398 9.818-9.818 9.818z"/></svg> Fale conosco no WhatsApp</a></div>
@@ -359,8 +361,6 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:1.5rem
 
 <script>
 window.addEventListener('scroll',function(){document.getElementById('hdr').classList.toggle('scrolled',scrollY>60)});
-var slides=document.querySelectorAll(',10000);
-
 function abrirCat(e){
   e.preventDefault();
   var old=document.getElementById('catP');if(old)old.remove();
@@ -452,24 +452,12 @@ document.addEventListener('click',function(e){
   }
 });
 
-;(function(){
-  var obs=new IntersectionObserver(function(entries){
-    entries.forEach(function(e){
-      if(e.isIntersecting){
-        var iframe=e.target.querySelector('iframe[data-src]');
-        if(iframe){
-          iframe.src=iframe.getAttribute('data-src');
-          iframe.onload=function(){
-            var loading=e.target.querySelector('.vid-loading');
-            if(loading)loading.style.display='none';
-          };
-        }
-        obs.unobserve(e.target);
-      }
-    });
-  },{rootMargin:'200px'});
-  document.querySelectorAll('.yt-card').forEach(function(c){obs.observe(c)});
-})();
+function playYT(card){
+  var vid=card.getAttribute('data-vid');
+  card.innerHTML='<iframe src="https://www.youtube.com/embed/'+vid+'?autoplay=1&rel=0" frameborder="0" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen></iframe>';
+  card.style.cursor='default';
+  card.onclick=null;
+}
 </script>
 </body>
 </html>
