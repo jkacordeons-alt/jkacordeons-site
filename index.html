@@ -150,6 +150,16 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:1.5rem
 .video-modal-box{position:relative;width:350px;max-width:90vw;aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#000}
 .video-modal-box iframe{width:100%;height:100%;border:none}
 .video-modal-fechar{position:absolute;top:-40px;right:0;background:none;border:none;color:#fff;font-size:28px;cursor:pointer;z-index:10}
+
+.vid-carousel{overflow:hidden;position:relative;cursor:grab}
+.vid-carousel:active{cursor:grabbing}
+.vid-track{display:flex;gap:16px;transition:transform .5s ease;padding:0 5%}
+.vid-card{min-width:300px;max-width:320px;height:500px;border-radius:12px;overflow:hidden;background:#111;border:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.vid-card iframe{width:100%;height:100%;border:none}
+.vid-dots{display:flex;justify-content:center;gap:8px;margin-top:1.5rem;padding-bottom:1rem}
+.vid-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.15);border:none;cursor:pointer;padding:0;transition:all .3s}
+.vid-dot.on{background:var(--r);transform:scale(1.3)}
+@media(max-width:768px){.vid-card{min-width:260px;height:440px}}
 </style>
 </head>
 <body>
@@ -191,11 +201,21 @@ footer{background:#000;border-top:1px solid rgba(255,255,255,.05);padding:1.5rem
 
 <section class="cm-s" id="como"><div class="cm-h"><h2>Como <span>comprar</span></h2><p>Simples, seguro e com toda a atenção que você merece</p></div><div class="stps" style="grid-template-columns:repeat(3,1fr)"><div class="stp"><div class="stn">1</div><h4>Entre em contato</h4><p>Fale conosco pelo WhatsApp para confirmar disponibilidade.</p></div><div class="stp"><div class="stn">2</div><h4>Efetue o pagamento</h4><p>PIX, transferência ou cartão em até 12x.</p></div><div class="stp"><div class="stn">3</div><h4>Receba em casa</h4><p>Enviamos para qualquer estado do Brasil.</p></div></div></section>
 
-<section class="vs" id="videos"><div class="vs-h"><h2>Quem comprou, <span>aprovou!</span></h2><p>Veja nossos clientes tocando e recebendo seus acordeons</p><div class="vs-div"></div></div><div class="vs-grid">
-  <div class="vc"><div class="vtp" onclick="abrirVideo('1InIO0MhjKc')"><img src="https://img.youtube.com/vi/1InIO0MhjKc/hqdefault.jpg" alt=""><div class="vplay"></div></div><div class="vi"><strong>Cliente recebendo</strong><span>Clique para assistir</span></div></div>
-  <div class="vc"><div class="vtp" onclick="abrirVideo('2R0ayaLCkhk')"><img src="https://img.youtube.com/vi/2R0ayaLCkhk/hqdefault.jpg" alt=""><div class="vplay"></div></div><div class="vi"><strong>Cliente tocando</strong><span>Clique para assistir</span></div></div>
-  <div class="vc"><div class="vtp" onclick="abrirVideo('5imxPQ4Ira8')"><img src="https://img.youtube.com/vi/5imxPQ4Ira8/hqdefault.jpg" alt=""><div class="vplay"></div></div><div class="vi"><strong>Depoimento</strong><span>Clique para assistir</span></div></div>
-</div><div class="vs-cta"><p>Quer aparecer aqui? Manda seu vídeo!</p><a href="https://wa.me/5542999580017?text=Quero enviar meu vídeo!" class="vs-wpp" target="_blank">💬 Enviar meu vídeo</a></div></section>
+<section class="vs" id="videos"><div class="vs-h"><h2>Quem comprou, <span>aprovou!</span></h2><p>Veja depoimentos reais dos nossos clientes</p></div>
+<div class="vid-carousel" id="vidCarousel">
+<div class="vid-track" id="vidTrack">
+<div class="vid-card"><iframe src="https://www.instagram.com/reel/Dd7g0rfI4-V/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/p/DeCTJ_Voxze/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/reel/DdrDU7RocJs/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/p/DdWk7LYIetd/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/p/DdWkNTjo70R/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/reel/Dc315z1IXIs/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/reel/DcmhslpIuOk/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+<div class="vid-card"><iframe src="https://www.instagram.com/reel/Db5-_I-jeVb/embed/" frameborder="0" scrolling="no" allowfullscreen></iframe></div>
+</div>
+</div>
+<div class="vid-dots" id="vidDots"></div>
+</section>
 
 
 <section class="dep-s" id="depoimentos">
@@ -317,6 +337,26 @@ function abrirVideo(id){
 }
 function fecharVideo(){var el=document.getElementById('videoModal');if(el)el.remove();document.body.style.overflow=''}
 
+
+;(function(){
+var track=document.getElementById('vidTrack'),carousel=document.getElementById('vidCarousel'),dotsDiv=document.getElementById('vidDots');
+if(!track||!carousel)return;
+var cards=track.querySelectorAll('.vid-card'),total=cards.length,idx=0,autoT;
+function vis(){return innerWidth<600?1:innerWidth<900?2:3}
+function cw(){return cards[0].offsetWidth+16}
+function go(i){var m=total-vis();if(i>m)i=0;if(i<0)i=m;idx=i;track.style.transform='translateX(-'+idx*cw()+'px)';var dots=dotsDiv.querySelectorAll('.vid-dot');dots.forEach(function(d,j){d.classList.toggle('on',j===i)})}
+function mkDots(){var m=total-vis()+1;dotsDiv.innerHTML='';for(var i=0;i<m;i++){var b=document.createElement('button');b.className='vid-dot'+(i===0?' on':'');b.setAttribute('data-i',i);b.onclick=function(){go(+this.getAttribute('data-i'));startA()};dotsDiv.appendChild(b)}}
+function startA(){clearInterval(autoT);autoT=setInterval(function(){go(idx+1)},4000)}
+mkDots();startA();
+var sx=0,mx=0,dr=false;
+carousel.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;dr=true});
+carousel.addEventListener('touchmove',function(e){if(dr)mx=e.touches[0].clientX-sx});
+carousel.addEventListener('touchend',function(){if(Math.abs(mx)>50){go(idx+(mx<0?1:-1));startA()}dr=false;mx=0});
+carousel.addEventListener('mousedown',function(e){sx=e.clientX;dr=true});
+carousel.addEventListener('mousemove',function(e){if(dr)mx=e.clientX-sx});
+carousel.addEventListener('mouseup',function(){if(Math.abs(mx)>50){go(idx+(mx<0?1:-1));startA()}dr=false;mx=0});
+addEventListener('resize',function(){mkDots();go(0)});
+})();
 </script>
 </body>
 </html>
