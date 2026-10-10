@@ -1182,12 +1182,12 @@ function uploadToImgbb(base64,imgbbKey){
 }
 
 function parsePrecoMeta(preco){
-  if(!preco)return'100 BRL';
+  if(!preco)return 100;
   var num=preco.replace(/[^\d,\.]/g,'').replace(/\./g,'').replace(',','.');
   var valor=parseFloat(num)||0;
   var centavos=Math.round(valor*100);
   if(centavos<100)centavos=100;
-  return centavos+' BRL';
+  return centavos;
 }
 
 function mapDisponibilidade(status){
