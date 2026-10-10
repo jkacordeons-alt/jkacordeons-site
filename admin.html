@@ -1187,7 +1187,7 @@ function parsePrecoMeta(preco){
   var valor=parseFloat(num)||0;
   var centavos=Math.round(valor*100);
   if(centavos<100)centavos=100;
-  return centavos;
+  return String(centavos);
 }
 
 function mapDisponibilidade(status){
@@ -1298,6 +1298,7 @@ function syncAllToMeta(){
         return{method:'CREATE',retailer_id:p.id,data:data};
       });
 
+      console.log('REQUESTS:', JSON.stringify(requests,null,2));
       var body=new FormData();
       body.append('access_token',mc.token);
       body.append('item_type','PRODUCT_ITEM');
