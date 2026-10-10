@@ -1255,24 +1255,33 @@ function syncAllToMeta(){
   if(mc.imgbbKey){
     spLog('📷 Enviando fotos...');
     prods.forEach(function(p,idx){
-      var foto=p.fotos&&p.fotos[0]?p.fotos[0]:'';
-      if(foto&&foto.startsWith('data:image')){
-        imgPromises.push(
-          uploadToImgbb(foto,mc.imgbbKey)
-          .then(function(url){prods[idx]._imgUrl=url;spLog('  ✅ '+p.nome)})
-          .catch(function(err){prods[idx]._imgUrl='';spLog('  ❌ '+p.nome+': '+err.message)})
-        );
-      }else if(foto&&foto.startsWith('http')){
-        prods[idx]._imgUrl=foto;
-      }else{
-        prods[idx]._imgUrl='';
-      }
+      var fotos=(p.fotos||[]).filter(function(f){return f});
+      if(!fotos.length){prods[idx]._imgUrls=[];return}
+      fotos.forEach(function(foto,fi){
+        if(foto&&foto.startsWith('data:image')){
+          imgPromises.push(
+            uploadToImgbb(foto,mc.imgbbKey)
+            .then(function(url){
+              if(!prods[idx]._imgUrls)prods[idx]._imgUrls=[];
+              prods[idx]._imgUrls[fi]=url;
+              spLog('  ✅ '+p.nome+' (foto '+(fi+1)+')');
+            })
+            .catch(function(err){
+              if(!prods[idx]._imgUrls)prods[idx]._imgUrls=[];
+              prods[idx]._imgUrls[fi]='';
+              spLog('  ❌ '+p.nome+' (foto '+(fi+1)+'): '+err.message);
+            })
+          );
+        }else if(foto&&foto.startsWith('http')){
+          if(!prods[idx]._imgUrls)prods[idx]._imgUrls=[];
+          prods[idx]._imgUrls[fi]=foto;
+        }
+      });
     });
   }else{
     spLog('⚠️ Sem chave imgBB — fotos não serão enviadas');
     prods.forEach(function(p,idx){
-      var foto=p.fotos&&p.fotos[0]?p.fotos[0]:'';
-      prods[idx]._imgUrl=foto&&foto.startsWith('http')?foto:'';
+      prods[idx]._imgUrls=[];
     });
   }
 
@@ -1294,7 +1303,9 @@ function syncAllToMeta(){
           url:'https://www.jkacordeons.com.br',
           brand:'JK Acordeons'
         };
-        if(p._imgUrl)data.image_url=p._imgUrl;
+        var urls=(p._imgUrls||[]).filter(function(u){return u});
+        if(urls.length>0)data.image_url=urls[0];
+        if(urls.length>1)data.additional_image_urls=JSON.stringify(urls.slice(1));
         return{method:'CREATE',retailer_id:p.id,data:data};
       });
 
