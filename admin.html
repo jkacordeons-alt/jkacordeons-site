@@ -3,198 +3,1378 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin — JK Acordeons</title>
+<title>Central JK Acordeons</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--r:#C0392B;--g:#25D366}
-body{font-family:'Inter',sans-serif;background:#0a0a0a;color:#fff;min-height:100vh}
+:root{
+  --bg:#0a0a0a;--card:#131313;--card2:#1a1a1a;
+  --bord:rgba(255,255,255,.06);--bord2:rgba(255,255,255,.1);
+  --g:#25D366;--g2:#1ebe5a;--g-soft:rgba(37,211,102,.08);
+  --r:#C0392B;--r-soft:rgba(192,57,43,.1);
+  --y:#F39C12;--y-soft:rgba(243,156,18,.1);
+  --b:#3498DB;--b-soft:rgba(52,152,219,.1);
+  --txt:#fff;--txt2:rgba(255,255,255,.55);--txt3:rgba(255,255,255,.3);
+  --radius:10px;--radius2:14px;
+  --sidebar:260px;
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
 
-.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem}
-.login-box{background:#1a1a1a;border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:2.5rem;width:380px;max-width:100%;text-align:center}
-.login-logo{font-size:2.5rem;margin-bottom:.5rem}
-.login-title{font-size:1.3rem;font-weight:800;margin-bottom:.3rem}
-.login-sub{font-size:12px;color:rgba(255,255,255,.35);margin-bottom:2rem}
-.login-input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:14px;color:#fff;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;text-align:center}
-.login-input:focus{border-color:var(--g)}
-.login-btn{width:100%;background:var(--g);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px}
-.login-btn:hover{background:#1ebe5a}
+/* ===== LOGIN ===== */
+.login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:2rem;background:var(--bg)}
+.login-box{background:var(--card2);border:1px solid var(--bord2);border-radius:var(--radius2);padding:2.5rem;width:400px;max-width:100%;text-align:center}
+.login-logo{font-size:2.8rem;margin-bottom:.5rem}
+.login-title{font-size:1.4rem;font-weight:800;margin-bottom:.3rem;background:linear-gradient(135deg,var(--g),#1ebe5a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.login-sub{font-size:12px;color:var(--txt3);margin-bottom:2rem}
+.login-input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bord2);border-radius:8px;padding:14px 16px;color:#fff;font-size:14px;font-family:inherit;outline:none;margin-bottom:12px;transition:border .2s}
+.login-input:focus{border-color:var(--g);background:rgba(37,211,102,.03)}
+.login-btn{width:100%;background:var(--g);color:#fff;border:none;border-radius:8px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-top:4px;transition:background .2s}
+.login-btn:hover{background:var(--g2)}
 .login-erro{color:var(--r);font-size:12px;margin-top:10px;display:none}
-.login-voltar{display:inline-block;margin-top:1.5rem;color:rgba(255,255,255,.3);font-size:12px;text-decoration:none}
+.login-voltar{display:inline-block;margin-top:1.5rem;color:var(--txt3);font-size:12px;text-decoration:none;transition:color .2s}
 .login-voltar:hover{color:#fff}
 
-.adm-page{display:none;min-height:100vh}
-.adm-page.on{display:block}
-.adm-top{background:#111;border-bottom:2px solid var(--g);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
-.adm-top h2{font-size:1.1rem;font-weight:800;color:var(--g)}
-.adm-top-btns{display:flex;gap:10px}
-.adm-close{background:none;border:1px solid rgba(255,255,255,.2);border-radius:6px;padding:7px 16px;color:rgba(255,255,255,.6);font-size:13px;font-family:inherit;cursor:pointer;text-decoration:none}
-.adm-close:hover{border-color:var(--g);color:var(--g)}
-.adm-wrap{max-width:800px;margin:0 auto;padding:2rem}
-.adm-box{background:#1a1a1a;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:1.5rem;margin-bottom:1.5rem}
-.adm-box h3{font-size:1rem;font-weight:700;margin-bottom:1rem;color:var(--g)}
-.adm-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.adm-f{margin-bottom:1rem}
-.adm-f label{display:block;font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px}
-.adm-f input,.adm-f textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:10px 12px;color:#fff;font-size:14px;font-family:inherit;outline:none}
-.adm-f input:focus,.adm-f textarea:focus{border-color:var(--g)}
-.adm-f textarea{min-height:80px;resize:vertical}
-.adm-fotos{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.adm-foto-box{text-align:center}
-.adm-foto-box input{margin-bottom:4px;font-size:12px;width:100%}
-.adm-foto-box span{font-size:10px;color:rgba(255,255,255,.25)}
-.adm-prev{width:100%;aspect-ratio:1;object-fit:cover;border-radius:6px;margin-top:6px;display:none;background:#111}
-.adm-save{background:var(--g);color:#fff;border:none;border-radius:6px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;width:100%;margin-top:.5rem}
-.adm-save:hover{background:#1ebe5a}
-.adm-list{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:1rem}
-.adm-item{background:#111;border:1px solid rgba(255,255,255,.06);border-radius:8px;overflow:hidden}
-.adm-item img{width:100%;aspect-ratio:1;object-fit:cover}
-.adm-item-info{padding:.6rem}
-.adm-item-info strong{display:block;font-size:12px;margin-bottom:2px;color:#fff}
-.adm-item-info span{font-size:11px;color:var(--r);font-weight:700}
-.adm-item-del{width:100%;padding:6px;background:rgba(192,57,43,.15);border:none;color:var(--r);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:6px;border-radius:4px}
-.adm-item-del:hover{background:rgba(192,57,43,.3)}
-.adm-msg{background:rgba(37,211,102,.08);border:1px solid rgba(37,211,102,.2);border-radius:8px;padding:1rem;font-size:13px;color:var(--g);margin-bottom:1.5rem;line-height:1.7}
-@media(max-width:768px){.adm-row,.adm-fotos{grid-template-columns:1fr}.adm-list{grid-template-columns:1fr 1fr}.adm-wrap{padding:1rem}.adm-top{padding:0 1rem}}
+/* ===== LAYOUT ===== */
+.app{display:none;min-height:100vh}
+.app.on{display:flex}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--card);border-right:1px solid var(--bord);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:20;transition:transform .3s}
+.sb-header{padding:1.5rem;border-bottom:1px solid var(--bord)}
+.sb-brand{display:flex;align-items:center;gap:10px}
+.sb-brand-icon{width:36px;height:36px;background:var(--g);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.sb-brand-txt h3{font-size:14px;font-weight:800;line-height:1.2}
+.sb-brand-txt span{font-size:10px;color:var(--txt3);font-weight:500}
+.sb-nav{flex:1;padding:1rem 0;overflow-y:auto}
+.sb-section{padding:0 1rem;margin-bottom:1.5rem}
+.sb-section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--txt3);padding:0 .75rem;margin-bottom:.5rem}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px .75rem;border-radius:8px;cursor:pointer;font-size:13px;font-weight:500;color:var(--txt2);transition:all .15s;text-decoration:none;position:relative}
+.sb-item:hover{background:rgba(255,255,255,.04);color:#fff}
+.sb-item.active{background:var(--g-soft);color:var(--g);font-weight:600}
+.sb-item .sb-icon{width:20px;text-align:center;font-size:15px;flex-shrink:0}
+.sb-item .sb-badge{position:absolute;right:.75rem;background:var(--g);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px}
+.sb-item.disabled{opacity:.3;pointer-events:none}
+.sb-item.disabled::after{content:'Em breve';position:absolute;right:.75rem;font-size:9px;color:var(--txt3);font-weight:600}
+.sb-footer{padding:1rem 1.5rem;border-top:1px solid var(--bord)}
+.sb-user{display:flex;align-items:center;gap:10px}
+.sb-avatar{width:32px;height:32px;background:var(--g-soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--g);font-weight:700}
+.sb-user-info{flex:1}
+.sb-user-info strong{display:block;font-size:12px;font-weight:600}
+.sb-user-info span{font-size:10px;color:var(--txt3)}
+.sb-logout{background:none;border:none;color:var(--txt3);cursor:pointer;font-size:16px;padding:4px;transition:color .2s}
+.sb-logout:hover{color:var(--r)}
+
+/* MAIN */
+.main{flex:1;margin-left:var(--sidebar);min-height:100vh}
+.topbar{height:60px;background:var(--card);border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between;padding:0 2rem;position:sticky;top:0;z-index:10}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.topbar-title{font-size:1.1rem;font-weight:700}
+.topbar-sub{font-size:12px;color:var(--txt3)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.topbar-btn{background:rgba(255,255,255,.05);border:1px solid var(--bord2);border-radius:8px;padding:8px 16px;color:#fff;font-size:13px;font-weight:500;font-family:inherit;cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:6px;transition:all .15s}
+.topbar-btn:hover{border-color:var(--g);color:var(--g)}
+.topbar-btn.primary{background:var(--g);border-color:var(--g);font-weight:600}
+.topbar-btn.primary:hover{background:var(--g2)}
+.topbar-btn.sync{background:rgba(52,152,219,.15);border-color:rgba(52,152,219,.3);color:var(--b);font-weight:600}
+.topbar-btn.sync:hover{background:rgba(52,152,219,.25);border-color:var(--b)}
+.topbar-btn.sync.syncing{opacity:.6;pointer-events:none}
+.menu-toggle{display:none;background:none;border:none;color:#fff;font-size:1.5rem;cursor:pointer}
+
+.content{padding:1.5rem 2rem 3rem}
+
+/* ===== PAGES ===== */
+.page{display:none}
+.page.on{display:block}
+
+/* ===== DASHBOARD ===== */
+.dash-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem}
+.stat-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;margin-bottom:.75rem}
+.stat-icon.green{background:var(--g-soft)}
+.stat-icon.blue{background:var(--b-soft)}
+.stat-icon.yellow{background:var(--y-soft)}
+.stat-icon.red{background:var(--r-soft)}
+.stat-val{font-size:1.8rem;font-weight:800;line-height:1}
+.stat-label{font-size:11px;color:var(--txt3);margin-top:4px;font-weight:500}
+
+.dash-welcome{background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(37,211,102,.02));border:1px solid rgba(37,211,102,.15);border-radius:var(--radius2);padding:2rem;margin-bottom:2rem}
+.dash-welcome h2{font-size:1.3rem;font-weight:800;margin-bottom:.5rem}
+.dash-welcome p{font-size:13px;color:var(--txt2);line-height:1.7}
+
+/* ===== CATÁLOGO ===== */
+.cat-toolbar{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.cat-search{display:flex;align-items:center;background:var(--card2);border:1px solid var(--bord);border-radius:8px;padding:0 12px;flex:1;max-width:400px}
+.cat-search input{background:none;border:none;color:#fff;font-size:13px;font-family:inherit;padding:10px 8px;outline:none;width:100%}
+.cat-search .search-icon{color:var(--txt3);font-size:14px}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap}
+.cat-filter{background:var(--card2);border:1px solid var(--bord);border-radius:6px;padding:7px 14px;font-size:12px;font-weight:500;color:var(--txt2);cursor:pointer;font-family:inherit;transition:all .15s}
+.cat-filter:hover,.cat-filter.active{border-color:var(--g);color:var(--g);background:var(--g-soft)}
+
+.cat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.cat-item{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);transition:border .2s}
+.cat-item:hover{border-color:rgba(255,255,255,.15)}
+.cat-item-img{position:relative;aspect-ratio:4/3;background:#111;overflow:hidden;border-radius:var(--radius) var(--radius) 0 0}
+.cat-item-img img{width:100%;height:100%;object-fit:cover}
+.cat-item-img .no-img{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:3rem;color:rgba(255,255,255,.06)}
+.cat-item-status{position:absolute;top:8px;right:8px;font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px}
+.cat-item-status.disponivel{background:var(--g);color:#fff}
+.cat-item-status.vendido{background:var(--r);color:#fff}
+.cat-item-status.reservado{background:var(--y);color:#fff}
+.cat-item-body{padding:1rem}
+.cat-item-name{font-size:14px;font-weight:700;margin-bottom:2px;line-height:1.3}
+.cat-item-marca{font-size:11px;color:var(--txt3);margin-bottom:8px}
+.cat-item-price{font-size:1.1rem;font-weight:800;color:var(--g)}
+.cat-item-parc{font-size:11px;color:var(--txt3);margin-top:2px}
+.cat-item-actions{display:flex;gap:6px;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bord)}
+.cat-act{flex:1;padding:10px 7px;border-radius:6px;border:none;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;position:relative;z-index:2}
+.cat-act.edit{background:var(--b-soft);color:var(--b)}
+.cat-act.edit:hover{background:rgba(52,152,219,.2)}
+.cat-act.del{background:var(--r-soft);color:var(--r)}
+.cat-act.del:hover{background:rgba(192,57,43,.2)}
+
+.cat-empty{text-align:center;padding:4rem 2rem;color:var(--txt3)}
+.cat-empty .cat-empty-icon{font-size:4rem;margin-bottom:1rem;opacity:.3}
+.cat-empty p{font-size:14px;margin-bottom:.5rem}
+.cat-empty span{font-size:12px;color:var(--txt3)}
+
+/* ===== SYNC STATUS BAR ===== */
+.sync-bar{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+.sync-bar .sync-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sync-bar .sync-dot.ok{background:var(--g);box-shadow:0 0 6px var(--g)}
+.sync-bar .sync-dot.off{background:var(--txt3)}
+.sync-bar .sync-info{flex:1;font-size:12px;color:var(--txt2)}
+.sync-bar .sync-info strong{color:#fff;font-weight:600}
+.sync-bar .sync-link{font-size:11px;color:var(--b);cursor:pointer;text-decoration:underline;white-space:nowrap}
+.sync-bar .sync-link:hover{color:#fff}
+
+/* ===== SYNC PROGRESS (floating) ===== */
+.sync-progress{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--card);border:1px solid var(--bord2);border-radius:var(--radius2);padding:1.25rem 1.5rem;min-width:360px;max-width:90vw;z-index:90;box-shadow:0 8px 32px rgba(0,0,0,.5);display:none}
+.sync-progress.on{display:block}
+.sync-progress h4{font-size:13px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sync-progress .sp-bar{height:4px;background:rgba(255,255,255,.08);border-radius:2px;margin-bottom:8px;overflow:hidden}
+.sync-progress .sp-fill{height:100%;background:var(--g);border-radius:2px;transition:width .3s;width:0%}
+.sync-progress .sp-log{font-size:11px;color:var(--txt2);max-height:120px;overflow-y:auto;font-family:'Inter',sans-serif;line-height:1.7}
+.sync-progress .sp-close{position:absolute;top:10px;right:12px;background:none;border:none;color:var(--txt3);cursor:pointer;font-size:14px}
+
+/* ===== SETUP WIZARD (modal) ===== */
+.wizard-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:60;align-items:center;justify-content:center;padding:2rem}
+.wizard-overlay.on{display:flex}
+.wizard{background:var(--card);border:1px solid var(--bord2);border-radius:var(--radius2);width:560px;max-width:100%;max-height:90vh;overflow-y:auto}
+.wizard-header{padding:1.5rem;border-bottom:1px solid var(--bord);display:flex;align-items:center;justify-content:space-between}
+.wizard-header h3{font-size:1.1rem;font-weight:800;display:flex;align-items:center;gap:10px}
+.wizard-close{background:none;border:none;color:var(--txt3);font-size:1.3rem;cursor:pointer}
+.wizard-body{padding:1.5rem}
+.wizard-step{display:none}
+.wizard-step.on{display:block}
+.wizard-step h4{font-size:14px;font-weight:700;margin-bottom:4px}
+.wizard-step p{font-size:12px;color:var(--txt2);margin-bottom:1rem;line-height:1.6}
+.wizard-step .form-group{margin-bottom:1rem}
+.wizard-step .form-group label{display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.wizard-step .form-group input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bord2);border-radius:8px;padding:11px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:border .2s}
+.wizard-step .form-group input:focus{border-color:var(--g)}
+.wizard-step .form-hint{font-size:10px;color:var(--txt3);margin-top:4px;line-height:1.5}
+.wizard-step .form-hint a{color:var(--b)}
+.wizard-footer{padding:1rem 1.5rem;border-top:1px solid var(--bord);display:flex;justify-content:space-between;gap:10px}
+.wizard-dots{display:flex;gap:6px;align-items:center;justify-content:center;padding:0 1.5rem .5rem}
+.wizard-dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.1);transition:all .2s}
+.wizard-dot.active{background:var(--g);width:20px;border-radius:4px}
+.wizard-dot.done{background:rgba(37,211,102,.4)}
+.wizard-test{display:inline-flex;align-items:center;gap:6px;font-size:12px;margin-top:8px;padding:8px 14px;background:rgba(255,255,255,.04);border:1px solid var(--bord);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:inherit;transition:all .15s}
+.wizard-test:hover{border-color:var(--g);color:var(--g)}
+.wizard-test-result{font-size:11px;margin-top:6px;min-height:16px}
+
+/* Catálogo configs dentro do wizard */
+.wiz-cat-item{background:rgba(255,255,255,.03);border:1px solid var(--bord);border-radius:8px;padding:1rem;margin-bottom:.75rem}
+.wiz-cat-item strong{font-size:12px;display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.wiz-cat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.wiz-cat-row input{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bord2);border-radius:6px;padding:9px 12px;color:#fff;font-size:12px;font-family:inherit;outline:none}
+.wiz-cat-row input:focus{border-color:var(--g)}
+
+/* ===== FORM (modal overlay) ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(4px);z-index:50;align-items:flex-start;justify-content:center;padding:2rem;overflow-y:auto}
+.modal-overlay.on{display:flex}
+.modal{background:var(--card);border:1px solid var(--bord2);border-radius:var(--radius2);width:720px;max-width:100%;margin-top:2rem}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--bord)}
+.modal-header h3{font-size:1rem;font-weight:700}
+.modal-close{background:none;border:none;color:var(--txt3);font-size:1.5rem;cursor:pointer;padding:4px;line-height:1;transition:color .2s}
+.modal-close:hover{color:#fff}
+.modal-body{padding:1.5rem}
+.modal-footer{padding:1rem 1.5rem;border-top:1px solid var(--bord);display:flex;justify-content:flex-end;gap:10px}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-row.three{grid-template-columns:1fr 1fr 1fr}
+.form-group{margin-bottom:1rem}
+.form-group label{display:block;font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.form-group input,.form-group textarea,.form-group select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bord2);border-radius:8px;padding:11px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none;transition:border .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--g)}
+.form-group textarea{min-height:80px;resize:vertical}
+.form-group select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='rgba(255,255,255,.3)' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.form-group select option{background:#1a1a1a}
+.form-hint{font-size:10px;color:var(--txt3);margin-top:4px}
+
+/* Drop zone */
+.fotos-dropzone{border:2px dashed var(--bord2);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:all .2s;margin-bottom:12px;position:relative;background:rgba(255,255,255,.02)}
+.fotos-dropzone:hover,.fotos-dropzone.drag-over{border-color:var(--g);background:var(--g-soft)}
+.fotos-dropzone .drop-icon{font-size:2.5rem;margin-bottom:.5rem;opacity:.5}
+.fotos-dropzone .drop-text{font-size:13px;color:var(--txt2);line-height:1.6}
+.fotos-dropzone .drop-text strong{color:var(--g);cursor:pointer}
+.fotos-dropzone .drop-hint{font-size:10px;color:var(--txt3);margin-top:6px}
+.fotos-dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+/* Foto grid (preview + reorder) */
+.fotos-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.foto-thumb{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;cursor:grab;border:2px solid transparent;transition:all .2s;background:#111}
+.foto-thumb:active{cursor:grabbing}
+.foto-thumb.dragging{opacity:.4;border-color:var(--g)}
+.foto-thumb.drag-target{border-color:var(--g);transform:scale(1.05)}
+.foto-thumb img{width:100%;height:100%;object-fit:cover;pointer-events:none}
+.foto-thumb .foto-badge{position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:700;padding:2px 8px;border-radius:10px}
+.foto-thumb:first-child .foto-badge{background:var(--g)}
+.foto-thumb .foto-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;background:rgba(0,0,0,.75);border:none;border-radius:50%;color:#fff;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:2;line-height:1}
+.foto-thumb:hover .foto-remove{display:flex}
+.foto-thumb .drag-hint{position:absolute;top:4px;left:4px;background:rgba(0,0,0,.6);color:var(--txt3);font-size:8px;padding:2px 6px;border-radius:4px;pointer-events:none;opacity:0;transition:opacity .2s}
+.foto-thumb:hover .drag-hint{opacity:1}
+
+.btn{padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--g);color:#fff}
+.btn-primary:hover{background:var(--g2)}
+.btn-secondary{background:rgba(255,255,255,.06);color:var(--txt2);border:1px solid var(--bord)}
+.btn-secondary:hover{border-color:var(--txt3);color:#fff}
+
+/* ===== TOAST ===== */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--card2);border:1px solid var(--g);border-radius:var(--radius);padding:1rem 1.5rem;font-size:13px;font-weight:500;color:var(--g);z-index:100;transform:translateY(120%);opacity:0;transition:all .3s}
+.toast.on{transform:translateY(0);opacity:1}
+.toast.error{border-color:var(--r);color:var(--r)}
+
+/* Sync ask bar (after save) */
+.sync-ask{background:linear-gradient(135deg,rgba(52,152,219,.1),rgba(52,152,219,.03));border:1px solid rgba(52,152,219,.2);border-radius:var(--radius);padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;margin-top:1rem;animation:fadeIn .3s}
+.sync-ask p{flex:1;font-size:12px;color:var(--txt2)}
+.sync-ask p strong{color:#fff}
+.sync-ask .btn{padding:8px 16px;font-size:12px}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== META PAGE (simplified) ===== */
+.meta-status-card{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius2);padding:1.5rem;margin-bottom:1.5rem}
+.meta-status-header{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.meta-status-header .meta-dot{width:10px;height:10px;border-radius:50%}
+.meta-status-header .meta-dot.ok{background:var(--g);box-shadow:0 0 8px var(--g)}
+.meta-status-header .meta-dot.off{background:var(--r)}
+.meta-status-header h3{font-size:1rem;font-weight:700}
+.meta-cat-list{display:grid;gap:.75rem}
+.meta-cat-card{background:rgba(255,255,255,.03);border:1px solid var(--bord);border-radius:8px;padding:.75rem 1rem;display:flex;align-items:center;gap:10px}
+.meta-cat-card .mcc-icon{font-size:1.2rem}
+.meta-cat-card .mcc-info{flex:1}
+.meta-cat-card .mcc-info strong{display:block;font-size:13px;font-weight:600}
+.meta-cat-card .mcc-info span{font-size:11px;color:var(--txt3)}
+.meta-cat-card .mcc-status{font-size:10px;font-weight:600;padding:3px 10px;border-radius:12px}
+.meta-cat-card .mcc-status.ok{background:var(--g-soft);color:var(--g)}
+.meta-cat-card .mcc-status.off{background:var(--r-soft);color:var(--r)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1024px){
+  .dash-stats{grid-template-columns:repeat(2,1fr)}
+  .cat-grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .menu-toggle{display:block}
+  .dash-stats{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr}
+  .form-row,.form-row.three{grid-template-columns:1fr}
+  .fotos-grid{grid-template-columns:repeat(3,1fr)}
+  .fotos-dropzone{padding:1.5rem}
+  .content{padding:1rem}
+  .topbar{padding:0 1rem}
+  .topbar-right{gap:6px}
+  .topbar-btn{padding:6px 10px;font-size:12px}
+  .cat-toolbar{flex-direction:column;align-items:stretch}
+  .cat-search{max-width:100%}
+  .sync-progress{min-width:auto;left:1rem;right:1rem;transform:none}
+  .wizard{margin:0}
+  .wiz-cat-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
+<!-- ===== LOGIN ===== -->
 <div class="login-page" id="loginPage">
   <div class="login-box">
-    <div class="login-logo">🔐</div>
-    <div class="login-title">Painel Admin</div>
-    <div class="login-sub">JK Acordeons — Área restrita</div>
-    <input class="login-input" type="text" id="loginUser" placeholder="Usuário" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
-    <input class="login-input" type="password" id="loginPass" placeholder="Senha" onkeydown="if(event.key==='Enter')tentarLogin()">
+    <div class="login-logo">🪗</div>
+    <div class="login-title">Central JK Acordeons</div>
+    <div class="login-sub">Painel administrativo — Área restrita</div>
+    <input class="login-input" type="text" id="loginUser" placeholder="Usuário" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    <input class="login-input" type="password" id="loginPass" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')tentarLogin()">
     <button class="login-btn" onclick="tentarLogin()">Entrar</button>
     <div class="login-erro" id="loginErro">Usuário ou senha incorretos</div>
     <a href="index.html" class="login-voltar">← Voltar ao site</a>
   </div>
 </div>
 
-<div class="adm-page" id="admPage">
-  <div class="adm-top">
-    <h2>🔧 Painel Admin — JK Acordeons</h2>
-    <div class="adm-top-btns">
-      <a href="index.html" class="adm-close">← Voltar ao site</a>
-      <button class="adm-close" onclick="logout()">Sair</button>
-    </div>
-  </div>
-  <div class="adm-wrap">
-    <div class="adm-msg">
-      ✅ <strong>Bem-vindo ao painel!</strong><br>
-      Adicione, edite e remova acordeons. Os produtos aparecem automaticamente no catálogo do site.<br>
-      Os dados ficam salvos neste navegador.
-    </div>
-    <div class="adm-box">
-      <h3>➕ Adicionar acordeon</h3>
-      <div class="adm-f">
-        <label>Fotos (até 3)</label>
-        <div class="adm-fotos">
-          <div class="adm-foto-box"><input type="file" id="af1" accept="image/*" onchange="prevAdm(1)"><img class="adm-prev" id="ap1"><span>Principal</span></div>
-          <div class="adm-foto-box"><input type="file" id="af2" accept="image/*" onchange="prevAdm(2)"><img class="adm-prev" id="ap2"><span>Foto 2</span></div>
-          <div class="adm-foto-box"><input type="file" id="af3" accept="image/*" onchange="prevAdm(3)"><img class="adm-prev" id="ap3"><span>Foto 3</span></div>
+<!-- ===== APP ===== -->
+<div class="app" id="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-brand">
+        <div class="sb-brand-icon">🪗</div>
+        <div class="sb-brand-txt">
+          <h3>JK Acordeons</h3>
+          <span>Central do negócio</span>
         </div>
       </div>
-      <div class="adm-row">
-        <div class="adm-f"><label>Nome do acordeon</label><input id="aN" placeholder="Ex: Scandalli Super VI — 120 Baixos"></div>
-        <div class="adm-f"><label>Preço</label><input id="aP" placeholder="Ex: R$ 8.500"></div>
-      </div>
-      <div class="adm-row">
-        <div class="adm-f"><label>Parcelamento</label><input id="aPa" placeholder="Ex: 12x R$ 708"></div>
-        <div class="adm-f"><label>Marca / Origem</label><input id="aM" placeholder="Ex: Scandalli · Italy"></div>
-      </div>
-      <div class="adm-f"><label>Especificações (uma por linha)</label><textarea id="aS" placeholder="120 baixos&#10;3ª e 5ª de voz&#10;Pronta para tocar"></textarea></div>
-      <button class="adm-save" onclick="salvarProd()">✅ Salvar acordeon</button>
     </div>
-    <div class="adm-box">
-      <h3>📦 Acordeons cadastrados</h3>
-      <div class="adm-list" id="admList"></div>
+    <nav class="sb-nav">
+      <div class="sb-section">
+        <div class="sb-section-label">Principal</div>
+        <div class="sb-item active" onclick="goPage('dashboard')">
+          <span class="sb-icon">📊</span> Dashboard
+        </div>
+        <div class="sb-item" onclick="goPage('catalogo')">
+          <span class="sb-icon">🪗</span> Catálogo
+          <span class="sb-badge" id="badgeTotal">0</span>
+        </div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-section-label">Integrações</div>
+        <div class="sb-item" onclick="goPage('meta')">
+          <span class="sb-icon">📱</span> WhatsApp / Meta
+          <span class="sb-badge" id="badgeMeta" style="display:none;background:var(--b)">●</span>
+        </div>
+        <div class="sb-item disabled">
+          <span class="sb-icon">📢</span> Google Ads
+        </div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-section-label">Gestão</div>
+        <div class="sb-item disabled">
+          <span class="sb-icon">💬</span> Mensagens
+        </div>
+        <div class="sb-item disabled">
+          <span class="sb-icon">📈</span> Relatórios
+        </div>
+        <div class="sb-item disabled">
+          <span class="sb-icon">⚙️</span> Configurações
+        </div>
+      </div>
+    </nav>
+    <div class="sb-footer">
+      <div class="sb-user">
+        <div class="sb-avatar">JK</div>
+        <div class="sb-user-info">
+          <strong>Admin</strong>
+          <span>jkacordeons.com.br</span>
+        </div>
+        <button class="sb-logout" onclick="logout()" title="Sair">⏻</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+        <div>
+          <div class="topbar-title" id="topTitle">Dashboard</div>
+          <div class="topbar-sub" id="topSub">Visão geral do negócio</div>
+        </div>
+      </div>
+      <div class="topbar-right" id="topRight">
+        <a href="index.html" class="topbar-btn" target="_blank">🌐 Ver site</a>
+        <button class="topbar-btn sync" id="btnSyncTop" style="display:none" onclick="syncAllToMeta()">📱 Sincronizar WhatsApp</button>
+        <button class="topbar-btn primary" id="topAction" style="display:none" onclick="abrirModal()">➕ Novo acordeon</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- PAGE: Dashboard -->
+      <div class="page on" id="pageDashboard">
+        <div class="dash-welcome">
+          <h2>👋 Bem-vindo à Central JK Acordeons</h2>
+          <p>
+            Gerencie seu catálogo de acordeons, acompanhe vendas e controle tudo em um só lugar.<br>
+            Cadastre os acordeons no catálogo e sincronize com seus 3 WhatsApp em um clique.
+          </p>
+        </div>
+        <div class="dash-stats">
+          <div class="stat-card">
+            <div class="stat-icon green">🪗</div>
+            <div class="stat-val" id="statTotal">0</div>
+            <div class="stat-label">Acordeons cadastrados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">✅</div>
+            <div class="stat-val" id="statDisp">0</div>
+            <div class="stat-label">Disponíveis</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon yellow">⏳</div>
+            <div class="stat-val" id="statRes">0</div>
+            <div class="stat-label">Reservados</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">🏷️</div>
+            <div class="stat-val" id="statVend">0</div>
+            <div class="stat-label">Vendidos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: Catálogo -->
+      <div class="page" id="pageCatalogo">
+        <!-- Sync status bar — aparece quando Meta está configurado -->
+        <div class="sync-bar" id="syncBar" style="display:none">
+          <div class="sync-dot" id="syncDot"></div>
+          <div class="sync-info" id="syncInfo"></div>
+          <span class="sync-link" onclick="goPage('meta')">Configurações ⚙️</span>
+        </div>
+
+        <div class="cat-toolbar">
+          <div class="cat-search">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="catBusca" placeholder="Buscar acordeon..." oninput="renderCatalogo()">
+          </div>
+          <div class="cat-filters">
+            <button class="cat-filter active" onclick="setFilter('todos',this)">Todos</button>
+            <button class="cat-filter" onclick="setFilter('disponivel',this)">Disponíveis</button>
+            <button class="cat-filter" onclick="setFilter('reservado',this)">Reservados</button>
+            <button class="cat-filter" onclick="setFilter('vendido',this)">Vendidos</button>
+          </div>
+        </div>
+        <div id="catGrid" class="cat-grid"></div>
+      </div>
+
+      <!-- PAGE: Meta (simplified — settings only) -->
+      <div class="page" id="pageMeta">
+        <div class="dash-welcome" style="border-color:rgba(52,152,219,.15);background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02))">
+          <h2>📱 WhatsApp / Meta — Configurações</h2>
+          <p>
+            Aqui você gerencia a conexão com os catálogos do Meta Commerce Manager.<br>
+            Depois de configurar, basta usar o botão <strong>"Sincronizar WhatsApp"</strong> no catálogo.
+          </p>
+        </div>
+
+        <!-- Status -->
+        <div class="meta-status-card" id="metaStatusCard">
+          <div class="meta-status-header">
+            <div class="meta-dot" id="metaMainDot"></div>
+            <h3 id="metaMainStatus">Não configurado</h3>
+          </div>
+          <div class="meta-cat-list" id="metaCatList"></div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+          <button class="btn btn-primary" onclick="abrirWizard()" style="flex:1">⚙️ Reconfigurar conexão</button>
+          <button class="btn btn-secondary" onclick="syncAllToMeta()" style="flex:1" id="metaBtnSync">🔄 Sincronizar agora</button>
+          <button class="btn btn-secondary" onclick="clearMetaCatalogs()" style="white-space:nowrap">🗑️ Limpar catálogos</button>
+        </div>
+
+        <!-- Log -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1rem">
+          <h4 style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--txt3)">Log de sincronização</h4>
+          <div id="syncLogMeta" style="max-height:250px;overflow-y:auto;font-size:11px;color:var(--txt2);line-height:1.8"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
 
+<!-- ===== MODAL: Novo/Editar ===== -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">➕ Novo acordeon</h3>
+      <button class="modal-close" onclick="fecharModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-group">
+        <label>Fotos (até 5 — arraste do computador ou clique para selecionar)</label>
+        <div class="fotos-dropzone" id="fotosDropzone">
+          <input type="file" accept="image/*" multiple onchange="addFotosFromInput(this)">
+          <div class="drop-icon">📷</div>
+          <div class="drop-text">Arraste as fotos aqui<br>ou <strong>clique para selecionar</strong></div>
+          <div class="drop-hint">Qualidade original mantida — sem compressão</div>
+        </div>
+        <div class="fotos-grid" id="fotosGrid"></div>
+        <div class="form-hint" id="fotosReorderHint" style="display:none;margin-top:6px">↕ Arraste as fotos para reordenar — a primeira será a capa do anúncio</div>
+      </div>
+
+      <div class="form-group">
+        <label>Nome do acordeon</label>
+        <input type="text" id="fNome" placeholder="Ex: Scandalli Super VI — 120 Baixos">
+      </div>
+
+      <div class="form-group">
+        <label>Preço</label>
+        <input type="text" id="fPreco" placeholder="R$ 8.500">
+      </div>
+
+      <div class="form-group">
+        <label>Descrição</label>
+        <textarea id="fDesc" placeholder="Descreva o acordeon: som, estado de conservação, diferenciais..."></textarea>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarProd()">💾 Salvar acordeon</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WIZARD: Setup Meta (one-time) ===== -->
+<div class="wizard-overlay" id="wizardOverlay">
+  <div class="wizard">
+    <div class="wizard-header">
+      <h3>📱 Configurar WhatsApp / Meta</h3>
+      <button class="wizard-close" onclick="fecharWizard()">✕</button>
+    </div>
+    <div class="wizard-body">
+
+      <!-- Step 1: Token Meta -->
+      <div class="wizard-step on" id="wizStep1">
+        <h4>Passo 1 — Token do Meta Business</h4>
+        <p>Esse token permite que o sistema envie produtos para os seus catálogos automaticamente.</p>
+        <div class="form-group">
+          <label>Access Token</label>
+          <input type="password" id="wizToken" placeholder="Cole aqui o token do Meta Business Manager">
+          <div class="form-hint">Gere em: <strong>Meta Business Suite → Configurações → Tokens de API do sistema</strong>. Precisa da permissão <strong>catalog_management</strong>.</div>
+        </div>
+        <button class="wizard-test" onclick="wizTestToken()">🧪 Testar token</button>
+        <div class="wizard-test-result" id="wizTokenResult"></div>
+      </div>
+
+      <!-- Step 2: imgBB -->
+      <div class="wizard-step" id="wizStep2">
+        <h4>Passo 2 — Hospedagem de fotos (imgBB)</h4>
+        <p>O Meta exige que as fotos dos produtos estejam hospedadas em uma URL pública. O imgBB é gratuito e faz isso automaticamente.</p>
+        <div class="form-group">
+          <label>Chave API do imgBB</label>
+          <input type="text" id="wizImgbb" placeholder="Cole a chave da API">
+          <div class="form-hint">Crie grátis em <a href="https://api.imgbb.com/" target="_blank">api.imgbb.com</a> — é só criar uma conta e copiar a chave.</div>
+        </div>
+      </div>
+
+      <!-- Step 3: Catalogs -->
+      <div class="wizard-step" id="wizStep3">
+        <h4>Passo 3 — Seus 3 catálogos</h4>
+        <p>Coloque o nome (para você identificar) e o ID de cada catálogo. Encontre os IDs em <strong>Meta Commerce Manager → Catálogos → Configurações</strong>.</p>
+        <div class="wiz-cat-item">
+          <strong>📞 Telefone 1</strong>
+          <div class="wiz-cat-row">
+            <input type="text" id="wizCatName1" placeholder="Apelido (ex: WhatsApp Principal)">
+            <input type="text" id="wizCatId1" placeholder="ID do catálogo">
+          </div>
+        </div>
+        <div class="wiz-cat-item">
+          <strong>📞 Telefone 2</strong>
+          <div class="wiz-cat-row">
+            <input type="text" id="wizCatName2" placeholder="Apelido (ex: WhatsApp Vendas)">
+            <input type="text" id="wizCatId2" placeholder="ID do catálogo">
+          </div>
+        </div>
+        <div class="wiz-cat-item">
+          <strong>📞 Telefone 3</strong>
+          <div class="wiz-cat-row">
+            <input type="text" id="wizCatName3" placeholder="Apelido (ex: WhatsApp Suporte)">
+            <input type="text" id="wizCatId3" placeholder="ID do catálogo">
+          </div>
+        </div>
+        <div class="form-hint" style="margin-top:4px">Não precisa preencher os 3 — preencha só os que usar.</div>
+      </div>
+
+    </div>
+    <div class="wizard-dots" id="wizDots">
+      <div class="wizard-dot active"></div>
+      <div class="wizard-dot"></div>
+      <div class="wizard-dot"></div>
+    </div>
+    <div class="wizard-footer">
+      <button class="btn btn-secondary" id="wizBtnPrev" onclick="wizPrev()" style="visibility:hidden">← Voltar</button>
+      <button class="btn btn-primary" id="wizBtnNext" onclick="wizNext()">Próximo →</button>
+    </div>
+  </div>
+</div>
+
+<!-- SYNC PROGRESS (floating) -->
+<div class="sync-progress" id="syncProgress">
+  <button class="sp-close" onclick="closeSyncProgress()">✕</button>
+  <h4><span id="spTitle">📱 Sincronizando...</span></h4>
+  <div class="sp-bar"><div class="sp-fill" id="spFill"></div></div>
+  <div class="sp-log" id="spLog"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-var ADM_USER='admin';
-var ADM_PASS='jk2026';
+/* ===== AUTH ===== */
+var ADM_USER='admin',ADM_PASS='jk2026';
+var editandoId=null;
+var filtroAtual='todos';
+var fotosTemp=[null,null,null,null,null];
 
 function tentarLogin(){
   var u=document.getElementById('loginUser').value.trim();
   var p=document.getElementById('loginPass').value.trim();
   if(u===ADM_USER&&p===ADM_PASS){
     document.getElementById('loginPage').style.display='none';
-    document.getElementById('admPage').classList.add('on');
-    renderList();
+    document.getElementById('app').classList.add('on');
+    atualizarStats();
+    goPage('dashboard');
   }else{
     document.getElementById('loginErro').style.display='block';
     document.getElementById('loginPass').value='';
     document.getElementById('loginPass').focus();
   }
 }
-
 function logout(){
-  document.getElementById('admPage').classList.remove('on');
+  document.getElementById('app').classList.remove('on');
   document.getElementById('loginPage').style.display='flex';
   document.getElementById('loginUser').value='';
   document.getElementById('loginPass').value='';
   document.getElementById('loginErro').style.display='none';
 }
 
-function prevAdm(n){
-  var input=document.getElementById('af'+n);
-  var prev=document.getElementById('ap'+n);
-  if(input.files&&input.files[0]){
-    var r=new FileReader();
-    r.onload=function(e){prev.src=e.target.result;prev.style.display='block'};
-    r.readAsDataURL(input.files[0]);
+/* ===== NAVIGATION ===== */
+function goPage(page){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('on')});
+  document.querySelectorAll('.sb-item:not(.disabled)').forEach(function(i){i.classList.remove('active')});
+  var topAction=document.getElementById('topAction');
+  var btnSyncTop=document.getElementById('btnSyncTop');
+  if(page==='dashboard'){
+    document.getElementById('pageDashboard').classList.add('on');
+    document.querySelectorAll('.sb-item')[0].classList.add('active');
+    document.getElementById('topTitle').textContent='Dashboard';
+    document.getElementById('topSub').textContent='Visão geral do negócio';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    atualizarStats();
+  }else if(page==='catalogo'){
+    document.getElementById('pageCatalogo').classList.add('on');
+    document.querySelectorAll('.sb-item')[1].classList.add('active');
+    document.getElementById('topTitle').textContent='Catálogo';
+    document.getElementById('topSub').textContent='Gerencie seus acordeons';
+    topAction.style.display='flex';
+    renderCatalogo();
+    atualizarSyncBar();
+    // Mostrar botão sync no topo se Meta configurado
+    var mc=getMetaConfig();
+    if(mc&&mc.token&&mc.cats.some(function(c){return c.id})){
+      btnSyncTop.style.display='flex';
+    }else{
+      btnSyncTop.style.display='none';
+    }
+  }else if(page==='meta'){
+    document.getElementById('pageMeta').classList.add('on');
+    document.querySelectorAll('.sb-item')[2].classList.add('active');
+    document.getElementById('topTitle').textContent='WhatsApp / Meta';
+    document.getElementById('topSub').textContent='Configurações da integração';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderMetaStatus();
   }
+  closeSidebar();
 }
 
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open')}
+
+/* ===== DATA ===== */
 function getProds(){try{return JSON.parse(localStorage.getItem('jk_prods')||'[]')}catch(e){return[]}}
 function setProds(p){try{localStorage.setItem('jk_prods',JSON.stringify(p))}catch(e){}}
 
-function salvarProd(){
-  var nome=document.getElementById('aN').value.trim();
-  var preco=document.getElementById('aP').value.trim();
-  var parc=document.getElementById('aPa').value.trim();
-  var marca=document.getElementById('aM').value.trim();
-  var specs=document.getElementById('aS').value.trim();
-  if(!nome||!preco){alert('Preencha o nome e o preço!');return}
-  var fotos=[];
-  for(var i=1;i<=3;i++){var p=document.getElementById('ap'+i);if(p.src&&p.src.startsWith('data:image'))fotos.push(p.src)}
+/* ===== STATS ===== */
+function atualizarStats(){
   var prods=getProds();
-  prods.push({
-    id:'p'+Date.now(),nome:nome,preco:preco,parc:parc,marca:marca,
-    foto:fotos[0]||'',fotos:fotos,
-    specs:specs?specs.split('\n').filter(function(s){return s.trim()}):[],
-    wpp:'Olá! Interesse no '+nome+'.'
-  });
-  setProds(prods);
-  document.getElementById('aN').value='';
-  document.getElementById('aP').value='';
-  document.getElementById('aPa').value='';
-  document.getElementById('aM').value='';
-  document.getElementById('aS').value='';
-  for(var j=1;j<=3;j++){document.getElementById('af'+j).value='';document.getElementById('ap'+j).src='';document.getElementById('ap'+j).style.display='none'}
-  renderList();
-  alert('✅ Acordeon salvo!');
+  var total=prods.length;
+  var disp=prods.filter(function(p){return(p.status||'disponivel')==='disponivel'}).length;
+  var res=prods.filter(function(p){return p.status==='reservado'}).length;
+  var vend=prods.filter(function(p){return p.status==='vendido'}).length;
+  document.getElementById('statTotal').textContent=total;
+  document.getElementById('statDisp').textContent=disp;
+  document.getElementById('statRes').textContent=res;
+  document.getElementById('statVend').textContent=vend;
+  document.getElementById('badgeTotal').textContent=total;
+  // Meta badge
+  var mc=getMetaConfig();
+  var badge=document.getElementById('badgeMeta');
+  if(mc&&mc.token&&mc.cats.some(function(c){return c.id})){
+    badge.style.display='';
+  }else{
+    badge.style.display='none';
+  }
 }
 
+/* ===== SYNC BAR (catálogo page) ===== */
+function atualizarSyncBar(){
+  var mc=getMetaConfig();
+  var bar=document.getElementById('syncBar');
+  var dot=document.getElementById('syncDot');
+  var info=document.getElementById('syncInfo');
+  if(mc&&mc.token&&mc.cats.some(function(c){return c.id})){
+    bar.style.display='flex';
+    dot.className='sync-dot ok';
+    var nomes=mc.cats.filter(function(c){return c.id}).map(function(c){return c.name||'Catálogo'});
+    info.innerHTML='<strong>Conectado</strong> — '+nomes.join(', ')+' — Use o botão <strong>"Sincronizar WhatsApp"</strong> para atualizar tudo';
+  }else{
+    bar.style.display='flex';
+    dot.className='sync-dot off';
+    info.innerHTML='WhatsApp não configurado — <span class="sync-link" onclick="abrirWizard()" style="cursor:pointer;color:var(--b);text-decoration:underline">Configurar agora</span>';
+  }
+}
+
+/* ===== CATÁLOGO ===== */
+function setFilter(f,el){
+  filtroAtual=f;
+  document.querySelectorAll('.cat-filter').forEach(function(b){b.classList.remove('active')});
+  if(el)el.classList.add('active');
+  renderCatalogo();
+}
+
+function renderCatalogo(){
+  var prods=getProds();
+  var busca=(document.getElementById('catBusca').value||'').toLowerCase();
+  if(busca){
+    prods=prods.filter(function(p){
+      return(p.nome||'').toLowerCase().indexOf(busca)>-1||(p.descricao||'').toLowerCase().indexOf(busca)>-1;
+    });
+  }
+  if(filtroAtual!=='todos'){
+    prods=prods.filter(function(p){return(p.status||'disponivel')===filtroAtual});
+  }
+  var el=document.getElementById('catGrid');
+  if(!prods.length){
+    el.innerHTML='<div class="cat-empty" style="grid-column:1/-1"><div class="cat-empty-icon">🪗</div><p>Nenhum acordeon encontrado</p><span>'+(busca||filtroAtual!=='todos'?'Tente outra busca ou filtro':'Clique em "Novo acordeon" para adicionar o primeiro')+'</span></div>';
+    return;
+  }
+  var statusLabel={disponivel:'disponivel',reservado:'reservado',vendido:'vendido'};
+  var statusText={disponivel:'Disponível',reservado:'Reservado',vendido:'Vendido'};
+  el.innerHTML=prods.map(function(p){
+    var st=p.status||'disponivel';
+    var img=p.fotos&&p.fotos[0]?'<img src="'+p.fotos[0]+'" alt="'+p.nome+'">':'<div class="no-img">🪗</div>';
+    return '<div class="cat-item">'+
+      '<div class="cat-item-img">'+img+'<span class="cat-item-status '+statusLabel[st]+'">'+statusText[st]+'</span></div>'+
+      '<div class="cat-item-body">'+
+        '<div class="cat-item-name">'+p.nome+'</div>'+
+        '<div class="cat-item-price">'+p.preco+'</div>'+
+        '<div class="cat-item-actions">'+
+          '<button class="cat-act edit" data-edit="'+p.id+'">✏️ Editar</button>'+
+          '<button class="cat-act del" data-del="'+p.id+'">🗑️ Excluir</button>'+
+        '</div>'+
+      '</div></div>';
+  }).join('');
+  el.querySelectorAll('[data-edit]').forEach(function(btn){
+    btn.addEventListener('click',function(e){e.stopPropagation();editarProd(this.getAttribute('data-edit'))});
+  });
+  el.querySelectorAll('[data-del]').forEach(function(btn){
+    btn.addEventListener('click',function(e){e.stopPropagation();delProd(this.getAttribute('data-del'))});
+  });
+  atualizarStats();
+}
+
+/* ===== MODAL ===== */
+function abrirModal(id){
+  editandoId=id||null;
+  fotosTemp=[null,null,null,null,null];
+  document.getElementById('modalTitle').textContent=id?'✏️ Editar acordeon':'➕ Novo acordeon';
+  document.getElementById('fNome').value='';
+  document.getElementById('fPreco').value='';
+  document.getElementById('fDesc').value='';
+  renderFotosGrid();
+  if(id){
+    var prods=getProds();
+    var p=prods.find(function(x){return x.id===id});
+    if(p){
+      document.getElementById('fNome').value=p.nome||'';
+      document.getElementById('fPreco').value=p.preco||'';
+      document.getElementById('fDesc').value=p.descricao||'';
+      if(p.fotos){
+        p.fotos.forEach(function(f,i){
+          if(f&&i<5){fotosTemp[i]=f}
+        });
+        renderFotosGrid();
+      }
+    }
+  }
+  document.getElementById('modal').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+function fecharModal(){
+  document.getElementById('modal').classList.remove('on');
+  document.body.style.overflow='';
+  editandoId=null;
+}
+
+/* ===== FOTOS — Drag & Drop + Reorder ===== */
+(function(){
+  var dz=document.getElementById('fotosDropzone');
+  ['dragenter','dragover'].forEach(function(ev){
+    dz.addEventListener(ev,function(e){e.preventDefault();e.stopPropagation();dz.classList.add('drag-over')});
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    dz.addEventListener(ev,function(e){e.preventDefault();e.stopPropagation();dz.classList.remove('drag-over')});
+  });
+  dz.addEventListener('drop',function(e){
+    var files=e.dataTransfer.files;
+    if(files.length)addFotosFiles(files);
+  });
+})();
+
+function addFotosFromInput(input){
+  if(input.files&&input.files.length)addFotosFiles(input.files);
+  input.value='';
+}
+
+function addFotosFiles(files){
+  var count=fotosTemp.filter(function(f){return f}).length;
+  for(var i=0;i<files.length;i++){
+    if(count>=5){showToast('Máximo de 5 fotos!','error');break}
+    if(!files[i].type.startsWith('image/')){continue}
+    (function(file){
+      var reader=new FileReader();
+      reader.onload=function(e){
+        fotosTemp.push(e.target.result);
+        var clean=fotosTemp.filter(function(f){return f});
+        fotosTemp=[null,null,null,null,null];
+        for(var j=0;j<clean.length&&j<5;j++)fotosTemp[j]=clean[j];
+        renderFotosGrid();
+      };
+      reader.readAsDataURL(file);
+    })(files[i]);
+    count++;
+  }
+}
+
+function removeFoto(idx){
+  fotosTemp.splice(idx,1);
+  fotosTemp.push(null);
+  renderFotosGrid();
+}
+
+function renderFotosGrid(){
+  var grid=document.getElementById('fotosGrid');
+  var hint=document.getElementById('fotosReorderHint');
+  var fotos=fotosTemp.filter(function(f){return f});
+  if(!fotos.length){grid.innerHTML='';hint.style.display='none';return}
+  hint.style.display='block';
+  grid.innerHTML=fotos.map(function(src,i){
+    return '<div class="foto-thumb" draggable="true" data-idx="'+i+'">'+
+      '<img src="'+src+'" alt="Foto '+(i+1)+'">'+
+      '<span class="foto-badge">'+(i===0?'Capa':'Foto '+(i+1))+'</span>'+
+      '<span class="drag-hint">↕ arrastar</span>'+
+      '<button class="foto-remove" onclick="event.stopPropagation();removeFoto('+i+')">✕</button>'+
+    '</div>';
+  }).join('');
+  initDragReorder();
+}
+
+var dragSrcIdx=null;
+function initDragReorder(){
+  var thumbs=document.querySelectorAll('.foto-thumb');
+  thumbs.forEach(function(thumb){
+    thumb.addEventListener('dragstart',function(e){
+      dragSrcIdx=parseInt(this.getAttribute('data-idx'));
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+      e.dataTransfer.setData('text/plain',dragSrcIdx);
+    });
+    thumb.addEventListener('dragend',function(){
+      this.classList.remove('dragging');
+      document.querySelectorAll('.foto-thumb').forEach(function(t){t.classList.remove('drag-target')});
+    });
+    thumb.addEventListener('dragover',function(e){
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      this.classList.add('drag-target');
+    });
+    thumb.addEventListener('dragleave',function(){
+      this.classList.remove('drag-target');
+    });
+    thumb.addEventListener('drop',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      this.classList.remove('drag-target');
+      var destIdx=parseInt(this.getAttribute('data-idx'));
+      if(dragSrcIdx===null||dragSrcIdx===destIdx)return;
+      var fotos=fotosTemp.filter(function(f){return f});
+      var moved=fotos.splice(dragSrcIdx,1)[0];
+      fotos.splice(destIdx,0,moved);
+      fotosTemp=[null,null,null,null,null];
+      for(var i=0;i<fotos.length&&i<5;i++)fotosTemp[i]=fotos[i];
+      dragSrcIdx=null;
+      renderFotosGrid();
+    });
+  });
+}
+
+/* ===== SALVAR ===== */
+function salvarProd(){
+  var nome=document.getElementById('fNome').value.trim();
+  var preco=document.getElementById('fPreco').value.trim();
+  if(!nome||!preco){showToast('Preencha o nome e o preço!','error');return}
+  var fotos=fotosTemp.filter(function(f){return f});
+  var prod={
+    id:editandoId||'p'+Date.now(),
+    nome:nome,
+    preco:preco,
+    status:'disponivel',
+    descricao:document.getElementById('fDesc').value.trim(),
+    fotos:fotos,
+    foto:fotos[0]||'',
+    wpp:'Olá! Interesse no '+nome+'.',
+    atualizado:new Date().toISOString()
+  };
+  var prods=getProds();
+  if(editandoId){
+    prods=prods.map(function(p){return p.id===editandoId?prod:p});
+  }else{
+    prods.push(prod);
+  }
+  setProds(prods);
+  fecharModal();
+  renderCatalogo();
+  atualizarStats();
+  showToast(editandoId?'✅ Acordeon atualizado!':'✅ Acordeon cadastrado!');
+
+  // Se Meta configurado, perguntar se quer sincronizar
+  var mc=getMetaConfig();
+  if(mc&&mc.token&&mc.cats.some(function(c){return c.id})){
+    mostrarSyncAsk();
+  }
+}
+
+function editarProd(id){abrirModal(id)}
+
+var pendingDel=null;
+var pendingDelTimer=null;
 function delProd(id){
-  if(!confirm('Remover este acordeon?'))return;
+  if(pendingDel!==id){
+    pendingDel=id;
+    var btn=document.querySelector('[data-del="'+id+'"]');
+    if(btn){
+      btn.textContent='⚠️ Confirmar?';
+      btn.style.background='rgba(192,57,43,.4)';
+      btn.style.color='#fff';
+    }
+    clearTimeout(pendingDelTimer);
+    pendingDelTimer=setTimeout(function(){
+      pendingDel=null;
+      renderCatalogo();
+    },3000);
+    return;
+  }
+  clearTimeout(pendingDelTimer);
+  pendingDel=null;
   var prods=getProds().filter(function(p){return p.id!==id});
   setProds(prods);
-  renderList();
+  renderCatalogo();
+  atualizarStats();
+  showToast('🗑️ Acordeon removido');
 }
 
-function renderList(){
+/* ===== "SINCRONIZAR AGORA?" after save ===== */
+function mostrarSyncAsk(){
+  // Remove existing
+  var old=document.querySelector('.sync-ask');
+  if(old)old.remove();
+  var grid=document.getElementById('catGrid');
+  var div=document.createElement('div');
+  div.className='sync-ask';
+  div.innerHTML='<p><strong>Produto salvo!</strong> Quer atualizar os catálogos do WhatsApp agora?</p>'+
+    '<button class="btn btn-primary" onclick="this.parentElement.remove();syncAllToMeta()">📱 Sincronizar</button>'+
+    '<button class="btn btn-secondary" onclick="this.parentElement.remove()">Depois</button>';
+  grid.parentElement.insertBefore(div,grid.nextSibling);
+  // Auto-remove after 10s
+  setTimeout(function(){if(div.parentElement)div.remove()},10000);
+}
+
+/* ===== TOAST ===== */
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(type==='error'?' error':'')+' on';
+  setTimeout(function(){t.classList.remove('on')},3000);
+}
+
+/* ===== META CONFIG ===== */
+var META_API='https://graph.facebook.com/v21.0';
+
+function getMetaConfig(){
+  try{
+    var c=JSON.parse(localStorage.getItem('jk_meta_config')||'null');
+    if(c&&c.cats)return c;
+  }catch(e){}
+  return{token:'',imgbbKey:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
+}
+function setMetaConfig(c){try{localStorage.setItem('jk_meta_config',JSON.stringify(c))}catch(e){}}
+
+/* ===== META STATUS PAGE ===== */
+function renderMetaStatus(){
+  var mc=getMetaConfig();
+  var dot=document.getElementById('metaMainDot');
+  var status=document.getElementById('metaMainStatus');
+  var list=document.getElementById('metaCatList');
+  var isConfigured=mc.token&&mc.cats.some(function(c){return c.id});
+
+  if(isConfigured){
+    dot.className='meta-dot ok';
+    status.textContent='Conectado e pronto para sincronizar';
+  }else{
+    dot.className='meta-dot off';
+    status.textContent='Não configurado — clique em "Reconfigurar" abaixo';
+  }
+
+  var html='';
+  mc.cats.forEach(function(cat,i){
+    var hasId=cat.id&&cat.id.length>5;
+    html+='<div class="meta-cat-card">'+
+      '<span class="mcc-icon">📞</span>'+
+      '<div class="mcc-info"><strong>'+(cat.name||'Telefone '+(i+1))+'</strong>'+
+      '<span>'+(hasId?'ID: '+cat.id.substring(0,8)+'...':'Sem ID configurado')+'</span></div>'+
+      '<span class="mcc-status '+(hasId?'ok':'off')+'">'+(hasId?'✅ Ativo':'❌ Inativo')+'</span>'+
+    '</div>';
+  });
+  list.innerHTML=html;
+}
+
+/* ===== WIZARD ===== */
+var wizStep=0;
+function abrirWizard(){
+  wizStep=0;
+  // Pre-fill com config existente
+  var mc=getMetaConfig();
+  document.getElementById('wizToken').value=mc.token||'';
+  document.getElementById('wizImgbb').value=mc.imgbbKey||'';
+  for(var i=0;i<3;i++){
+    document.getElementById('wizCatName'+(i+1)).value=(mc.cats[i]&&mc.cats[i].name)||'';
+    document.getElementById('wizCatId'+(i+1)).value=(mc.cats[i]&&mc.cats[i].id)||'';
+  }
+  document.getElementById('wizTokenResult').textContent='';
+  renderWizStep();
+  document.getElementById('wizardOverlay').classList.add('on');
+  document.body.style.overflow='hidden';
+}
+
+function fecharWizard(){
+  document.getElementById('wizardOverlay').classList.remove('on');
+  document.body.style.overflow='';
+}
+
+function renderWizStep(){
+  for(var i=1;i<=3;i++){
+    document.getElementById('wizStep'+i).className='wizard-step'+(i===(wizStep+1)?' on':'');
+  }
+  // Dots
+  var dots=document.getElementById('wizDots').children;
+  for(var i=0;i<3;i++){
+    dots[i].className='wizard-dot'+(i===wizStep?' active':(i<wizStep?' done':''));
+  }
+  // Buttons
+  document.getElementById('wizBtnPrev').style.visibility=wizStep===0?'hidden':'visible';
+  var nextBtn=document.getElementById('wizBtnNext');
+  if(wizStep===2){
+    nextBtn.textContent='✅ Salvar e conectar';
+    nextBtn.className='btn btn-primary';
+  }else{
+    nextBtn.textContent='Próximo →';
+    nextBtn.className='btn btn-primary';
+  }
+}
+
+function wizNext(){
+  if(wizStep===0){
+    var token=document.getElementById('wizToken').value.trim();
+    if(!token){showToast('Cole o token do Meta!','error');return}
+  }
+  if(wizStep===2){
+    // Save
+    wizSave();
+    return;
+  }
+  wizStep++;
+  renderWizStep();
+}
+
+function wizPrev(){
+  if(wizStep>0){wizStep--;renderWizStep()}
+}
+
+function wizSave(){
+  var config={
+    token:document.getElementById('wizToken').value.trim(),
+    imgbbKey:document.getElementById('wizImgbb').value.trim(),
+    cats:[]
+  };
+  for(var i=0;i<3;i++){
+    config.cats.push({
+      name:document.getElementById('wizCatName'+(i+1)).value.trim(),
+      id:document.getElementById('wizCatId'+(i+1)).value.trim()
+    });
+  }
+  if(!config.cats.some(function(c){return c.id})){
+    showToast('Preencha pelo menos 1 ID de catálogo!','error');
+    return;
+  }
+  setMetaConfig(config);
+  fecharWizard();
+  showToast('✅ WhatsApp conectado!');
+  atualizarStats();
+  // Refresh current page
+  var pageCatalogo=document.getElementById('pageCatalogo');
+  if(pageCatalogo.classList.contains('on')){
+    atualizarSyncBar();
+    document.getElementById('btnSyncTop').style.display='flex';
+  }
+  var pageMeta=document.getElementById('pageMeta');
+  if(pageMeta.classList.contains('on')){
+    renderMetaStatus();
+  }
+}
+
+function wizTestToken(){
+  var token=document.getElementById('wizToken').value.trim();
+  var result=document.getElementById('wizTokenResult');
+  if(!token){result.textContent='❌ Cole o token primeiro';result.style.color='var(--r)';return}
+  result.textContent='🔄 Testando...';result.style.color='var(--txt2)';
+  fetch(META_API+'/me?access_token='+encodeURIComponent(token))
+  .then(function(r){return r.json()})
+  .then(function(data){
+    if(data.error){
+      result.textContent='❌ '+(data.error.message||'Token inválido');
+      result.style.color='var(--r)';
+    }else{
+      result.textContent='✅ Conectado como: '+(data.name||data.id);
+      result.style.color='var(--g)';
+    }
+  })
+  .catch(function(err){
+    result.textContent='❌ Erro: '+err.message;
+    result.style.color='var(--r)';
+  });
+}
+
+/* ===== SYNC ENGINE ===== */
+
+function uploadToImgbb(base64,imgbbKey){
+  return new Promise(function(resolve,reject){
+    if(!base64||!base64.startsWith('data:image')){resolve('');return}
+    var pure=base64.split(',')[1];
+    var form=new FormData();
+    form.append('key',imgbbKey);
+    form.append('image',pure);
+    fetch('https://api.imgbb.com/1/upload',{method:'POST',body:form})
+    .then(function(r){return r.json()})
+    .then(function(data){
+      if(data.success&&data.data&&data.data.url){resolve(data.data.url)}
+      else{reject(new Error(data.error?data.error.message:'Falha no upload'))}
+    })
+    .catch(reject);
+  });
+}
+
+function parsePrecoMeta(preco){
+  if(!preco)return'0 BRL';
+  var num=preco.replace(/[^\d,\.]/g,'').replace(/\./g,'').replace(',','.');
+  return(parseFloat(num)||0).toFixed(0)+' BRL';
+}
+
+function mapDisponibilidade(status){
+  if(status==='vendido')return'out of stock';
+  return'in stock';
+}
+
+function mapCondicao(cond){
+  if(cond==='novo')return'new';
+  if(cond==='usado')return'used';
+  return'refurbished';
+}
+
+// Sync progress UI
+var spTotal=0,spDone=0;
+function spLog(msg){
+  var log=document.getElementById('spLog');
+  log.innerHTML+='<div>'+msg+'</div>';
+  log.scrollTop=log.scrollHeight;
+  // Also log to meta page if visible
+  var metaLog=document.getElementById('syncLogMeta');
+  if(metaLog){
+    var time=new Date().toLocaleTimeString('pt-BR');
+    metaLog.innerHTML+='<div>['+time+'] '+msg+'</div>';
+    metaLog.scrollTop=metaLog.scrollHeight;
+  }
+}
+function spProgress(pct){
+  document.getElementById('spFill').style.width=pct+'%';
+}
+function openSyncProgress(){
+  var sp=document.getElementById('syncProgress');
+  sp.classList.add('on');
+  document.getElementById('spLog').innerHTML='';
+  document.getElementById('spFill').style.width='0%';
+  document.getElementById('spTitle').textContent='📱 Sincronizando...';
+}
+function closeSyncProgress(){
+  document.getElementById('syncProgress').classList.remove('on');
+}
+
+function syncAllToMeta(){
+  var mc=getMetaConfig();
+  if(!mc||!mc.token){
+    // Não configurado → abrir wizard
+    abrirWizard();
+    return;
+  }
+  var activeCats=mc.cats.filter(function(c){return c.id});
+  if(!activeCats.length){abrirWizard();return}
   var prods=getProds();
-  var el=document.getElementById('admList');
-  if(!prods.length){el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:rgba(255,255,255,.15);font-size:13px">Nenhum acordeon cadastrado ainda.<br>Adicione seu primeiro acordeon acima!</div>';return}
-  el.innerHTML=prods.map(function(p){
-    return '<div class="adm-item">'+(p.foto?'<img src="'+p.foto+'" alt="">':'<div style="aspect-ratio:1;background:#0a0a0a;display:flex;align-items:center;justify-content:center;font-size:2rem;color:rgba(255,255,255,.1)">🪗</div>')+'<div class="adm-item-info"><strong>'+p.nome+'</strong><span>'+p.preco+'</span><button class="adm-item-del" onclick="delProd(\''+p.id+'\')">🗑 Remover</button></div></div>';
-  }).join('');
+  if(!prods.length){showToast('Nenhum acordeon cadastrado!','error');return}
+
+  // Disable sync buttons
+  var btnTop=document.getElementById('btnSyncTop');
+  if(btnTop){btnTop.classList.add('syncing');btnTop.textContent='⏳ Sincronizando...'}
+
+  openSyncProgress();
+  spLog('🚀 Iniciando sincronização...');
+  spLog('📦 '+prods.length+' acordeon(s) → '+activeCats.length+' catálogo(s)');
+  spProgress(5);
+
+  // 1. Upload images
+  var imgPromises=[];
+  if(mc.imgbbKey){
+    spLog('📷 Enviando fotos...');
+    prods.forEach(function(p,idx){
+      var foto=p.fotos&&p.fotos[0]?p.fotos[0]:'';
+      if(foto&&foto.startsWith('data:image')){
+        imgPromises.push(
+          uploadToImgbb(foto,mc.imgbbKey)
+          .then(function(url){prods[idx]._imgUrl=url;spLog('  ✅ '+p.nome)})
+          .catch(function(err){prods[idx]._imgUrl='';spLog('  ❌ '+p.nome+': '+err.message)})
+        );
+      }else if(foto&&foto.startsWith('http')){
+        prods[idx]._imgUrl=foto;
+      }else{
+        prods[idx]._imgUrl='';
+      }
+    });
+  }else{
+    spLog('⚠️ Sem chave imgBB — fotos não serão enviadas');
+    prods.forEach(function(p,idx){
+      var foto=p.fotos&&p.fotos[0]?p.fotos[0]:'';
+      prods[idx]._imgUrl=foto&&foto.startsWith('http')?foto:'';
+    });
+  }
+
+  Promise.all(imgPromises).then(function(){
+    spProgress(40);
+    spLog('📱 Enviando aos catálogos...');
+
+    var catPromises=[];
+    var catDone=0;
+    activeCats.forEach(function(cat){
+      var requests=prods.map(function(p){
+        var data={
+          name:p.nome||'Acordeon',
+          description:p.descricao||p.nome,
+          availability:mapDisponibilidade(p.status),
+          condition:'refurbished',
+          price:parsePrecoMeta(p.preco),
+          currency:'BRL',
+          url:'https://www.jkacordeons.com.br',
+          brand:'JK Acordeons'
+        };
+        if(p._imgUrl)data.image_url=p._imgUrl;
+        return{method:'CREATE',retailer_id:p.id,data:data};
+      });
+
+      var body=new FormData();
+      body.append('access_token',mc.token);
+      body.append('item_type','PRODUCT_ITEM');
+      body.append('requests',JSON.stringify(requests));
+      body.append('allow_upsert','true');
+
+      catPromises.push(
+        fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+        .then(function(r){return r.json()})
+        .then(function(resp){
+          catDone++;
+          spProgress(40+Math.round(catDone/activeCats.length*55));
+          if(resp.error){
+            spLog('❌ '+(cat.name||cat.id)+': '+resp.error.message);
+          }else{
+            var handles=resp.handles||[];
+            spLog('✅ '+(cat.name||cat.id)+': '+handles.length+' produto(s) enviados');
+          }
+        })
+        .catch(function(err){
+          catDone++;
+          spLog('❌ '+(cat.name||cat.id)+': '+err.message);
+        })
+      );
+    });
+
+    return Promise.all(catPromises);
+  }).then(function(){
+    spProgress(100);
+    spLog('');
+    spLog('✅ Sincronização concluída!');
+    document.getElementById('spTitle').textContent='✅ Concluído!';
+    showToast('✅ Catálogos do WhatsApp atualizados!');
+    if(btnTop){btnTop.classList.remove('syncing');btnTop.textContent='📱 Sincronizar WhatsApp'}
+    // Auto-close progress after 5s
+    setTimeout(closeSyncProgress,5000);
+  }).catch(function(err){
+    spLog('❌ Erro: '+err.message);
+    document.getElementById('spTitle').textContent='❌ Erro na sincronização';
+    if(btnTop){btnTop.classList.remove('syncing');btnTop.textContent='📱 Sincronizar WhatsApp'}
+  });
+}
+
+function clearMetaCatalogs(){
+  var mc=getMetaConfig();
+  if(!mc||!mc.token){showToast('Configure o Meta primeiro!','error');return}
+  var activeCats=mc.cats.filter(function(c){return c.id});
+  if(!activeCats.length){showToast('Nenhum catálogo configurado!','error');return}
+  var prods=getProds();
+  if(!prods.length){showToast('Nenhum produto para remover!','error');return}
+
+  openSyncProgress();
+  document.getElementById('spTitle').textContent='🗑️ Limpando catálogos...';
+  spLog('🗑️ Removendo produtos dos catálogos...');
+
+  var promises=[];
+  activeCats.forEach(function(cat){
+    var requests=prods.map(function(p){return{method:'DELETE',retailer_id:p.id}});
+    var body=new FormData();
+    body.append('access_token',mc.token);
+    body.append('item_type','PRODUCT_ITEM');
+    body.append('requests',JSON.stringify(requests));
+
+    promises.push(
+      fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+      .then(function(r){return r.json()})
+      .then(function(resp){
+        if(resp.error){spLog('❌ '+(cat.name||cat.id)+': '+resp.error.message)}
+        else{spLog('✅ '+(cat.name||cat.id)+' limpo')}
+      })
+      .catch(function(err){spLog('❌ '+err.message)})
+    );
+  });
+  Promise.all(promises).then(function(){
+    spLog('✅ Limpeza concluída');
+    document.getElementById('spTitle').textContent='✅ Catálogos limpos';
+    showToast('🗑️ Catálogos limpos no Meta');
+    spProgress(100);
+    setTimeout(closeSyncProgress,4000);
+  });
 }
 </script>
 </body>
