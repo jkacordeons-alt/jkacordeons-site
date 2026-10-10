@@ -1182,9 +1182,12 @@ function uploadToImgbb(base64,imgbbKey){
 }
 
 function parsePrecoMeta(preco){
-  if(!preco)return'0 BRL';
+  if(!preco)return'100 BRL';
   var num=preco.replace(/[^\d,\.]/g,'').replace(/\./g,'').replace(',','.');
-  return(parseFloat(num)||0).toFixed(0)+' BRL';
+  var valor=parseFloat(num)||0;
+  var centavos=Math.round(valor*100);
+  if(centavos<100)centavos=100;
+  return centavos+' BRL';
 }
 
 function mapDisponibilidade(status){
@@ -1307,11 +1310,21 @@ function syncAllToMeta(){
         .then(function(resp){
           catDone++;
           spProgress(40+Math.round(catDone/activeCats.length*55));
+          console.log('META RESPONSE:', JSON.stringify(resp));
           if(resp.error){
             spLog('❌ '+(cat.name||cat.id)+': '+resp.error.message);
+          }else if(resp.validation_status){
+            var errs=resp.validation_status.filter(function(v){return v.errors&&v.errors.length});
+            if(errs.length){
+              errs.forEach(function(v){
+                spLog('⚠️ '+v.retailer_id+': '+v.errors.map(function(e){return e.message}).join(', '));
+              });
+            }else{
+              spLog('✅ '+(cat.name||cat.id)+': '+prods.length+' produto(s) enviados');
+            }
           }else{
             var handles=resp.handles||[];
-            spLog('✅ '+(cat.name||cat.id)+': '+handles.length+' produto(s) enviados');
+            spLog('✅ '+(cat.name||cat.id)+': '+(handles.length||prods.length)+' produto(s) enviados');
           }
         })
         .catch(function(err){
