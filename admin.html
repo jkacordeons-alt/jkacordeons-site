@@ -743,8 +743,11 @@ function iniciarSessao(){
     }else if(prods.length>0){
       showToast('📱 '+prods.length+' produto(s) carregado(s) localmente');
     }else{
-      showToast('Nenhum produto ainda — adicione ou importe do Meta');
+      showToast('Nenhum produto ainda — buscando do Meta...');
     }
+    // Auto-importar do Meta em background ao logar
+    _autoImportDone=false;
+    autoImportarDoMeta();
   });
 }
 
@@ -801,6 +804,8 @@ function goPage(page){
     var mc=getMetaConfig();
     if(mc&&mc.token&&mc.cats.some(function(c){return c.id})){
       btnSyncTop.style.display='flex';
+      // Auto-importar do Meta ao abrir catálogo (silencioso)
+      autoImportarDoMeta();
     }else{
       btnSyncTop.style.display='none';
     }
@@ -926,7 +931,81 @@ function renderCatalogo(){
   }
 }
 
-/* ===== IMPORTAR DO META ===== */
+/* ===== AUTO-IMPORTAR DO META (silencioso ao abrir catálogo) ===== */
+var _autoImportDone=false;
+function autoImportarDoMeta(){
+  if(_autoImportDone)return; // só roda 1x por sessão
+  _autoImportDone=true;
+  var mc=getMetaConfig();
+  if(!mc||!mc.token)return;
+  var cats=mc.cats.filter(function(c){return c.id&&c.id.length>5});
+  if(!cats.length)return;
+
+  var info=document.getElementById('dataInfo');
+  if(info)info.textContent='⏳ Sincronizando com Meta...';
+
+  var allMetaProducts=[];
+
+  function fetchCatalog(cat){
+    var url=META_API+'/'+cat.id+'/products?fields=retailer_id,name,description,image_url,price,availability,additional_image_urls&limit=250&access_token='+encodeURIComponent(mc.token);
+    return fetch(url)
+    .then(function(r){return r.json()})
+    .then(function(resp){
+      if(resp.error){console.warn('Auto-import erro catálogo '+cat.id+':', resp.error.message);return;}
+      var items=resp.data||[];
+      console.log('📥 Auto-import '+( cat.name||cat.id)+': '+items.length+' produto(s)');
+      items.forEach(function(item){
+        allMetaProducts.push({
+          id:item.retailer_id||('meta_'+item.id),
+          nome:item.name||'Sem nome',
+          preco:formatarPrecoMeta(item.price)||'Consultar',
+          descricao:item.description||'',
+          status:mapStatusFromMeta(item.availability),
+          fotos:buildFotosFromMeta(item),
+          foto:'',
+          wpp:'Olá! Interesse no '+(item.name||'acordeon')+'.',
+          atualizado:new Date().toISOString(),
+          _fromMeta:true
+        });
+      });
+    }).catch(function(err){
+      console.warn('Auto-import erro:', err.message);
+    });
+  }
+
+  Promise.all(cats.map(fetchCatalog)).then(function(){
+    if(!allMetaProducts.length){
+      if(info){var t=getProds().length;info.textContent=t+' produto(s) no catálogo';}
+      return;
+    }
+    // Deduplica
+    var unique={};
+    allMetaProducts.forEach(function(p){if(!unique[p.id])unique[p.id]=p});
+    var metaProds=Object.keys(unique).map(function(k){return unique[k]});
+
+    // Merge com local
+    var localProds=getProds();
+    var localIds={};
+    localProds.forEach(function(p){localIds[p.id]=true});
+
+    var novos=0;
+    metaProds.forEach(function(mp){
+      if(!localIds[mp.id]){
+        localProds.push(mp);
+        novos++;
+      }
+    });
+
+    if(novos>0){
+      setProds(localProds);
+      renderCatalogo();
+      showToast('📥 '+novos+' produto(s) importado(s) do Meta automaticamente!');
+    }
+    if(info)info.textContent=localProds.length+' produto(s) no catálogo';
+  });
+}
+
+/* ===== IMPORTAR DO META (botão manual) ===== */
 function importarDoMeta(){
   var mc=getMetaConfig();
   if(!mc||!mc.token){
@@ -1016,14 +1095,32 @@ function importarDoMeta(){
 }
 
 function formatarPrecoMeta(price){
-  if(!price)return '';
-  // Meta retorna "1500.00 BRL" ou similar
-  var match=price.match(/([\d,.]+)/);
-  if(!match)return price;
-  var num=parseFloat(match[1]);
-  if(isNaN(num))return price;
-  // Formatar como R$ X.XXX,XX
-  return 'R$ '+num.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(!price)return 'Consultar';
+  var str=String(price).trim();
+  // Remover código de moeda (BRL, R$, etc)
+  str=str.replace(/[A-Za-z$\s]/g,'').trim();
+  if(!str)return String(price);
+
+  var num;
+  if(str.indexOf(',')>-1&&str.indexOf('.')>-1){
+    // Tem ponto E vírgula: "9.900,00" — ponto é milhar, vírgula é decimal
+    num=parseFloat(str.replace(/\./g,'').replace(',','.'));
+  }else if(str.indexOf(',')>-1){
+    // Só vírgula: "9900,00" — vírgula é decimal
+    num=parseFloat(str.replace(',','.'));
+  }else{
+    // Só ponto ou nenhum: "9900.00" ou "9900" (formato Meta padrão)
+    num=parseFloat(str);
+  }
+
+  if(isNaN(num)||num<=0)return String(price);
+
+  // Formato brasileiro manual (sem depender de toLocaleString)
+  var cents=Math.round(num*100);
+  var reais=Math.floor(cents/100);
+  var centavos=cents%100;
+  var reaisStr=reais.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return 'R$ '+reaisStr+','+(centavos<10?'0'+centavos:centavos);
 }
 
 function mapStatusFromMeta(availability){
