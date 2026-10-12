@@ -993,18 +993,27 @@ function removeFromMetaCatalog(prodId,prodNome){
   if(!mc||!mc.token)return;
   var activeCats=mc.cats.filter(function(c){return c.id});
   if(!activeCats.length)return;
+  var ok=0,fail=0;
+  var promises=[];
   activeCats.forEach(function(cat){
     var body=new FormData();
     body.append('access_token',mc.token);
     body.append('item_type','PRODUCT_ITEM');
     body.append('requests',JSON.stringify([{method:'DELETE',retailer_id:prodId}]));
-    fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
-    .then(function(r){return r.json()})
-    .then(function(resp){
-      console.log('META DELETE '+prodNome+':', JSON.stringify(resp));
-      if(resp.error){showToast('⚠️ Erro ao remover do catálogo: '+resp.error.message,'error')}
-    })
-    .catch(function(err){console.log('META DELETE error:', err.message)});
+    promises.push(
+      fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+      .then(function(r){return r.json()})
+      .then(function(resp){
+        console.log('META DELETE '+prodNome+' ('+cat.id+'):', JSON.stringify(resp));
+        if(resp.error){fail++;console.warn('Catálogo '+cat.id+': '+resp.error.message)}
+        else{ok++}
+      })
+      .catch(function(err){fail++;console.warn('META DELETE error ('+cat.id+'):', err.message)})
+    );
+  });
+  Promise.all(promises).then(function(){
+    if(ok>0){showToast('📱 '+prodNome+' removido de '+ok+' catálogo(s)')}
+    if(fail>0){console.warn('⚠️ Falha em '+fail+' catálogo(s) — verifique os IDs na configuração Meta')}
   });
 }
 
