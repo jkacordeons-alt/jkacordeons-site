@@ -1305,7 +1305,7 @@ function syncAllToMeta(){
         };
         var urls=(p._imgUrls||[]).filter(function(u){return u});
         if(urls.length>0)data.image_url=urls[0];
-        if(urls.length>1)data.additional_image_urls=JSON.stringify(urls.slice(1));
+        p._extraUrls=urls.length>1?urls.slice(1):[];
         return{method:'CREATE',retailer_id:p.id,data:data};
       });
 
@@ -1347,6 +1347,33 @@ function syncAllToMeta(){
     });
 
     return Promise.all(catPromises);
+  }).then(function(){
+    // 3. Update extra images individually
+    var extraProds=prods.filter(function(p){return p._extraUrls&&p._extraUrls.length});
+    if(!extraProds.length){return Promise.resolve()}
+    spLog('🖼️ Enviando fotos extras...');
+    var extraPromises=[];
+    extraProds.forEach(function(p){
+      activeCats.forEach(function(cat){
+        // Find product ID in catalog by retailer_id
+        extraPromises.push(
+          fetch(META_API+'/'+cat.id+'/products?access_token='+mc.token+'&filter='+encodeURIComponent('{"retailer_id":{"eq":"'+p.id+'"}}')).then(function(r){return r.json()}).then(function(resp){
+            if(!resp.data||!resp.data[0])return;
+            var prodId=resp.data[0].id;
+            var body=new FormData();
+            body.append('access_token',mc.token);
+            p._extraUrls.forEach(function(url){
+              body.append('additional_image_urls[]',url);
+            });
+            return fetch(META_API+'/'+prodId,{method:'POST',body:body}).then(function(r2){return r2.json()}).then(function(r2){
+              if(r2.success){spLog('  ✅ '+p.nome+': +'+ p._extraUrls.length+' fotos')}
+              else{console.log('EXTRA IMG RESPONSE:',JSON.stringify(r2));spLog('  ⚠️ '+p.nome+': fotos extras não aceitas')}
+            });
+          }).catch(function(err){spLog('  ❌ '+p.nome+': '+err.message)})
+        );
+      });
+    });
+    return Promise.all(extraPromises);
   }).then(function(){
     spProgress(100);
     spLog('');
