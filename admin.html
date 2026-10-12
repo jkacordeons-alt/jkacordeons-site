@@ -623,14 +623,69 @@ var filtroAtual='todos';
 var MAX_FOTOS=10;
 var fotosTemp=Array(MAX_FOTOS).fill(null);
 
+/* ===== SYNC COM SERVIDOR ===== */
+var API_URL='api.php';
+var API_KEY='jk2024acordeons';
+var _syncTimer=null;
+
+function syncToServer(){
+  clearTimeout(_syncTimer);
+  _syncTimer=setTimeout(function(){
+    var payload={
+      produtos:getProdsLocal(),
+      meta_config:getMetaConfigLocal()
+    };
+    fetch(API_URL+'?action=save&key='+API_KEY,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    }).then(function(r){return r.json()}).then(function(resp){
+      if(resp.ok){console.log('☁️ Dados salvos no servidor: '+resp.updated)}
+      else{console.warn('☁️ Erro ao salvar:', resp.error)}
+    }).catch(function(err){console.warn('☁️ Servidor offline, dados salvos localmente:', err.message)});
+  },1000); // debounce 1s
+}
+
+function loadFromServer(){
+  return fetch(API_URL+'?action=load&key='+API_KEY)
+  .then(function(r){return r.json()})
+  .then(function(data){
+    if(data&&data.produtos&&data.produtos.length>0){
+      // Servidor tem dados — usar eles (são os mais atuais)
+      localStorage.setItem('jk_prods',JSON.stringify(data.produtos));
+      console.log('☁️ '+data.produtos.length+' produto(s) carregados do servidor');
+    }
+    if(data&&data.meta_config){
+      localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
+      console.log('☁️ Config Meta carregada do servidor');
+    }
+    return data;
+  }).catch(function(err){
+    console.warn('☁️ Servidor indisponível, usando dados locais:', err.message);
+    return null;
+  });
+}
+
+// Funções locais (sem sync)
+function getProdsLocal(){try{return JSON.parse(localStorage.getItem('jk_prods')||'[]')}catch(e){return[]}}
+function setProdsLocal(p){try{localStorage.setItem('jk_prods',JSON.stringify(p))}catch(e){}}
+function getMetaConfigLocal(){
+  try{var c=JSON.parse(localStorage.getItem('jk_meta_config')||'null');if(c&&c.cats)return c}catch(e){}
+  return{token:'',imgbbKey:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
+}
+
 function tentarLogin(){
   var u=document.getElementById('loginUser').value.trim();
   var p=document.getElementById('loginPass').value.trim();
   if(u===ADM_USER&&p===ADM_PASS){
     document.getElementById('loginPage').style.display='none';
     document.getElementById('app').classList.add('on');
-    atualizarStats();
-    goPage('dashboard');
+    // Carregar dados do servidor antes de renderizar
+    loadFromServer().then(function(){
+      atualizarStats();
+      goPage('dashboard');
+      showToast('☁️ Dados sincronizados!');
+    });
   }else{
     document.getElementById('loginErro').style.display='block';
     document.getElementById('loginPass').value='';
@@ -690,8 +745,8 @@ function toggleSidebar(){document.getElementById('sidebar').classList.toggle('op
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open')}
 
 /* ===== DATA ===== */
-function getProds(){try{return JSON.parse(localStorage.getItem('jk_prods')||'[]')}catch(e){return[]}}
-function setProds(p){try{localStorage.setItem('jk_prods',JSON.stringify(p))}catch(e){}}
+function getProds(){return getProdsLocal()}
+function setProds(p){setProdsLocal(p);syncToServer()}
 
 /* ===== STATS ===== */
 function atualizarStats(){
@@ -1191,14 +1246,8 @@ function showToast(msg,type){
 /* ===== META CONFIG ===== */
 var META_API='https://graph.facebook.com/v21.0';
 
-function getMetaConfig(){
-  try{
-    var c=JSON.parse(localStorage.getItem('jk_meta_config')||'null');
-    if(c&&c.cats)return c;
-  }catch(e){}
-  return{token:'',imgbbKey:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
-}
-function setMetaConfig(c){try{localStorage.setItem('jk_meta_config',JSON.stringify(c))}catch(e){}}
+function getMetaConfig(){return getMetaConfigLocal()}
+function setMetaConfig(c){try{localStorage.setItem('jk_meta_config',JSON.stringify(c))}catch(e){}syncToServer()}
 
 /* ===== META STATUS PAGE ===== */
 function renderMetaStatus(){
