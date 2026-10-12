@@ -1120,8 +1120,14 @@ function syncSingleProduct(prod){
       link:'https://www.jkacordeons.com.br',
       brand:'JK Acordeons'
     };
-    if(urls.length>0)data.image_link=urls[0];
-    var extraUrls=urls.length>1?urls.slice(1):[];
+    // image é campo OBRIGATÓRIO como array de objetos
+    if(urls.length>0){
+      data.image=urls.map(function(u){return{url:u}});
+    }
+    // additional_image_link como fallback
+    if(urls.length>1){
+      data.additional_image_link=urls.slice(1);
+    }
 
     var requests=[{method:'UPDATE',data:data}];
     console.log('SINGLE REQUEST:', JSON.stringify(requests,null,2));
@@ -1136,37 +1142,25 @@ function syncSingleProduct(prod){
         fetch(META_API+'/'+cat.id+'/items_batch',{method:'POST',body:body})
         .then(function(r){return r.json()})
         .then(function(resp){
-          console.log('SINGLE SYNC '+prod.nome+':', JSON.stringify(resp));
+          console.log('SINGLE SYNC '+prod.nome+' ('+cat.id+'):', JSON.stringify(resp));
           if(resp.error){showToast('❌ '+prod.nome+': '+resp.error.message,'error')}
-          else{showToast('✅ '+prod.nome+' sincronizado!')}
+          else if(resp.validation_status){
+            var errs=resp.validation_status.filter(function(v){return v.errors&&v.errors.length});
+            if(errs.length){
+              errs.forEach(function(v){console.warn('VALIDATION:', JSON.stringify(v))});
+              showToast('⚠️ '+prod.nome+': verificar console','error');
+            }else{
+              showToast('✅ '+prod.nome+' sincronizado!');
+            }
+          }else{
+            showToast('✅ '+prod.nome+' sincronizado!');
+          }
         })
         .catch(function(err){showToast('❌ Erro: '+err.message,'error')})
       );
     });
 
-    return Promise.all(catPromises).then(function(){
-      // Extra photos after delay
-      if(!extraUrls.length)return;
-      return new Promise(function(resolve){setTimeout(resolve,5000)}).then(function(){
-        var extraChain=Promise.resolve();
-        activeCats.forEach(function(cat){
-          extraChain=extraChain.then(function(){
-            return fetch(META_API+'/'+cat.id+'/products?access_token='+mc.token+'&filter='+encodeURIComponent('{"retailer_id":{"eq":"'+prod.id+'"}}')).then(function(r){return r.json()}).then(function(resp){
-              if(!resp.data||!resp.data[0])return;
-              var prodId=resp.data[0].id;
-              var body=new FormData();
-              body.append('access_token',mc.token);
-              extraUrls.forEach(function(url){body.append('additional_image_urls[]',url)});
-              return fetch(META_API+'/'+prodId,{method:'POST',body:body}).then(function(r2){return r2.json()}).then(function(r2){
-                console.log('EXTRA IMG SINGLE:', JSON.stringify(r2));
-                if(r2.success){showToast('🖼️ +'+extraUrls.length+' fotos extras enviadas!')}
-              });
-            }).catch(function(err){console.log('Extra img error:', err.message)});
-          });
-        });
-        return extraChain;
-      });
-    });
+    return Promise.all(catPromises);
   });
 }
 
@@ -1497,9 +1491,14 @@ function syncAllToMeta(){
           brand:'JK Acordeons'
         };
         var urls=(p._imgUrls||[]).filter(function(u){return u});
-        if(urls.length>0)data.image_link=urls[0];
-        p._extraUrls=urls.length>1?urls.slice(1):[];
-        console.log(p.nome+': '+urls.length+' foto(s) total, '+p._extraUrls.length+' extra(s)');
+        // image é campo OBRIGATÓRIO como array de objetos
+        if(urls.length>0){
+          data.image=urls.map(function(u){return{url:u}});
+        }
+        if(urls.length>1){
+          data.additional_image_link=urls.slice(1);
+        }
+        console.log(p.nome+': '+urls.length+' foto(s) total');
         return{method:'UPDATE',data:data};
       });
 
@@ -1516,14 +1515,14 @@ function syncAllToMeta(){
         .then(function(resp){
           catDone++;
           spProgress(40+Math.round(catDone/activeCats.length*55));
-          console.log('META RESPONSE:', JSON.stringify(resp));
+          console.log('META RESPONSE ('+cat.id+'):', JSON.stringify(resp));
           if(resp.error){
             spLog('❌ '+(cat.name||cat.id)+': '+resp.error.message);
           }else if(resp.validation_status){
             var errs=resp.validation_status.filter(function(v){return v.errors&&v.errors.length});
             if(errs.length){
               errs.forEach(function(v){
-                spLog('⚠️ '+v.retailer_id+': '+v.errors.map(function(e){return e.message}).join(', '));
+                spLog('⚠️ '+(v.retailer_id||v.id)+': '+v.errors.map(function(e){return e.message}).join(', '));
               });
             }else{
               spLog('✅ '+(cat.name||cat.id)+': '+prods.length+' produto(s) enviados');
@@ -1541,46 +1540,6 @@ function syncAllToMeta(){
     });
 
     return Promise.all(catPromises);
-  }).then(function(){
-    // 3. Update extra images individually (with delay for Meta processing)
-    var extraProds=prods.filter(function(p){return p._extraUrls&&p._extraUrls.length});
-    if(!extraProds.length){
-      spLog('ℹ️ Nenhuma foto extra para enviar');
-      return Promise.resolve();
-    }
-    spLog('🖼️ '+extraProds.length+' produto(s) com fotos extras — aguardando Meta processar...');
-    // Wait 6 seconds for Meta to finish processing the batch
-    return new Promise(function(resolve){setTimeout(resolve,6000)}).then(function(){
-      spLog('🖼️ Enviando fotos extras agora...');
-      var extraChain=Promise.resolve();
-      extraProds.forEach(function(p){
-        activeCats.forEach(function(cat){
-          extraChain=extraChain.then(function(){
-            spLog('  🔍 Buscando '+p.nome+' no catálogo...');
-            return fetch(META_API+'/'+cat.id+'/products?access_token='+mc.token+'&filter='+encodeURIComponent('{"retailer_id":{"eq":"'+p.id+'"}}')).then(function(r){return r.json()}).then(function(resp){
-              console.log('PRODUCT LOOKUP for '+p.nome+':', JSON.stringify(resp));
-              if(!resp.data||!resp.data[0]){
-                spLog('  ⚠️ '+p.nome+': não encontrado no catálogo (ainda processando?)');
-                return;
-              }
-              var prodId=resp.data[0].id;
-              spLog('  📤 '+p.nome+': enviando '+p._extraUrls.length+' foto(s) extra(s)...');
-              var body=new FormData();
-              body.append('access_token',mc.token);
-              p._extraUrls.forEach(function(url){
-                body.append('additional_image_urls[]',url);
-              });
-              return fetch(META_API+'/'+prodId,{method:'POST',body:body}).then(function(r2){return r2.json()}).then(function(r2){
-                console.log('EXTRA IMG RESPONSE for '+p.nome+':', JSON.stringify(r2));
-                if(r2.success){spLog('  ✅ '+p.nome+': +'+p._extraUrls.length+' fotos extras enviadas!')}
-                else{spLog('  ⚠️ '+p.nome+': '+JSON.stringify(r2))}
-              });
-            }).catch(function(err){spLog('  ❌ '+p.nome+': '+err.message)});
-          });
-        });
-      });
-      return extraChain;
-    });
   }).then(function(){
     spProgress(100);
     spLog('');
