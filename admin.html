@@ -1000,9 +1000,9 @@ function removeFromMetaCatalog(prodId,prodNome){
     var body=new FormData();
     body.append('access_token',mc.token);
     body.append('item_type','PRODUCT_ITEM');
-    body.append('requests',JSON.stringify([{method:'DELETE',retailer_id:prodId}]));
+    body.append('requests',JSON.stringify([{method:'DELETE',data:{id:prodId}}]));
     promises.push(
-      fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+      fetch(META_API+'/'+cat.id+'/items_batch',{method:'POST',body:body})
       .then(function(r){return r.json()})
       .then(function(resp){
         console.log('META DELETE '+prodNome+' ('+cat.id+'):', JSON.stringify(resp));
@@ -1111,19 +1111,19 @@ function syncSingleProduct(prod){
   Promise.all(imgPromises).then(function(){
     var urls=imgUrls.filter(function(u){return u});
     var data={
-      name:prod.nome||'Acordeon',
+      id:prod.id,
+      title:prod.nome||'Acordeon',
       description:prod.descricao||prod.nome,
       availability:mapDisponibilidade(prod.status),
-      condition:'used_like_new',
+      condition:'used',
       price:parsePrecoMeta(prod.preco),
-      currency:'BRL',
-      url:'https://www.jkacordeons.com.br',
+      link:'https://www.jkacordeons.com.br',
       brand:'JK Acordeons'
     };
-    if(urls.length>0)data.image_url=urls[0];
+    if(urls.length>0)data.image_link=urls[0];
     var extraUrls=urls.length>1?urls.slice(1):[];
 
-    var requests=[{method:'UPDATE',retailer_id:prod.id,data:data}];
+    var requests=[{method:'UPDATE',data:data}];
     console.log('SINGLE REQUEST:', JSON.stringify(requests,null,2));
     var catPromises=[];
     activeCats.forEach(function(cat){
@@ -1133,7 +1133,7 @@ function syncSingleProduct(prod){
       body.append('requests',JSON.stringify(requests));
       body.append('allow_upsert','true');
       catPromises.push(
-        fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+        fetch(META_API+'/'+cat.id+'/items_batch',{method:'POST',body:body})
         .then(function(r){return r.json()})
         .then(function(resp){
           console.log('SINGLE SYNC '+prod.nome+':', JSON.stringify(resp));
@@ -1375,12 +1375,11 @@ function uploadToImgbb(base64,imgbbKey){
 }
 
 function parsePrecoMeta(preco){
-  if(!preco)return 100;
+  if(!preco)return '1.00 BRL';
   var num=preco.replace(/[^\d,\.]/g,'').replace(/\./g,'').replace(',','.');
   var valor=parseFloat(num)||0;
-  var centavos=Math.round(valor*100);
-  if(centavos<100)centavos=100;
-  return String(centavos);
+  if(valor<1)valor=1;
+  return valor.toFixed(2)+' BRL';
 }
 
 function mapDisponibilidade(status){
@@ -1488,20 +1487,20 @@ function syncAllToMeta(){
     activeCats.forEach(function(cat){
       var requests=prods.map(function(p){
         var data={
-          name:p.nome||'Acordeon',
+          id:p.id,
+          title:p.nome||'Acordeon',
           description:p.descricao||p.nome,
           availability:mapDisponibilidade(p.status),
-          condition:'used_like_new',
+          condition:'used',
           price:parsePrecoMeta(p.preco),
-          currency:'BRL',
-          url:'https://www.jkacordeons.com.br',
+          link:'https://www.jkacordeons.com.br',
           brand:'JK Acordeons'
         };
         var urls=(p._imgUrls||[]).filter(function(u){return u});
-        if(urls.length>0)data.image_url=urls[0];
+        if(urls.length>0)data.image_link=urls[0];
         p._extraUrls=urls.length>1?urls.slice(1):[];
         console.log(p.nome+': '+urls.length+' foto(s) total, '+p._extraUrls.length+' extra(s)');
-        return{method:'UPDATE',retailer_id:p.id,data:data};
+        return{method:'UPDATE',data:data};
       });
 
       console.log('REQUESTS:', JSON.stringify(requests,null,2));
@@ -1512,7 +1511,7 @@ function syncAllToMeta(){
       body.append('allow_upsert','true');
 
       catPromises.push(
-        fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+        fetch(META_API+'/'+cat.id+'/items_batch',{method:'POST',body:body})
         .then(function(r){return r.json()})
         .then(function(resp){
           catDone++;
@@ -1612,14 +1611,14 @@ function clearMetaCatalogs(){
 
   var promises=[];
   activeCats.forEach(function(cat){
-    var requests=prods.map(function(p){return{method:'DELETE',retailer_id:p.id}});
+    var requests=prods.map(function(p){return{method:'DELETE',data:{id:p.id}}});
     var body=new FormData();
     body.append('access_token',mc.token);
     body.append('item_type','PRODUCT_ITEM');
     body.append('requests',JSON.stringify(requests));
 
     promises.push(
-      fetch(META_API+'/'+cat.id+'/batch',{method:'POST',body:body})
+      fetch(META_API+'/'+cat.id+'/items_batch',{method:'POST',body:body})
       .then(function(r){return r.json()})
       .then(function(resp){
         if(resp.error){spLog('❌ '+(cat.name||cat.id)+': '+resp.error.message)}
