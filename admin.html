@@ -1111,7 +1111,6 @@ function syncSingleProduct(prod){
   Promise.all(imgPromises).then(function(){
     var urls=imgUrls.filter(function(u){return u});
     var data={
-      title:prod.nome||'Acordeon',
       name:prod.nome||'Acordeon',
       description:prod.descricao||prod.nome,
       availability:mapDisponibilidade(prod.status),
@@ -1124,7 +1123,8 @@ function syncSingleProduct(prod){
     if(urls.length>0)data.image_url=urls[0];
     var extraUrls=urls.length>1?urls.slice(1):[];
 
-    var requests=[{method:'CREATE',retailer_id:prod.id,data:data}];
+    var requests=[{method:'UPDATE',retailer_id:prod.id,data:data}];
+    console.log('SINGLE REQUEST:', JSON.stringify(requests,null,2));
     var catPromises=[];
     activeCats.forEach(function(cat){
       var body=new FormData();
@@ -1488,7 +1488,6 @@ function syncAllToMeta(){
     activeCats.forEach(function(cat){
       var requests=prods.map(function(p){
         var data={
-          title:p.nome||'Acordeon',
           name:p.nome||'Acordeon',
           description:p.descricao||p.nome,
           availability:mapDisponibilidade(p.status),
@@ -1502,7 +1501,7 @@ function syncAllToMeta(){
         if(urls.length>0)data.image_url=urls[0];
         p._extraUrls=urls.length>1?urls.slice(1):[];
         console.log(p.nome+': '+urls.length+' foto(s) total, '+p._extraUrls.length+' extra(s)');
-        return{method:'CREATE',retailer_id:p.id,data:data};
+        return{method:'UPDATE',retailer_id:p.id,data:data};
       });
 
       console.log('REQUESTS:', JSON.stringify(requests,null,2));
