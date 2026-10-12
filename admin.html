@@ -446,6 +446,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             <button class="cat-filter" onclick="setFilter('vendido',this)">Vendidos</button>
           </div>
         </div>
+        <!-- Ferramentas de dados -->
+        <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap">
+          <button onclick="importarDoMeta()" style="background:rgba(52,152,219,.12);color:var(--b);border:1px solid rgba(52,152,219,.2);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px" id="btnImportMeta" title="Buscar produtos direto dos catálogos Meta">📥 Importar do Meta</button>
+          <button onclick="exportarDados()" style="background:rgba(255,255,255,.05);color:var(--txt2);border:1px solid var(--bord);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px" title="Baixar todos os produtos como arquivo">💾 Exportar</button>
+          <button onclick="document.getElementById('importFile').click()" style="background:rgba(255,255,255,.05);color:var(--txt2);border:1px solid var(--bord);padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px" title="Carregar produtos de um arquivo exportado">📂 Importar arquivo</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importarDados(event)">
+          <span id="dataInfo" style="font-size:11px;color:var(--txt3);align-self:center;margin-left:auto"></span>
+        </div>
         <div id="catGrid" class="cat-grid"></div>
       </div>
 
@@ -709,6 +717,7 @@ function loadFromServer(){
     return data;
   }).catch(function(err){
     console.warn('☁️ Servidor indisponível, usando dados locais:', err.message);
+    showToast('⚠️ Servidor offline — usando dados locais. Use "Importar do Meta" para trazer produtos de outro computador.','error');
     return null;
   });
 }
@@ -725,10 +734,17 @@ function iniciarSessao(){
   document.getElementById('loginPage').style.display='none';
   document.getElementById('app').classList.add('on');
   sessionStorage.setItem('jk_logado','1');
-  loadFromServer().then(function(){
+  loadFromServer().then(function(data){
     atualizarStats();
     goPage('dashboard');
-    showToast('☁️ Dados sincronizados!');
+    var prods=getProds();
+    if(data&&data.produtos&&data.produtos.length>0){
+      showToast('☁️ '+prods.length+' produto(s) sincronizado(s)!');
+    }else if(prods.length>0){
+      showToast('📱 '+prods.length+' produto(s) carregado(s) localmente');
+    }else{
+      showToast('Nenhum produto ainda — adicione ou importe do Meta');
+    }
   });
 }
 
@@ -902,6 +918,210 @@ function renderCatalogo(){
     btn.addEventListener('click',function(e){e.stopPropagation();delProd(this.getAttribute('data-del'))});
   });
   atualizarStats();
+  // Mostrar contagem
+  var info=document.getElementById('dataInfo');
+  if(info){
+    var totalProds=getProds().length;
+    info.textContent=totalProds+' produto(s) no catálogo';
+  }
+}
+
+/* ===== IMPORTAR DO META ===== */
+function importarDoMeta(){
+  var mc=getMetaConfig();
+  if(!mc||!mc.token){
+    showToast('Configure o Meta primeiro na página WhatsApp/Meta','error');
+    return;
+  }
+  var cats=mc.cats.filter(function(c){return c.id&&c.id.length>5});
+  if(!cats.length){
+    showToast('Nenhum catálogo configurado','error');
+    return;
+  }
+  var btn=document.getElementById('btnImportMeta');
+  btn.disabled=true;
+  btn.textContent='⏳ Buscando...';
+  showToast('Buscando produtos dos catálogos Meta...');
+
+  var allMetaProducts=[];
+  var fetched=0;
+
+  function fetchCatalog(cat){
+    var url=META_API+'/'+cat.id+'/products?fields=retailer_id,name,description,image_url,price,availability,additional_image_urls&limit=250&access_token='+encodeURIComponent(mc.token);
+    return fetch(url)
+    .then(function(r){return r.json()})
+    .then(function(resp){
+      if(resp.error){
+        console.warn('Meta erro catálogo '+cat.id+':', resp.error.message);
+        return;
+      }
+      var items=resp.data||[];
+      console.log('📥 Catálogo '+(cat.name||cat.id)+': '+items.length+' produto(s)');
+      items.forEach(function(item){
+        allMetaProducts.push({
+          id:item.retailer_id||('meta_'+item.id),
+          nome:item.name||'Sem nome',
+          preco:formatarPrecoMeta(item.price)||'Consultar',
+          descricao:item.description||'',
+          status:mapStatusFromMeta(item.availability),
+          fotos:buildFotosFromMeta(item),
+          foto:'',
+          wpp:'Olá! Interesse no '+(item.name||'acordeon')+'.',
+          atualizado:new Date().toISOString(),
+          _fromMeta:true
+        });
+      });
+    }).catch(function(err){
+      console.warn('Erro ao buscar catálogo '+cat.id+':', err.message);
+    });
+  }
+
+  Promise.all(cats.map(fetchCatalog)).then(function(){
+    btn.disabled=false;
+    btn.textContent='📥 Importar do Meta';
+
+    if(!allMetaProducts.length){
+      showToast('Nenhum produto encontrado nos catálogos Meta','error');
+      return;
+    }
+
+    // Deduplica por retailer_id (mesmo produto em múltiplos catálogos)
+    var unique={};
+    allMetaProducts.forEach(function(p){
+      if(!unique[p.id])unique[p.id]=p;
+    });
+    var metaProds=Object.keys(unique).map(function(k){return unique[k]});
+
+    // Merge com local
+    var localProds=getProds();
+    var localIds={};
+    localProds.forEach(function(p){localIds[p.id]=true});
+
+    var novos=0;
+    metaProds.forEach(function(mp){
+      if(!localIds[mp.id]){
+        localProds.push(mp);
+        novos++;
+      }
+    });
+
+    if(novos>0){
+      setProds(localProds);
+      renderCatalogo();
+      showToast('✅ '+novos+' produto(s) importado(s) do Meta! Total: '+localProds.length);
+    }else{
+      showToast('Todos os '+metaProds.length+' produto(s) do Meta já estão no catálogo local');
+    }
+  });
+}
+
+function formatarPrecoMeta(price){
+  if(!price)return '';
+  // Meta retorna "1500.00 BRL" ou similar
+  var match=price.match(/([\d,.]+)/);
+  if(!match)return price;
+  var num=parseFloat(match[1]);
+  if(isNaN(num))return price;
+  // Formatar como R$ X.XXX,XX
+  return 'R$ '+num.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+
+function mapStatusFromMeta(availability){
+  if(!availability)return 'disponivel';
+  if(availability==='in stock')return 'disponivel';
+  if(availability==='out of stock')return 'vendido';
+  if(availability==='available for order')return 'reservado';
+  return 'disponivel';
+}
+
+function buildFotosFromMeta(item){
+  var fotos=[];
+  if(item.image_url)fotos.push(item.image_url);
+  if(item.additional_image_urls&&item.additional_image_urls.length){
+    item.additional_image_urls.forEach(function(u){fotos.push(u)});
+  }
+  return fotos;
+}
+
+/* ===== EXPORTAR / IMPORTAR DADOS ===== */
+function exportarDados(){
+  var prods=getProds();
+  var mc=getMetaConfig();
+  var data={
+    produtos:prods,
+    meta_config:mc,
+    exportado:new Date().toISOString(),
+    total:prods.length
+  };
+  var blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='jk_acordeons_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('💾 Backup exportado com '+prods.length+' produto(s)');
+}
+
+function importarDados(evt){
+  var file=evt.target.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      var data=JSON.parse(e.target.result);
+      var importProds=data.produtos||[];
+      if(!importProds.length){
+        showToast('Arquivo não contém produtos','error');
+        return;
+      }
+
+      // Merge com local
+      var localProds=getProds();
+      var localIds={};
+      localProds.forEach(function(p){localIds[p.id]=true});
+
+      var novos=0;
+      var atualizados=0;
+      importProds.forEach(function(ip){
+        if(!localIds[ip.id]){
+          localProds.push(ip);
+          novos++;
+        }else{
+          // Atualizar se o importado for mais recente
+          var idx=localProds.findIndex(function(p){return p.id===ip.id});
+          if(idx>-1&&ip.atualizado&&localProds[idx].atualizado&&ip.atualizado>localProds[idx].atualizado){
+            localProds[idx]=ip;
+            atualizados++;
+          }
+        }
+      });
+
+      if(novos>0||atualizados>0){
+        setProds(localProds);
+        renderCatalogo();
+        var msg='✅ Importação: '+novos+' novo(s)';
+        if(atualizados>0)msg+=', '+atualizados+' atualizado(s)';
+        msg+='. Total: '+localProds.length;
+        showToast(msg);
+      }else{
+        showToast('Todos os '+importProds.length+' produto(s) já estão no catálogo');
+      }
+
+      // Importar config Meta se não tiver local
+      if(data.meta_config&&data.meta_config.token){
+        var localMc=getMetaConfig();
+        if(!localMc.token){
+          setMetaConfig(data.meta_config);
+          showToast('⚙️ Configuração Meta também importada!');
+        }
+      }
+    }catch(err){
+      showToast('Erro ao ler arquivo: '+err.message,'error');
+    }
+  };
+  reader.readAsText(file);
+  evt.target.value=''; // reset para permitir reimportação
 }
 
 /* ===== MODAL ===== */
