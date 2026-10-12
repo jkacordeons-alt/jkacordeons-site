@@ -650,14 +650,31 @@ function loadFromServer(){
   return fetch(API_URL+'?action=load&key='+API_KEY)
   .then(function(r){return r.json()})
   .then(function(data){
-    if(data&&data.produtos&&data.produtos.length>0){
+    var serverHasData=data&&data.produtos&&data.produtos.length>0;
+    var localProds=getProdsLocal();
+    var localMc=getMetaConfigLocal();
+
+    if(serverHasData){
       // Servidor tem dados — usar eles (são os mais atuais)
       localStorage.setItem('jk_prods',JSON.stringify(data.produtos));
       console.log('☁️ '+data.produtos.length+' produto(s) carregados do servidor');
-    }
-    if(data&&data.meta_config){
-      localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
-      console.log('☁️ Config Meta carregada do servidor');
+      if(data.meta_config){
+        localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
+        console.log('☁️ Config Meta carregada do servidor');
+      }
+    }else if(localProds.length>0){
+      // Servidor vazio mas localStorage tem dados — empurrar pro servidor
+      console.log('☁️ Servidor vazio, enviando '+localProds.length+' produto(s) do localStorage...');
+      var payload={produtos:localProds,meta_config:localMc};
+      return fetch(API_URL+'?action=save&key='+API_KEY,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(payload)
+      }).then(function(r){return r.json()}).then(function(resp){
+        if(resp.ok){console.log('☁️ Dados locais enviados ao servidor com sucesso!')}
+        else{console.warn('☁️ Erro ao enviar:', resp.error)}
+        return resp;
+      });
     }
     return data;
   }).catch(function(err){
