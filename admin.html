@@ -646,34 +646,64 @@ function syncToServer(){
   },1000); // debounce 1s
 }
 
+function mergeProds(serverProds,localProds){
+  // Merge: pega todos do servidor + adiciona locais que não existem no servidor
+  var merged=serverProds.slice();
+  var ids={};
+  merged.forEach(function(p){ids[p.id]=true});
+  localProds.forEach(function(p){
+    if(!ids[p.id]){merged.push(p);ids[p.id]=true}
+  });
+  return merged;
+}
+
 function loadFromServer(){
   return fetch(API_URL+'?action=load&key='+API_KEY)
   .then(function(r){return r.json()})
   .then(function(data){
-    var serverHasData=data&&data.produtos&&data.produtos.length>0;
+    var serverProds=(data&&data.produtos)?data.produtos:[];
     var localProds=getProdsLocal();
     var localMc=getMetaConfigLocal();
 
-    if(serverHasData){
-      // Servidor tem dados — usar eles (são os mais atuais)
-      localStorage.setItem('jk_prods',JSON.stringify(data.produtos));
-      console.log('☁️ '+data.produtos.length+' produto(s) carregados do servidor');
+    console.log('☁️ Servidor: '+serverProds.length+' produto(s), Local: '+localProds.length+' produto(s)');
+
+    if(serverProds.length>0&&localProds.length>0){
+      // Ambos têm dados — merge pra não perder nenhum
+      var merged=mergeProds(serverProds,localProds);
+      localStorage.setItem('jk_prods',JSON.stringify(merged));
+      console.log('☁️ Merge: '+merged.length+' produto(s) total');
       if(data.meta_config){
         localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
-        console.log('☁️ Config Meta carregada do servidor');
+      }
+      // Salvar merge de volta no servidor se ganhou produtos
+      if(merged.length>serverProds.length){
+        console.log('☁️ Enviando merge ao servidor (+'+( merged.length-serverProds.length)+' novos)...');
+        var payload={produtos:merged,meta_config:data.meta_config||localMc};
+        return fetch(API_URL+'?action=save&key='+API_KEY,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify(payload)
+        }).then(function(r){return r.json()}).then(function(resp){
+          if(resp.ok){console.log('☁️ Merge salvo no servidor!')}
+          return data;
+        });
+      }
+    }else if(serverProds.length>0){
+      // Só servidor tem dados
+      localStorage.setItem('jk_prods',JSON.stringify(serverProds));
+      console.log('☁️ '+serverProds.length+' produto(s) carregados do servidor');
+      if(data.meta_config){
+        localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
       }
     }else if(localProds.length>0){
-      // Servidor vazio mas localStorage tem dados — empurrar pro servidor
-      console.log('☁️ Servidor vazio, enviando '+localProds.length+' produto(s) do localStorage...');
+      // Só local tem dados — empurrar pro servidor
+      console.log('☁️ Servidor vazio, enviando '+localProds.length+' produto(s)...');
       var payload={produtos:localProds,meta_config:localMc};
       return fetch(API_URL+'?action=save&key='+API_KEY,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
+        method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify(payload)
       }).then(function(r){return r.json()}).then(function(resp){
-        if(resp.ok){console.log('☁️ Dados locais enviados ao servidor com sucesso!')}
-        else{console.warn('☁️ Erro ao enviar:', resp.error)}
-        return resp;
+        if(resp.ok){console.log('☁️ Dados locais enviados ao servidor!')}
+        return data;
       });
     }
     return data;
@@ -691,18 +721,22 @@ function getMetaConfigLocal(){
   return{token:'',imgbbKey:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
 }
 
+function iniciarSessao(){
+  document.getElementById('loginPage').style.display='none';
+  document.getElementById('app').classList.add('on');
+  sessionStorage.setItem('jk_logado','1');
+  loadFromServer().then(function(){
+    atualizarStats();
+    goPage('dashboard');
+    showToast('☁️ Dados sincronizados!');
+  });
+}
+
 function tentarLogin(){
   var u=document.getElementById('loginUser').value.trim();
   var p=document.getElementById('loginPass').value.trim();
   if(u===ADM_USER&&p===ADM_PASS){
-    document.getElementById('loginPage').style.display='none';
-    document.getElementById('app').classList.add('on');
-    // Carregar dados do servidor antes de renderizar
-    loadFromServer().then(function(){
-      atualizarStats();
-      goPage('dashboard');
-      showToast('☁️ Dados sincronizados!');
-    });
+    iniciarSessao();
   }else{
     document.getElementById('loginErro').style.display='block';
     document.getElementById('loginPass').value='';
@@ -710,12 +744,20 @@ function tentarLogin(){
   }
 }
 function logout(){
+  sessionStorage.removeItem('jk_logado');
   document.getElementById('app').classList.remove('on');
   document.getElementById('loginPage').style.display='flex';
   document.getElementById('loginUser').value='';
   document.getElementById('loginPass').value='';
   document.getElementById('loginErro').style.display='none';
 }
+
+// Auto-login se sessão ativa (não deslogar ao recarregar)
+(function(){
+  if(sessionStorage.getItem('jk_logado')==='1'){
+    iniciarSessao();
+  }
+})()
 
 /* ===== NAVIGATION ===== */
 function goPage(page){
