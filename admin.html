@@ -1943,19 +1943,27 @@ function renderCompras(){
   }
   empty.style.display='none';
 
-  // Ordenar por data (mais recente primeiro)
-  compras.sort(function(a,b){return(b.data||'').localeCompare(a.data||'')});
+  // Separar: pendentes (sem vínculo) vs vinculadas (no catálogo)
+  var pendentes=compras.filter(function(c){return !c.produto_id});
+  var vinculadas=compras.filter(function(c){return !!c.produto_id});
 
-  grid.innerHTML=compras.map(function(c){
+  // Ordenar por data (mais recente primeiro)
+  pendentes.sort(function(a,b){return(b.data||'').localeCompare(a.data||'')});
+  vinculadas.sort(function(a,b){return(b.data||'').localeCompare(a.data||'')});
+
+  function renderCompraCard(c,isVinculada){
     var custoTotal=c.custo_compra+(c.frete_entrada||0)+cf.bag_alcas;
     var dataFmt=c.data?new Date(c.data+'T12:00:00').toLocaleDateString('pt-BR'):'—';
-    var vinculado=c.produto_id?'<span style="color:var(--g)">✓ vinculado</span>':'<span style="color:var(--txt3)">avulso</span>';
+    var statusBadge=isVinculada?
+      '<span style="color:var(--g);font-size:10px">✅ No catálogo</span>':
+      '<span style="background:rgba(243,156,18,.12);color:var(--y);font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600">📦 Aguardando chegada</span>';
     var trocaBadge=c.tipo==='troca'?'<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>':'';
-    return '<div class="compra-card"'+(c.tipo==='troca'?' style="border-left:3px solid var(--y)"':'')+'>'+
+    var borderStyle=c.tipo==='troca'?' style="border-left:3px solid var(--y)"':(isVinculada?' style="opacity:.7"':'');
+    return '<div class="compra-card"'+borderStyle+'>'+
       '<div class="compra-icon">'+(c.tipo==='troca'?'🔄':'🪗')+'</div>'+
       '<div class="compra-info">'+
         '<div class="compra-nome">'+c.nome+trocaBadge+'</div>'+
-        '<div class="compra-detail">'+dataFmt+(c.origem?' · '+c.origem:'')+' · '+vinculado+'</div>'+
+        '<div class="compra-detail">'+dataFmt+(c.origem?' · '+c.origem:'')+' · '+statusBadge+'</div>'+
       '</div>'+
       '<div class="compra-valores">'+
         '<div class="compra-preco">'+formatarValorBR(c.custo_compra)+'</div>'+
@@ -1966,12 +1974,39 @@ function renderCompras(){
         '<button onclick="excluirCompra(\''+c.id+'\')" style="background:var(--r-soft);color:var(--r);border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit">🗑️</button>'+
       '</div>'+
     '</div>';
-  }).join('');
+  }
+
+  var html='';
+  // Pendentes primeiro (estas são as que importam)
+  if(pendentes.length){
+    html+=pendentes.map(function(c){return renderCompraCard(c,false)}).join('');
+  }
+  // Vinculadas: escondidas por padrão com toggle
+  if(vinculadas.length){
+    html+='<div style="margin:1rem 0;text-align:center">'+
+      '<button onclick="var el=document.getElementById(\'comprasVinculadas\');var on=el.style.display!==\'none\';el.style.display=on?\'none\':\'block\';this.innerHTML=on?\'👁 Mostrar '+vinculadas.length+' compra(s) já no catálogo\':\'✕ Ocultar compras vinculadas\'" style="background:none;border:1px solid var(--bord);color:var(--txt3);font-size:11px;padding:6px 14px;border-radius:6px;cursor:pointer;font-family:inherit">'+
+        '👁 Mostrar '+vinculadas.length+' compra(s) já no catálogo'+
+      '</button>'+
+    '</div>'+
+    '<div id="comprasVinculadas" style="display:none">'+
+      vinculadas.map(function(c){return renderCompraCard(c,true)}).join('')+
+    '</div>';
+  }
+
+  if(!pendentes.length&&vinculadas.length){
+    html='<div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:13px;margin-bottom:1rem">'+
+      '<div style="font-size:2rem;margin-bottom:8px">✅</div>'+
+      '<div>Todas as compras estão vinculadas ao catálogo!</div>'+
+    '</div>'+html;
+  }
+
+  grid.innerHTML=html;
 }
 
 function atualizarBadgeCompras(){
   var badge=document.getElementById('badgeCompras');
-  if(badge)badge.textContent=getCompras().length;
+  var pendentes=getCompras().filter(function(c){return !c.produto_id});
+  if(badge)badge.textContent=pendentes.length||'';
 }
 
 /* ===== FINANCEIRO ===== */
