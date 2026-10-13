@@ -399,6 +399,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         <div class="sb-item disabled">
           <span class="sb-icon">📢</span> Google Ads
         </div>
+        <div class="sb-item" onclick="goPage('bling')">
+          <span class="sb-icon">🧾</span> Bling (NF-e)
+          <span class="sb-badge" id="badgeBling" style="display:none;background:var(--g)">●</span>
+        </div>
+        <div class="sb-item" onclick="goPage('correios')">
+          <span class="sb-icon">📦</span> Correios
+          <span class="sb-badge" id="badgeCorreios" style="display:none;background:var(--b)">●</span>
+        </div>
       </div>
       <div class="sb-section">
         <div class="sb-section-label">Gestão</div>
@@ -846,6 +854,272 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- PAGE: Bling (NF-e) -->
+      <div class="page" id="pageBling">
+        <div class="dash-welcome" style="border-color:rgba(37,211,102,.15);background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(37,211,102,.02))">
+          <h2>🧾 Bling — Notas Fiscais</h2>
+          <p>Emita NF-e de entrada e saída direto pelo painel.</p>
+        </div>
+
+        <!-- Status da conexão -->
+        <div class="card" style="padding:16px;margin-bottom:1.5rem">
+          <div id="blingStatus" style="display:flex;align-items:center;gap:12px">
+            <div id="blingStatusIcon" style="width:40px;height:40px;border-radius:10px;background:rgba(149,165,166,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem">🔌</div>
+            <div style="flex:1">
+              <div id="blingStatusTitle" style="font-weight:700;font-size:14px">Não conectado</div>
+              <div id="blingStatusSub" style="font-size:12px;color:var(--txt3)">Configure suas credenciais para começar</div>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleBlingConfig()" style="font-size:12px" id="btnBlingConfig">⚙️ Configurar</button>
+          </div>
+        </div>
+
+        <!-- Configuração OAuth2 (toggle) -->
+        <div id="blingConfigPanel" style="display:none;margin-bottom:1.5rem">
+          <div class="card" style="padding:20px">
+            <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">🔐 Credenciais OAuth2 do Bling</h4>
+            <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Crie um aplicativo em <a href="https://developer.bling.com.br" target="_blank" style="color:var(--b)">developer.bling.com.br</a> → obtenha Client ID e Client Secret.</p>
+
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Client ID</label>
+              <input type="text" id="blingClientId" placeholder="Cole o Client ID do seu app Bling" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Client Secret</label>
+              <input type="password" id="blingClientSecret" placeholder="Cole o Client Secret" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">URL de Callback (copie e cole no app Bling)</label>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="blingCallbackUrl" readonly style="padding:8px 12px;background:var(--bg);font-size:11px;font-family:monospace" value="">
+                <button class="btn btn-secondary" onclick="copiarCallback()" style="white-space:nowrap;font-size:11px">📋 Copiar</button>
+              </div>
+              <div class="form-hint">Essa URL deve ser registrada como callback no seu aplicativo Bling</div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-primary" onclick="salvarBlingConfig()" style="font-size:12px">💾 Salvar credenciais</button>
+              <button class="btn btn-secondary" onclick="iniciarAuthBling()" id="btnBlingAuth" style="font-size:12px;display:none">🔗 Conectar ao Bling</button>
+            </div>
+            <div id="blingConfigResult" style="margin-top:8px;font-size:12px"></div>
+
+            <div style="margin-top:16px;padding:12px;background:rgba(52,152,219,.05);border-radius:8px;border:1px solid rgba(52,152,219,.12)">
+              <div style="font-size:12px;font-weight:700;color:var(--b);margin-bottom:6px">📋 Passo a passo</div>
+              <ol style="margin:0;padding-left:18px;font-size:11px;color:var(--txt2);line-height:1.8">
+                <li>Acesse <a href="https://developer.bling.com.br" target="_blank" style="color:var(--b)">developer.bling.com.br</a> e crie um aplicativo</li>
+                <li>Copie a URL de callback acima e cole nas configurações do app</li>
+                <li>Cole aqui o <strong>Client ID</strong> e o <strong>Client Secret</strong></li>
+                <li>Clique em <strong>Salvar</strong> e depois em <strong>Conectar ao Bling</strong></li>
+                <li>Autorize o acesso na tela do Bling</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dados da empresa para NF-e -->
+        <div class="card" style="padding:20px;margin-bottom:1.5rem">
+          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🏢 Dados do emitente</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Informações da sua empresa para emissão de NF-e. Esses dados são salvos localmente.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Razão Social</label>
+              <input type="text" id="blingRazao" placeholder="Razão social da empresa" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">CNPJ</label>
+              <input type="text" id="blingCnpj" placeholder="00.000.000/0000-00" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Inscrição Estadual</label>
+              <input type="text" id="blingIe" placeholder="IE" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">CEP (origem)</label>
+              <input type="text" id="blingCep" placeholder="00000-000" style="padding:6px 10px;font-size:12px">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="salvarBlingEmitente()" style="font-size:12px;margin-top:12px">💾 Salvar dados</button>
+        </div>
+
+        <!-- Notas emitidas -->
+        <div class="card" style="padding:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h4 style="margin:0;font-size:14px;font-weight:700">📄 Notas emitidas</h4>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-secondary" onclick="emitirNfEntrada()" style="font-size:11px;padding:5px 10px">📥 NF Entrada</button>
+              <button class="btn btn-primary" onclick="emitirNfSaida()" style="font-size:11px;padding:5px 10px">📤 NF Saída</button>
+            </div>
+          </div>
+          <div id="blingNotasList">
+            <div style="text-align:center;padding:2rem;color:var(--txt3)">
+              <div style="font-size:1.5rem;margin-bottom:6px">📄</div>
+              <p style="margin:0;font-size:12px">Nenhuma nota emitida ainda</p>
+              <span style="font-size:11px">Conecte ao Bling e emita sua primeira NF-e</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGE: Correios -->
+      <div class="page" id="pageCorreios">
+        <div class="dash-welcome" style="border-color:rgba(52,152,219,.15);background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02))">
+          <h2>📦 Correios — Frete e Etiquetas</h2>
+          <p>Calcule frete, gere etiquetas e rastreie encomendas.</p>
+        </div>
+
+        <!-- Status -->
+        <div class="card" style="padding:16px;margin-bottom:1.5rem">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div id="correiosStatusIcon" style="width:40px;height:40px;border-radius:10px;background:rgba(149,165,166,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem">🔌</div>
+            <div style="flex:1">
+              <div id="correiosStatusTitle" style="font-weight:700;font-size:14px">Não conectado</div>
+              <div id="correiosStatusSub" style="font-size:12px;color:var(--txt3)">Configure suas credenciais dos Correios</div>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleCorreiosConfig()" style="font-size:12px" id="btnCorreiosConfig">⚙️ Configurar</button>
+          </div>
+        </div>
+
+        <!-- Config -->
+        <div id="correiosConfigPanel" style="display:none;margin-bottom:1.5rem">
+          <div class="card" style="padding:20px">
+            <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">🔐 Credenciais da API dos Correios</h4>
+            <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Use suas credenciais do <a href="https://cws.correios.com.br" target="_blank" style="color:var(--b)">CWS Correios</a> (contrato comercial PJ).</p>
+
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Usuário (Meu Correios)</label>
+              <input type="text" id="correiosUser" placeholder="Seu login do Meu Correios" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Código de acesso (API)</label>
+              <input type="password" id="correiosToken" placeholder="Token gerado no CWS" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Nº do contrato</label>
+              <input type="text" id="correiosContrato" placeholder="Número do contrato comercial" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Nº do cartão de postagem</label>
+              <input type="text" id="correiosCartao" placeholder="Número do cartão de postagem" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">CEP de origem</label>
+              <input type="text" id="correiosCepOrigem" placeholder="CEP do remetente (seu CEP)" style="padding:8px 12px">
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-primary" onclick="salvarCorreiosConfig()" style="font-size:12px">💾 Salvar credenciais</button>
+              <button class="btn btn-secondary" onclick="testarCorreios()" id="btnTestarCorreios" style="font-size:12px;display:none">🧪 Testar conexão</button>
+            </div>
+            <div id="correiosConfigResult" style="margin-top:8px;font-size:12px"></div>
+
+            <div style="margin-top:16px;padding:12px;background:rgba(52,152,219,.05);border-radius:8px;border:1px solid rgba(52,152,219,.12)">
+              <div style="font-size:12px;font-weight:700;color:var(--b);margin-bottom:6px">📋 Passo a passo</div>
+              <ol style="margin:0;padding-left:18px;font-size:11px;color:var(--txt2);line-height:1.8">
+                <li>Tenha um <strong>contrato comercial</strong> com os Correios (CNPJ)</li>
+                <li>Acesse <a href="https://cws.correios.com.br" target="_blank" style="color:var(--b)">cws.correios.com.br</a></li>
+                <li>Em "Permissão de Acesso", gere um <strong>código de acesso</strong> para a API</li>
+                <li>Cole as credenciais acima e salve</li>
+                <li>Teste a conexão para verificar se está tudo certo</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Calculadora de frete -->
+        <div class="card" style="padding:20px;margin-bottom:1.5rem">
+          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🧮 Calcular frete</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">CEP de destino</label>
+              <input type="text" id="frCepDestino" placeholder="00000-000" maxlength="9" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Peso (kg)</label>
+              <input type="text" id="frPeso" placeholder="Ex: 12" value="12" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Comprimento (cm)</label>
+              <input type="text" id="frComprimento" placeholder="Ex: 50" value="50" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Largura (cm)</label>
+              <input type="text" id="frLargura" placeholder="Ex: 45" value="45" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Altura (cm)</label>
+              <input type="text" id="frAltura" placeholder="Ex: 25" value="25" style="padding:6px 10px;font-size:12px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Valor declarado (R$)</label>
+              <input type="text" id="frValorDeclarado" placeholder="Ex: 5000" style="padding:6px 10px;font-size:12px">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="calcularFreteCorreios()" style="font-size:12px;margin-top:12px">📦 Calcular frete</button>
+          <div id="frResultado" style="margin-top:14px"></div>
+        </div>
+
+        <!-- Gerar etiqueta -->
+        <div class="card" style="padding:20px;margin-bottom:1.5rem">
+          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🏷️ Gerar etiqueta de envio</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Venda</label>
+              <select id="etqVenda" class="venda-select" style="padding:6px 10px;font-size:12px" onchange="preencherDadosEtiqueta()">
+                <option value="">Selecione uma venda...</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Serviço</label>
+              <select id="etqServico" class="venda-select" style="padding:6px 10px;font-size:12px">
+                <option value="03220">SEDEX</option>
+                <option value="03298">PAC</option>
+                <option value="03204">SEDEX 10</option>
+                <option value="03158">SEDEX 12</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--txt2)">📬 Destinatário</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px">Nome</label>
+                <input type="text" id="etqNome" placeholder="Nome do comprador" style="padding:6px 10px;font-size:12px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px">CPF/CNPJ</label>
+                <input type="text" id="etqCpf" placeholder="000.000.000-00" style="padding:6px 10px;font-size:12px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px">Telefone</label>
+                <input type="text" id="etqTel" placeholder="(00) 00000-0000" style="padding:6px 10px;font-size:12px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px">CEP</label>
+                <input type="text" id="etqCep" placeholder="00000-000" maxlength="9" style="padding:6px 10px;font-size:12px">
+              </div>
+              <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label style="font-size:11px">Endereço completo</label>
+                <input type="text" id="etqEndereco" placeholder="Rua, número, complemento, bairro, cidade - UF" style="padding:6px 10px;font-size:12px">
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-primary" onclick="gerarEtiquetaCorreios()" style="font-size:12px">🏷️ Gerar etiqueta</button>
+          </div>
+          <div id="etqResultado" style="margin-top:12px"></div>
+        </div>
+
+        <!-- Rastreamento -->
+        <div class="card" style="padding:20px">
+          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🔍 Rastrear encomenda</h4>
+          <div style="display:flex;gap:8px">
+            <input type="text" id="rastreioCodigo" placeholder="Código de rastreio (Ex: BR123456789BR)" style="padding:8px 12px;flex:1">
+            <button class="btn btn-primary" onclick="rastrearEncomenda()" style="font-size:12px;white-space:nowrap">🔍 Rastrear</button>
+          </div>
+          <div id="rastreioResultado" style="margin-top:14px"></div>
         </div>
       </div>
 
@@ -2778,9 +3052,25 @@ function goPage(page){
     topAction.style.display='none';
     btnSyncTop.style.display='none';
     renderMetaStatus();
+  }else if(page==='bling'){
+    document.getElementById('pageBling').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[3].classList.add('active');
+    document.getElementById('topTitle').textContent='Bling (NF-e)';
+    document.getElementById('topSub').textContent='Emissão de notas fiscais';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderBlingStatus();
+  }else if(page==='correios'){
+    document.getElementById('pageCorreios').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[4].classList.add('active');
+    document.getElementById('topTitle').textContent='Correios';
+    document.getElementById('topSub').textContent='Frete e rastreamento';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderCorreiosStatus();
   }else if(page==='vendedores'){
     document.getElementById('pageVendedores').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[3].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[5].classList.add('active');
     document.getElementById('topTitle').textContent='Vendedores';
     document.getElementById('topSub').textContent='Equipe de vendas';
     topAction.style.display='none';
@@ -2788,7 +3078,7 @@ function goPage(page){
     renderVendedores();
   }else if(page==='compras'){
     document.getElementById('pageCompras').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[4].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[6].classList.add('active');
     document.getElementById('topTitle').textContent='Compras';
     document.getElementById('topSub').textContent='Registro de aquisições';
     topAction.style.display='none';
@@ -2797,7 +3087,7 @@ function goPage(page){
     renderCompras();
   }else if(page==='ranking'){
     document.getElementById('pageRanking').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[5].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
     document.getElementById('topTitle').textContent='Ranking de Vendas';
     document.getElementById('topSub').textContent='Desempenho da equipe';
     topAction.style.display='none';
@@ -2805,7 +3095,7 @@ function goPage(page){
     renderRanking();
   }else if(page==='financeiro'){
     document.getElementById('pageFinanceiro').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[6].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[8].classList.add('active');
     document.getElementById('topTitle').textContent='Financeiro';
     document.getElementById('topSub').textContent='Relatório de faturamento e custos';
     topAction.style.display='none';
@@ -2813,14 +3103,14 @@ function goPage(page){
     renderFinanceiro();
   }else if(page==='simulador'){
     document.getElementById('pageSimulador').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[9].classList.add('active');
     document.getElementById('topTitle').textContent='Simulador de Compra';
     document.getElementById('topSub').textContent='Calcule se vale a pena antes de comprar';
     topAction.style.display='none';
     btnSyncTop.style.display='none';
   }else if(page==='config'){
     document.getElementById('pageConfig').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[8].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[10].classList.add('active');
     document.getElementById('topTitle').textContent='Configurações';
     document.getElementById('topSub').textContent='Segurança e dados do sistema';
     topAction.style.display='none';
@@ -2832,6 +3122,314 @@ function goPage(page){
 
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open')}
+
+/* ===== BLING (NF-e) ===== */
+function getBlingConfig(){try{return JSON.parse(localStorage.getItem('jk_bling_config'))||{}}catch(e){return{}}}
+function setBlingConfig(c){localStorage.setItem('jk_bling_config',JSON.stringify(c));syncToServer()}
+
+function renderBlingStatus(){
+  var bc=getBlingConfig();
+  var icon=document.getElementById('blingStatusIcon');
+  var title=document.getElementById('blingStatusTitle');
+  var sub=document.getElementById('blingStatusSub');
+  if(bc.access_token&&bc.token_expires&&Date.now()<bc.token_expires){
+    icon.textContent='✅';title.textContent='Conectado ao Bling';
+    sub.textContent='Token válido até '+new Date(bc.token_expires).toLocaleString('pt-BR');
+    document.getElementById('badgeBling').style.display='';
+  }else if(bc.client_id&&bc.client_secret){
+    icon.textContent='🔶';title.textContent='Configurado — autenticação pendente';
+    sub.textContent='Clique em "Iniciar Autenticação" para conectar';
+    document.getElementById('badgeBling').style.display='none';
+  }else{
+    icon.textContent='⚪';title.textContent='Não configurado';
+    sub.textContent='Configure suas credenciais do Bling';
+    document.getElementById('badgeBling').style.display='none';
+  }
+  // Set callback URL
+  var cbField=document.getElementById('blingCallbackUrl');
+  if(cbField) cbField.value=window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.html';
+  // Fill form fields
+  if(bc.client_id) document.getElementById('blingClientId').value=bc.client_id;
+  if(bc.client_secret) document.getElementById('blingClientSecret').value=bc.client_secret;
+  // Emitente data
+  if(bc.emitente){
+    if(bc.emitente.razao) document.getElementById('blingRazao').value=bc.emitente.razao;
+    if(bc.emitente.cnpj) document.getElementById('blingCnpj').value=bc.emitente.cnpj;
+    if(bc.emitente.ie) document.getElementById('blingIe').value=bc.emitente.ie;
+    if(bc.emitente.cep) document.getElementById('blingCep').value=bc.emitente.cep;
+  }
+  renderBlingNotas();
+}
+
+function toggleBlingConfig(){
+  var p=document.getElementById('blingConfigPanel');
+  p.style.display=p.style.display==='none'?'':'none';
+}
+
+function copiarCallback(){
+  var cb=document.getElementById('blingCallbackUrl');
+  cb.select();document.execCommand('copy');
+  showToast('URL de callback copiada!','✅');
+}
+
+function salvarBlingConfig(){
+  var bc=getBlingConfig();
+  bc.client_id=(document.getElementById('blingClientId').value||'').trim();
+  bc.client_secret=(document.getElementById('blingClientSecret').value||'').trim();
+  if(!bc.client_id||!bc.client_secret){showToast('Preencha Client ID e Client Secret','⚠️');return}
+  setBlingConfig(bc);
+  showToast('Credenciais Bling salvas!','✅');
+  renderBlingStatus();
+}
+
+function iniciarAuthBling(){
+  var bc=getBlingConfig();
+  if(!bc.client_id||!bc.client_secret){showToast('Salve as credenciais primeiro','⚠️');return}
+  var cbUrl=document.getElementById('blingCallbackUrl').value;
+  var state=Math.random().toString(36).substr(2,10);
+  bc.oauth_state=state;setBlingConfig(bc);
+  var authUrl='https://www.bling.com.br/Api/v3/oauth/authorize?response_type=code&client_id='+encodeURIComponent(bc.client_id)+'&redirect_uri='+encodeURIComponent(cbUrl)+'&state='+state;
+  showToast('Abrindo Bling para autenticação...','🔗');
+  window.open(authUrl,'_blank');
+}
+
+function completarAuthBling(code){
+  var bc=getBlingConfig();
+  if(!bc.client_id||!bc.client_secret){showToast('Credenciais não encontradas','⚠️');return}
+  var cbUrl=document.getElementById('blingCallbackUrl')?document.getElementById('blingCallbackUrl').value:(window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.html');
+  // Exchange code for token — needs server-side proxy due to CORS
+  // For now, show instructions
+  showToast('Código recebido: '+code+'. A troca por token requer proxy server (CORS). Configure um endpoint /api/bling_token.php','⚠️');
+}
+
+function salvarBlingEmitente(){
+  var bc=getBlingConfig();
+  bc.emitente={
+    razao:(document.getElementById('blingRazao').value||'').trim(),
+    cnpj:(document.getElementById('blingCnpj').value||'').trim(),
+    ie:(document.getElementById('blingIe').value||'').trim(),
+    cep:(document.getElementById('blingCep').value||'').trim()
+  };
+  if(!bc.emitente.razao||!bc.emitente.cnpj){showToast('Preencha Razão Social e CNPJ','⚠️');return}
+  setBlingConfig(bc);
+  showToast('Dados do emitente salvos!','✅');
+}
+
+function emitirNfEntrada(){
+  var bc=getBlingConfig();
+  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
+  // Get compras sem nota
+  var compras=getCompras().filter(function(c){return !c.nf_entrada});
+  if(!compras.length){showToast('Nenhuma compra pendente de NF de entrada','ℹ️');return}
+  var html='<h4 style="margin:0 0 12px;color:var(--pri)">Compras sem NF de Entrada</h4>';
+  compras.forEach(function(c){
+    var p=getProds().find(function(pr){return pr.id===c.produto_id});
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:6px">';
+    html+='<span style="font-size:13px">'+(p?p.modelo:'Compra #'+c.id)+' — '+formatarValorBR(c.valor)+'</span>';
+    html+='<button onclick="gerarNfEntradaBling(\''+c.id+'\')" style="padding:4px 12px;background:var(--pri);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">Emitir NF-e</button>';
+    html+='</div>';
+  });
+  document.getElementById('blingNotasList').innerHTML=html;
+}
+
+function gerarNfEntradaBling(compraId){
+  var bc=getBlingConfig();
+  if(!bc.access_token){showToast('Token Bling expirado','⚠️');return}
+  showToast('⏳ Emissão de NF-e de entrada requer proxy server para API Bling (CORS). Endpoint: POST /Api/v3/nfe','ℹ️');
+}
+
+function emitirNfSaida(){
+  var bc=getBlingConfig();
+  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
+  var vendas=getVendas().filter(function(v){return !v.sem_nota&&!v.nf_saida});
+  if(!vendas.length){showToast('Nenhuma venda pendente de NF de saída','ℹ️');return}
+  var html='<h4 style="margin:0 0 12px;color:var(--pri)">Vendas sem NF de Saída</h4>';
+  vendas.forEach(function(v){
+    var p=getProds().find(function(pr){return pr.id===v.produto_id});
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:6px">';
+    html+='<span style="font-size:13px">'+(p?p.modelo:'Venda #'+v.id)+' — '+formatarValorBR(v.preco_venda)+'</span>';
+    html+='<button onclick="gerarNfSaidaBling(\''+v.id+'\')" style="padding:4px 12px;background:var(--g);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">Emitir NF-e</button>';
+    html+='</div>';
+  });
+  document.getElementById('blingNotasList').innerHTML=html;
+}
+
+function gerarNfSaidaBling(vendaId){
+  var bc=getBlingConfig();
+  if(!bc.access_token){showToast('Token Bling expirado','⚠️');return}
+  showToast('⏳ Emissão de NF-e de saída requer proxy server para API Bling (CORS). Endpoint: POST /Api/v3/nfe','ℹ️');
+}
+
+function renderBlingNotas(){
+  var el=document.getElementById('blingNotasList');
+  if(!el) return;
+  // Show recent NF-e issued
+  var vendas=getVendas().filter(function(v){return v.nf_saida});
+  var compras=getCompras().filter(function(c){return c.nf_entrada});
+  if(!vendas.length&&!compras.length){el.innerHTML='<p style="color:var(--txt3);font-size:13px;text-align:center;padding:20px">Nenhuma nota emitida ainda</p>';return}
+  var html='';
+  if(compras.length){
+    html+='<h4 style="margin:0 0 8px;color:var(--pri);font-size:13px">NF-e Entrada ('+compras.length+')</h4>';
+    compras.forEach(function(c){
+      html+='<div style="padding:6px 10px;background:var(--bg);border-radius:4px;margin-bottom:4px;font-size:12px">NF #'+c.nf_entrada+' — '+formatarValorBR(c.valor)+'</div>';
+    });
+  }
+  if(vendas.length){
+    html+='<h4 style="margin:8px 0;color:var(--g);font-size:13px">NF-e Saída ('+vendas.length+')</h4>';
+    vendas.forEach(function(v){
+      html+='<div style="padding:6px 10px;background:var(--bg);border-radius:4px;margin-bottom:4px;font-size:12px">NF #'+v.nf_saida+' — '+formatarValorBR(v.preco_venda)+'</div>';
+    });
+  }
+  el.innerHTML=html;
+}
+
+/* ===== CORREIOS ===== */
+function getCorreiosConfig(){try{return JSON.parse(localStorage.getItem('jk_correios_config'))||{}}catch(e){return{}}}
+function setCorreiosConfig(c){localStorage.setItem('jk_correios_config',JSON.stringify(c));syncToServer()}
+
+function renderCorreiosStatus(){
+  var cc=getCorreiosConfig();
+  var icon=document.getElementById('correiosStatusIcon');
+  var title=document.getElementById('correiosStatusTitle');
+  var sub=document.getElementById('correiosStatusSub');
+  if(cc.token&&cc.token_expires&&Date.now()<cc.token_expires){
+    icon.textContent='✅';title.textContent='Conectado aos Correios';
+    sub.textContent='Token válido até '+new Date(cc.token_expires).toLocaleString('pt-BR');
+    document.getElementById('badgeCorreios').style.display='';
+  }else if(cc.usuario&&cc.token_api){
+    icon.textContent='🔶';title.textContent='Configurado — autenticação pendente';
+    sub.textContent='Clique em "Testar Conexão"';
+    document.getElementById('badgeCorreios').style.display='none';
+  }else{
+    icon.textContent='⚪';title.textContent='Não configurado';
+    sub.textContent='Configure suas credenciais dos Correios';
+    document.getElementById('badgeCorreios').style.display='none';
+  }
+  // Fill fields
+  if(cc.usuario) document.getElementById('correiosUser').value=cc.usuario;
+  if(cc.token_api) document.getElementById('correiosToken').value=cc.token_api;
+  if(cc.contrato) document.getElementById('correiosContrato').value=cc.contrato;
+  if(cc.cartao) document.getElementById('correiosCartao').value=cc.cartao;
+  if(cc.cep_origem) document.getElementById('correiosCepOrigem').value=cc.cep_origem;
+  // Populate venda select for etiqueta
+  populateEtqVendaSelect();
+}
+
+function toggleCorreiosConfig(){
+  var p=document.getElementById('correiosConfigPanel');
+  p.style.display=p.style.display==='none'?'':'none';
+}
+
+function salvarCorreiosConfig(){
+  var cc=getCorreiosConfig();
+  cc.usuario=(document.getElementById('correiosUser').value||'').trim();
+  cc.token_api=(document.getElementById('correiosToken').value||'').trim();
+  cc.contrato=(document.getElementById('correiosContrato').value||'').trim();
+  cc.cartao=(document.getElementById('correiosCartao').value||'').trim();
+  cc.cep_origem=(document.getElementById('correiosCepOrigem').value||'').trim();
+  if(!cc.usuario||!cc.token_api){showToast('Preencha usuário e token','⚠️');return}
+  setCorreiosConfig(cc);
+  showToast('Configurações dos Correios salvas!','✅');
+  renderCorreiosStatus();
+}
+
+function testarCorreios(){
+  var cc=getCorreiosConfig();
+  if(!cc.usuario||!cc.token_api){showToast('Salve as configurações primeiro','⚠️');return}
+  showToast('⏳ Testando conexão com Correios...','📦');
+  // POST https://api.correios.com.br/token/v1/autentica/cartaopostagem
+  // Requires server-side proxy due to CORS
+  // Simulated test
+  setTimeout(function(){
+    showToast('⚠️ Teste de conexão requer proxy server (CORS). Endpoint: POST /token/v1/autentica/cartaopostagem com header Authorization: Basic base64(usuario:token_api)','ℹ️');
+  },800);
+}
+
+function calcularFreteCorreios(){
+  var cc=getCorreiosConfig();
+  var cepDest=(document.getElementById('frCepDestino').value||'').replace(/\D/g,'');
+  var cepOrig=(cc.cep_origem||'').replace(/\D/g,'');
+  if(!cepOrig){showToast('Configure o CEP de origem primeiro','⚠️');return}
+  if(cepDest.length!==8){showToast('CEP de destino inválido','⚠️');return}
+  var peso=parseFloat(document.getElementById('frPeso').value)||12;
+  var comp=parseFloat(document.getElementById('frComprimento').value)||50;
+  var larg=parseFloat(document.getElementById('frLargura').value)||45;
+  var alt=parseFloat(document.getElementById('frAltura').value)||25;
+  var vlDecl=parseFloat(document.getElementById('frValorDeclarado').value)||0;
+  document.getElementById('frResultado').innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3)">⏳ Calculando frete...</div>';
+  // Correios API: POST /preco/v1/nacional
+  // Needs server-side proxy. Fallback: estimate based on weight+distance
+  setTimeout(function(){
+    // Estimated values for demonstration
+    var distFactor=Math.abs(parseInt(cepDest.substr(0,2))-parseInt(cepOrig.substr(0,2)));
+    var baseSedex=35+(peso*2.5)+(distFactor*1.8);
+    var basePac=22+(peso*1.8)+(distFactor*1.2);
+    var html='<div style="display:grid;gap:8px">';
+    html+='<div style="padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--r)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<div><strong style="font-size:13px">SEDEX</strong><br><span style="font-size:11px;color:var(--txt3)">3-5 dias úteis</span></div>';
+    html+='<strong style="color:var(--pri);font-size:16px">'+formatarValorBR(baseSedex)+'</strong></div></div>';
+    html+='<div style="padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--b)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
+    html+='<div><strong style="font-size:13px">PAC</strong><br><span style="font-size:11px;color:var(--txt3)">8-15 dias úteis</span></div>';
+    html+='<strong style="color:var(--pri);font-size:16px">'+formatarValorBR(basePac)+'</strong></div></div>';
+    html+='<p style="font-size:10px;color:var(--txt3);text-align:center;margin:8px 0 0">⚠️ Valores estimados. Para preços reais, configure o proxy server para a API dos Correios.</p>';
+    html+='</div>';
+    document.getElementById('frResultado').innerHTML=html;
+  },1000);
+}
+
+function populateEtqVendaSelect(){
+  var sel=document.getElementById('etqVenda');
+  if(!sel) return;
+  sel.innerHTML='<option value="">Selecione uma venda...</option>';
+  var vendas=getVendas().filter(function(v){return !v.sem_nota});
+  vendas.sort(function(a,b){return (b.data_venda||'').localeCompare(a.data_venda||'')});
+  vendas.forEach(function(v){
+    var p=getProds().find(function(pr){return pr.id===v.produto_id});
+    var nome=p?p.modelo:'Venda #'+v.id;
+    var dFmt=v.data_venda?new Date(v.data_venda+'T12:00:00').toLocaleDateString('pt-BR'):'';
+    sel.innerHTML+='<option value="'+v.id+'">'+nome+' — '+formatarValorBR(v.preco_venda)+(dFmt?' ('+dFmt+')':'')+'</option>';
+  });
+}
+
+function preencherDadosEtiqueta(){
+  var vendaId=document.getElementById('etqVenda').value;
+  if(!vendaId) return;
+  var v=getVendas().find(function(vd){return vd.id===vendaId});
+  if(!v) return;
+  // If venda has buyer data, fill it
+  if(v.comprador){
+    if(v.comprador.nome) document.getElementById('etqNome').value=v.comprador.nome;
+    if(v.comprador.cpf) document.getElementById('etqCpf').value=v.comprador.cpf;
+    if(v.comprador.tel) document.getElementById('etqTel').value=v.comprador.tel;
+    if(v.comprador.cep) document.getElementById('etqCep').value=v.comprador.cep;
+    if(v.comprador.endereco) document.getElementById('etqEndereco').value=v.comprador.endereco;
+  }
+}
+
+function gerarEtiquetaCorreios(){
+  var cc=getCorreiosConfig();
+  var vendaId=document.getElementById('etqVenda').value;
+  var servico=document.getElementById('etqServico').value;
+  var nome=(document.getElementById('etqNome').value||'').trim();
+  var cep=(document.getElementById('etqCep').value||'').replace(/\D/g,'');
+  var endereco=(document.getElementById('etqEndereco').value||'').trim();
+  if(!vendaId){showToast('Selecione uma venda','⚠️');return}
+  if(!nome||cep.length!==8||!endereco){showToast('Preencha todos os dados do destinatário','⚠️');return}
+  showToast('⏳ Geração de etiqueta requer proxy server para API Correios. Endpoint: POST /prepostagem/v1/prepostagens','ℹ️');
+}
+
+function rastrearEncomenda(){
+  var codigo=(document.getElementById('rastreioCodigo').value||'').trim().toUpperCase();
+  if(!codigo||codigo.length<13){showToast('Código de rastreio inválido','⚠️');return}
+  document.getElementById('rastreioResultado').innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3)">⏳ Rastreando...</div>';
+  // Correios API: GET /srorastro/v1/objetos/{codigo}
+  // Needs server-side proxy
+  setTimeout(function(){
+    document.getElementById('rastreioResultado').innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3)">⚠️ Rastreamento requer proxy server para API Correios (CORS).<br><br><a href="https://www.linkcorreios.com.br/?id='+codigo+'" target="_blank" style="color:var(--pri);text-decoration:underline">Rastrear no site dos Correios →</a></div>';
+  },800);
+}
 
 /* ===== DATA ===== */
 function getProds(){return getProdsLocal()}
