@@ -129,8 +129,59 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 .cat-act{flex:1;padding:10px 7px;border-radius:6px;border:none;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .15s;position:relative;z-index:2}
 .cat-act.edit{background:var(--b-soft);color:var(--b)}
 .cat-act.edit:hover{background:rgba(52,152,219,.2)}
-.cat-act.del{background:var(--r-soft);color:var(--r)}
-.cat-act.del:hover{background:rgba(192,57,43,.2)}
+/* ===== VENDEDORES ===== */
+.vend-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem}
+.vend-card{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;transition:border .2s}
+.vend-card:hover{border-color:rgba(255,255,255,.12)}
+.vend-card-top{display:flex;align-items:center;gap:12px;margin-bottom:1rem}
+.vend-avatar{width:42px;height:42px;border-radius:50%;background:var(--g-soft);color:var(--g);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;flex-shrink:0}
+.vend-nome{font-size:14px;font-weight:700}
+.vend-sub{font-size:11px;color:var(--txt3);margin-top:2px}
+.vend-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem}
+.vend-stat{background:rgba(255,255,255,.03);border-radius:6px;padding:8px 10px;text-align:center}
+.vend-stat-val{font-size:15px;font-weight:800}
+.vend-stat-label{font-size:10px;color:var(--txt3);margin-top:2px}
+.vend-actions{display:flex;gap:6px}
+.vend-actions button{flex:1;padding:7px;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* ===== RANKING ===== */
+.rank-podium{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:2rem 0;padding:1rem}
+.rank-spot{text-align:center;border-radius:var(--radius);padding:1rem;transition:transform .2s}
+.rank-spot:hover{transform:translateY(-4px)}
+.rank-spot.first{background:linear-gradient(135deg,rgba(243,156,18,.15),rgba(243,156,18,.05));border:1px solid rgba(243,156,18,.2);order:2;min-height:180px}
+.rank-spot.second{background:linear-gradient(135deg,rgba(192,192,192,.1),rgba(192,192,192,.04));border:1px solid rgba(192,192,192,.15);order:1;min-height:150px}
+.rank-spot.third{background:linear-gradient(135deg,rgba(205,127,50,.1),rgba(205,127,50,.04));border:1px solid rgba(205,127,50,.15);order:3;min-height:130px}
+.rank-medal{font-size:2rem;margin-bottom:6px}
+.rank-name{font-size:14px;font-weight:700;margin-bottom:4px}
+.rank-val{font-size:12px;color:var(--txt2)}
+.rank-table{width:100%;border-collapse:collapse;font-size:13px}
+.rank-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--txt3);padding:8px 12px;border-bottom:1px solid var(--bord)}
+.rank-table td{padding:10px 12px;border-bottom:1px solid var(--bord)}
+.rank-table tr:hover td{background:rgba(255,255,255,.02)}
+.rank-pos{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-weight:800;font-size:12px}
+
+/* ===== MODAL VENDA ===== */
+.venda-select{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--bord2);border-radius:8px;padding:11px 14px;color:#fff;font-size:13px;font-family:inherit;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer}
+.venda-select option{background:#1a1a1a;color:#fff}
+.venda-resumo{background:rgba(37,211,102,.06);border:1px solid rgba(37,211,102,.15);border-radius:8px;padding:1rem;margin-top:1rem}
+.venda-resumo-line{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.venda-resumo-line:last-child{margin-bottom:0;font-weight:700;padding-top:6px;border-top:1px solid rgba(255,255,255,.06)}
+
+/* ===== COMPRAS & FINANCEIRO ===== */
+.compra-card{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;display:flex;gap:1rem;align-items:center;transition:border .2s}
+.compra-card:hover{border-color:rgba(255,255,255,.12)}
+.compra-icon{width:42px;height:42px;border-radius:10px;background:var(--y-soft);color:var(--y);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.compra-info{flex:1;min-width:0}
+.compra-nome{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.compra-detail{font-size:11px;color:var(--txt2);margin-top:3px}
+.compra-valores{text-align:right;flex-shrink:0}
+.compra-preco{font-size:15px;font-weight:800;color:var(--y)}
+.compra-frete{font-size:11px;color:var(--txt3);margin-top:2px}
+.fin-card{background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;text-align:center}
+.fin-card-label{font-size:11px;color:var(--txt3);margin-bottom:4px}
+.fin-card-val{font-size:22px;font-weight:800}
+.fin-card-sub{font-size:10px;color:var(--txt3);margin-top:4px}
+.rank-table tfoot td{font-weight:800;border-top:2px solid var(--bord);padding-top:12px}
 
 .cat-empty{text-align:center;padding:4rem 2rem;color:var(--txt3)}
 .cat-empty .cat-empty-icon{font-size:4rem;margin-bottom:1rem;opacity:.3}
@@ -305,10 +356,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
     <div class="login-logo">🪗</div>
     <div class="login-title">Central JK Acordeons</div>
     <div class="login-sub">Painel administrativo — Área restrita</div>
-    <input class="login-input" type="text" id="loginUser" placeholder="Usuário" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
+    <input class="login-input" type="email" id="loginUser" placeholder="E-mail" autocomplete="username" onkeydown="if(event.key==='Enter')document.getElementById('loginPass').focus()">
     <input class="login-input" type="password" id="loginPass" placeholder="Senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')tentarLogin()">
-    <button class="login-btn" onclick="tentarLogin()">Entrar</button>
-    <div class="login-erro" id="loginErro">Usuário ou senha incorretos</div>
+    <button class="login-btn" id="loginBtn" onclick="tentarLogin()">Entrar</button>
+    <div class="login-erro" id="loginErro">E-mail ou senha incorretos</div>
     <a href="index.html" class="login-voltar">← Voltar ao site</a>
   </div>
 </div>
@@ -350,13 +401,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       </div>
       <div class="sb-section">
         <div class="sb-section-label">Gestão</div>
-        <div class="sb-item disabled">
-          <span class="sb-icon">💬</span> Mensagens
+        <div class="sb-item" onclick="goPage('vendedores')">
+          <span class="sb-icon">👥</span> Vendedores
+          <span class="sb-badge" id="badgeVendedores" style="background:var(--b)">0</span>
         </div>
-        <div class="sb-item disabled">
-          <span class="sb-icon">📈</span> Relatórios
+        <div class="sb-item" onclick="goPage('compras')">
+          <span class="sb-icon">🛒</span> Compras
+          <span class="sb-badge" id="badgeCompras" style="background:var(--y)">0</span>
         </div>
-        <div class="sb-item disabled">
+        <div class="sb-item" onclick="goPage('ranking')">
+          <span class="sb-icon">🏆</span> Ranking de Vendas
+        </div>
+        <div class="sb-item" onclick="goPage('financeiro')">
+          <span class="sb-icon">💹</span> Financeiro
+        </div>
+      </div>
+      <div class="sb-section">
+        <div class="sb-section-label">Sistema</div>
+        <div class="sb-item" onclick="goPage('config')">
           <span class="sb-icon">⚙️</span> Configurações
         </div>
       </div>
@@ -365,8 +427,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <div class="sb-user">
         <div class="sb-avatar">JK</div>
         <div class="sb-user-info">
-          <strong>Admin</strong>
-          <span>jkacordeons.com.br</span>
+          <strong>Jorge Kotsko</strong>
+          <span style="font-size:10px">JK Acordeons</span>
         </div>
         <button class="sb-logout" onclick="logout()" title="Sair">⏻</button>
       </div>
@@ -423,6 +485,33 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             <div class="stat-label">Vendidos</div>
           </div>
         </div>
+        <!-- Valor em estoque vs a caminho -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:2rem">
+          <div class="stat-card" style="border-left:3px solid var(--g)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="font-size:1.3rem">📦</span>
+              <span style="font-size:12px;font-weight:600;color:var(--txt2)">Valor em Estoque</span>
+            </div>
+            <div class="stat-val" id="statValorEstoque" style="font-size:1.5rem;color:var(--g)">R$ 0</div>
+            <div class="stat-label" id="statQtdEstoque">0 acordeon(s) em mãos</div>
+          </div>
+          <div class="stat-card" style="border-left:3px solid var(--y)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="font-size:1.3rem">🚚</span>
+              <span style="font-size:12px;font-weight:600;color:var(--txt2)">Valor a Caminho</span>
+            </div>
+            <div class="stat-val" id="statValorCaminho" style="font-size:1.5rem;color:var(--y)">R$ 0</div>
+            <div class="stat-label" id="statQtdCaminho">0 acordeon(s) em trânsito</div>
+          </div>
+          <div class="stat-card" style="border-left:3px solid var(--b)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+              <span style="font-size:1.3rem">💰</span>
+              <span style="font-size:12px;font-weight:600;color:var(--txt2)">Valor Total Investido</span>
+            </div>
+            <div class="stat-val" id="statValorTotal" style="font-size:1.5rem;color:var(--b)">R$ 0</div>
+            <div class="stat-label" id="statQtdTotal">estoque + a caminho</div>
+          </div>
+        </div>
       </div>
 
       <!-- PAGE: Catálogo -->
@@ -442,6 +531,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <div class="cat-filters">
             <button class="cat-filter active" onclick="setFilter('todos',this)">Todos</button>
             <button class="cat-filter" onclick="setFilter('disponivel',this)">Disponíveis</button>
+            <button class="cat-filter" onclick="setFilter('em_estoque',this)">📦 Em estoque</button>
+            <button class="cat-filter" onclick="setFilter('a_caminho',this)">🚚 A caminho</button>
             <button class="cat-filter" onclick="setFilter('reservado',this)">Reservados</button>
             <button class="cat-filter" onclick="setFilter('vendido',this)">Vendidos</button>
           </div>
@@ -483,10 +574,261 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <button class="btn btn-secondary" onclick="clearMetaCatalogs()" style="white-space:nowrap">🗑️ Limpar catálogos</button>
         </div>
 
+        <!-- Facebook Ads -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--bord);display:flex;align-items:center;gap:10px">
+            <span style="font-size:1.2rem">📢</span>
+            <div>
+              <h4 style="margin:0;font-size:14px;font-weight:700">Facebook Ads — Gastos automáticos</h4>
+              <p style="margin:2px 0 0;font-size:11px;color:var(--txt3)">O gasto com anúncios aparece automaticamente no Financeiro</p>
+            </div>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:600">ID da Conta de Anúncios</label>
+              <div style="display:flex;gap:8px">
+                <input type="text" id="metaAdAccountId" placeholder="Ex: act_123456789" style="flex:1">
+                <button class="btn btn-secondary" onclick="salvarAdAccount()" style="white-space:nowrap;font-size:12px">💾 Salvar</button>
+                <button class="btn btn-secondary" onclick="testarAdAccount()" style="white-space:nowrap;font-size:12px">🧪 Testar</button>
+              </div>
+              <div class="form-hint">Encontre em: <strong>Gerenciador de Anúncios → Configurações → ID da conta</strong>. Adicione "act_" na frente se não tiver.</div>
+            </div>
+            <div id="adAccountTestResult" style="font-size:12px;margin-top:8px"></div>
+          </div>
+        </div>
+
         <!-- Log -->
         <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1rem">
           <h4 style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--txt3)">Log de sincronização</h4>
           <div id="syncLogMeta" style="max-height:250px;overflow-y:auto;font-size:11px;color:var(--txt2);line-height:1.8"></div>
+        </div>
+      </div>
+
+      <!-- PAGE: Vendedores -->
+      <div class="page" id="pageVendedores">
+        <div class="dash-welcome" style="border-color:rgba(52,152,219,.15);background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02))">
+          <h2>👥 Equipe de Vendas</h2>
+          <p>Cadastre seus vendedores, defina comissões e acompanhe as horas trabalhadas.</p>
+        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+          <button class="btn btn-primary" onclick="abrirModalVendedor()">➕ Novo vendedor</button>
+          <button class="btn btn-secondary" onclick="toggleInativos()">👁️ <span id="btnInativos">Mostrar inativos</span></button>
+        </div>
+        <div class="vend-grid" id="vendGrid"></div>
+        <div id="vendEmpty" class="cat-empty" style="display:none">
+          <div class="cat-empty-icon">👥</div>
+          <p>Nenhum vendedor cadastrado</p>
+          <span>Clique em "Novo vendedor" para começar</span>
+        </div>
+      </div>
+
+      <!-- PAGE: Ranking -->
+      <div class="page" id="pageRanking">
+        <div class="dash-welcome" style="border-color:rgba(243,156,18,.15);background:linear-gradient(135deg,rgba(243,156,18,.08),rgba(243,156,18,.02))">
+          <h2>🏆 Ranking de Vendas</h2>
+          <p>Acompanhe o desempenho dos seus vendedores em tempo real.</p>
+        </div>
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
+          <label style="font-size:12px;color:var(--txt2)">Período:</label>
+          <select class="venda-select" id="rankPeriodo" onchange="renderRanking()" style="width:auto;min-width:160px">
+            <option value="todos">Todo o período</option>
+            <option value="mes">Este mês</option>
+            <option value="semana">Esta semana</option>
+          </select>
+        </div>
+        <div id="rankPodium" class="rank-podium"></div>
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
+          <table class="rank-table" id="rankTable">
+            <thead><tr><th>#</th><th>Vendedor</th><th>Vendas</th><th>Faturamento</th><th>Comissão</th></tr></thead>
+            <tbody id="rankBody"></tbody>
+          </table>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem" id="rankCards"></div>
+        <div id="rankEmpty" class="cat-empty" style="display:none">
+          <div class="cat-empty-icon">🏆</div>
+          <p>Nenhuma venda registrada ainda</p>
+          <span>Marque produtos como vendidos para gerar o ranking</span>
+        </div>
+      </div>
+
+      <!-- PAGE: Compras -->
+      <div class="page" id="pageCompras">
+        <div class="dash-welcome" style="border-color:rgba(243,156,18,.15);background:linear-gradient(135deg,rgba(243,156,18,.08),rgba(243,156,18,.02))">
+          <h2>🛒 Registro de Compras</h2>
+          <p>Cadastre as gaitas que você compra para controlar custos e calcular a margem de lucro.</p>
+        </div>
+
+        <!-- Custos fixos -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;margin-bottom:1.5rem">
+          <h4 style="font-size:12px;font-weight:700;color:var(--txt3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">⚙️ Custos fixos por acordeon</h4>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-end">
+            <div class="form-group" style="margin:0;flex:1;min-width:180px">
+              <label style="font-size:11px">Bag + Alças (R$)</label>
+              <input type="text" id="cfBagAlcas" value="204" onchange="salvarCustosFixos()" style="padding:10px 12px">
+            </div>
+            <div class="form-group" style="margin:0;flex:1;min-width:180px">
+              <label style="font-size:11px">Imposto sobre faturamento (%)</label>
+              <input type="text" id="cfImposto" value="7.5" onchange="salvarCustosFixos()" style="padding:10px 12px">
+            </div>
+            <button class="btn btn-secondary" onclick="salvarCustosFixos()" style="height:40px;font-size:11px">💾 Salvar</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+          <button class="btn btn-primary" onclick="abrirModalCompra()">➕ Registrar compra</button>
+        </div>
+
+        <div id="comprasGrid" class="cat-grid"></div>
+        <div id="comprasEmpty" class="cat-empty" style="display:none">
+          <div class="cat-empty-icon">🛒</div>
+          <p>Nenhuma compra registrada</p>
+          <span>Clique em "Registrar compra" para começar</span>
+        </div>
+      </div>
+
+      <!-- PAGE: Financeiro -->
+      <div class="page" id="pageFinanceiro">
+        <div class="dash-welcome" style="border-color:rgba(37,211,102,.15);background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(37,211,102,.02))">
+          <h2>💹 Relatório Financeiro</h2>
+          <p>Visão completa de faturamento, custos e lucro líquido.</p>
+        </div>
+
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
+          <label style="font-size:12px;color:var(--txt2)">Período:</label>
+          <select class="venda-select" id="finPeriodo" onchange="onFinPeriodoChange()" style="width:auto;min-width:160px">
+            <option value="todos">Todo o período</option>
+            <option value="semana">Esta semana</option>
+            <option value="mes">Este mês</option>
+            <option value="trimestre">Este trimestre</option>
+            <option value="ano">Este ano</option>
+            <option value="mes_passado">Mês passado</option>
+            <option value="trimestre_passado">Trimestre passado</option>
+            <option value="ano_passado">Ano passado</option>
+            <option value="customizado">📅 Período customizado</option>
+          </select>
+          <div id="finCustomDates" style="display:none;gap:8px;align-items:center;flex-wrap:wrap">
+            <label style="font-size:11px;color:var(--txt3)">De:</label>
+            <input type="date" id="finDateFrom" class="login-input" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderFinanceiro()">
+            <label style="font-size:11px;color:var(--txt3)">Até:</label>
+            <input type="date" id="finDateTo" class="login-input" style="width:auto;padding:6px 10px;font-size:12px" onchange="renderFinanceiro()">
+          </div>
+        </div>
+
+        <!-- Resumo cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem" id="finCards"></div>
+
+        <!-- Tabela detalhada por produto vendido -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
+          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--bord)">
+            <h4 style="font-size:13px;font-weight:700">📋 Detalhamento por venda</h4>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="rank-table" id="finTable">
+              <thead><tr>
+                <th>Acordeon</th><th>Compra</th><th>Frete↓</th><th>Bag+Alças</th><th>Venda</th><th>Frete↑</th><th>Comissão</th><th>Imposto</th><th>Lucro</th><th>Margem</th>
+              </tr></thead>
+              <tbody id="finBody"></tbody>
+              <tfoot id="finFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- Outros Gastos -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
+          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--bord);display:flex;justify-content:space-between;align-items:center">
+            <h4 style="font-size:13px;font-weight:700">📝 Outros Gastos</h4>
+            <button class="btn btn-primary" onclick="abrirModalGasto()" style="padding:6px 14px;font-size:12px">+ Novo gasto</button>
+          </div>
+          <div id="gastosLista" style="padding:1rem 1.25rem"></div>
+          <div id="gastosEmpty" style="padding:2rem;text-align:center;color:var(--txt3);font-size:13px;display:none">Nenhum gasto registrado neste período</div>
+        </div>
+
+        <!-- Facebook Ads spend -->
+        <div id="finAdsSection" style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem;display:none">
+          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--bord);display:flex;justify-content:space-between;align-items:center">
+            <h4 style="font-size:13px;font-weight:700">📢 Facebook Ads</h4>
+            <span id="finAdsPeriodo" style="font-size:11px;color:var(--txt3)"></span>
+          </div>
+          <div id="finAdsContent" style="padding:1rem 1.25rem">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:1.3rem">⏳</span>
+              <span style="font-size:13px;color:var(--txt3)">Carregando gastos com anúncios...</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="finEmpty" class="cat-empty" style="display:none">
+          <div class="cat-empty-icon">💹</div>
+          <p>Nenhuma venda com dados de custo ainda</p>
+          <span>Registre compras e vendas para ver o relatório</span>
+        </div>
+      </div>
+
+      <!-- PAGE: Configurações -->
+      <div class="page" id="pageConfig">
+        <div class="dash-welcome" style="border-color:rgba(52,152,219,.15);background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02))">
+          <h2>⚙️ Configurações do Sistema</h2>
+          <p>Segurança, dados e configurações gerais.</p>
+        </div>
+
+        <!-- Alterar Senha -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--bord)">
+            <h4 style="margin:0;font-size:14px;font-weight:700">🔐 Alterar Senha</h4>
+          </div>
+          <div style="padding:14px 16px">
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:600">Senha atual</label>
+              <input type="password" id="cfgSenhaAtual" placeholder="Digite sua senha atual" autocomplete="current-password">
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:600">Nova senha</label>
+              <input type="password" id="cfgSenhaNova" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:600">Confirmar nova senha</label>
+              <input type="password" id="cfgSenhaConfirm" placeholder="Repita a nova senha" autocomplete="new-password">
+            </div>
+            <button class="btn btn-primary" onclick="alterarSenha()">💾 Alterar senha</button>
+            <div id="cfgSenhaResult" style="margin-top:8px;font-size:12px"></div>
+          </div>
+        </div>
+
+        <!-- Backup e Dados -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--bord)">
+            <h4 style="margin:0;font-size:14px;font-weight:700">💾 Dados e Backup</h4>
+          </div>
+          <div style="padding:14px 16px">
+            <p style="font-size:12px;color:var(--txt2);margin-bottom:12px">
+              Seus dados são salvos automaticamente no servidor a cada alteração.<br>
+              O servidor mantém os últimos <strong>20 backups</strong> automáticos.
+            </p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+              <button class="btn btn-secondary" onclick="forcarSync()" style="font-size:12px">☁️ Forçar sincronização</button>
+              <button class="btn btn-secondary" onclick="exportarDados()" style="font-size:12px">📥 Exportar dados (JSON)</button>
+              <label class="btn btn-secondary" style="font-size:12px;cursor:pointer">
+                📤 Importar dados
+                <input type="file" accept=".json" style="display:none" onchange="importarDados(event)">
+              </label>
+            </div>
+            <div id="cfgSyncStatus" style="font-size:11px;color:var(--txt3)"></div>
+          </div>
+        </div>
+
+        <!-- Informações de segurança -->
+        <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem">
+          <div style="padding:14px 16px;border-bottom:1px solid var(--bord)">
+            <h4 style="margin:0;font-size:14px;font-weight:700">🛡️ Segurança</h4>
+          </div>
+          <div style="padding:14px 16px;font-size:12px;color:var(--txt2);line-height:1.8">
+            <div>✅ Senha armazenada com hash bcrypt no servidor</div>
+            <div>✅ Bloqueio automático após 5 tentativas de login</div>
+            <div>✅ Sessões expiram após 24 horas</div>
+            <div>✅ Proteção contra acesso direto aos arquivos de dados</div>
+            <div>✅ Backup automático a cada salvamento (últimos 20)</div>
+            <div>✅ Comunicação via HTTPS (quando configurado no servidor)</div>
+          </div>
         </div>
       </div>
 
@@ -523,6 +865,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <div class="form-group">
         <label>Preço</label>
         <input type="text" id="fPreco" placeholder="R$ 8.500">
+      </div>
+
+      <div class="form-group">
+        <label>Situação do estoque</label>
+        <select class="venda-select" id="fLocalizacao">
+          <option value="em_estoque">📦 Em estoque (já está aqui)</option>
+          <option value="a_caminho">🚚 A caminho (ainda não chegou)</option>
+        </select>
       </div>
 
       <div class="form-group">
@@ -612,6 +962,193 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   </div>
 </div>
 
+<!-- ===== MODAL: Registrar Venda ===== -->
+<div class="modal-overlay" id="modalVenda">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="modalVendaTitle">💰 Registrar Venda</h3>
+      <button class="modal-close" onclick="fecharModalVenda()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(255,255,255,.03);border-radius:8px;padding:1rem;margin-bottom:1rem">
+        <div style="font-size:13px;font-weight:700" id="vendaProdNome">—</div>
+        <div style="font-size:18px;font-weight:800;color:var(--g);margin-top:4px" id="vendaProdPreco">—</div>
+      </div>
+      <input type="hidden" id="vendaProdId">
+      <div class="form-group">
+        <label>Vendedor</label>
+        <select class="venda-select" id="vendaVendedorSelect" onchange="atualizarResumoVenda()">
+          <option value="">— Selecione o vendedor —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Preço de venda (se diferente do anunciado)</label>
+        <input type="text" id="vendaPrecoFinal" placeholder="Deixe vazio para usar o preço do catálogo" oninput="atualizarResumoVenda()">
+      </div>
+      <div class="form-group">
+        <label>Frete de envio ao cliente (R$)</label>
+        <input type="text" id="vendaFreteSaida" placeholder="Custo do frete para o comprador" oninput="atualizarResumoVenda()">
+      </div>
+      <!-- TROCA -->
+      <div style="margin:1rem 0;padding:12px 14px;background:rgba(243,156,18,.06);border:1px solid rgba(243,156,18,.18);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--y)">
+          <input type="checkbox" id="vendaTrocaToggle" onchange="toggleTrocaFields()" style="accent-color:var(--y);width:16px;height:16px">
+          🔄 Inclui troca de acordeão
+        </label>
+        <div id="vendaTrocaFields" style="display:none;margin-top:12px">
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:12px">Nome do acordeão recebido na troca</label>
+            <input type="text" id="vendaTrocaNome" placeholder="Ex: Todeschini Super 5 — 80 Baixos" oninput="atualizarResumoVenda()">
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:12px">Valor da troca / crédito ao cliente (R$)</label>
+            <input type="text" id="vendaTrocaValor" placeholder="Quanto deu de desconto pela troca" oninput="atualizarResumoVenda()">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label style="font-size:12px">Preço estimado de revenda (R$)</label>
+            <input type="text" id="vendaTrocaRevenda" placeholder="Quanto pretende vender esse acordeão">
+            <div class="form-hint">Referência para quando cadastrar no catálogo depois</div>
+          </div>
+        </div>
+      </div>
+      <div class="venda-resumo" id="vendaResumo" style="display:none">
+        <div class="venda-resumo-line"><span>Preço de venda</span><span id="vrPreco">—</span></div>
+        <div class="venda-resumo-line"><span>Comissão (<span id="vrPct">0</span>%)</span><span id="vrComissao">—</span></div>
+        <div class="venda-resumo-line"><span>Frete de envio</span><span id="vrFrete">—</span></div>
+        <div class="venda-resumo-line"><span>Imposto (<span id="vrImpPct">7.5</span>%)</span><span id="vrImposto">—</span></div>
+        <div class="venda-resumo-line" id="vrCustoLine" style="display:none"><span>Custo total (compra+frete+bag)</span><span id="vrCusto">—</span></div>
+        <div class="venda-resumo-line" id="vrTrocaLine" style="display:none"><span>🔄 Valor da troca</span><span id="vrTroca" style="color:var(--y)">—</span></div>
+        <div class="venda-resumo-line" id="vrDinheiroLine" style="display:none"><span>💵 Recebido em dinheiro</span><span id="vrDinheiro" style="color:var(--g)">—</span></div>
+        <div class="venda-resumo-line"><span>Lucro líquido estimado</span><span id="vrLucro">—</span></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModalVenda()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmarVenda()" style="background:var(--r)">💰 Confirmar venda</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Novo/Editar Vendedor ===== -->
+<div class="modal-overlay" id="modalVendedor">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="modalVendedorTitle">➕ Novo vendedor</h3>
+      <button class="modal-close" onclick="fecharModalVendedor()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="vendedorEditId">
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="fVendNome" placeholder="Ex: João Silva">
+      </div>
+      <div class="form-group">
+        <label>Comissão (%)</label>
+        <input type="number" id="fVendComissao" placeholder="Ex: 10" min="0" max="100" step="0.5">
+        <div class="form-hint">Porcentagem do valor de venda que o vendedor recebe</div>
+      </div>
+      <div class="form-group">
+        <label>Telefone (opcional)</label>
+        <input type="text" id="fVendTel" placeholder="(42) 99999-9999">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModalVendedor()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarVendedor()">💾 Salvar vendedor</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Registrar Compra ===== -->
+<div class="modal-overlay" id="modalCompra">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="modalCompraTitle">🛒 Registrar Compra</h3>
+      <button class="modal-close" onclick="fecharModalCompra()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="compraEditId">
+      <div class="form-group">
+        <label>Vincular a produto do catálogo (opcional)</label>
+        <select class="venda-select" id="compraProdSelect" onchange="preencherCompraFromProd()">
+          <option value="">— Compra avulsa (sem vínculo) —</option>
+        </select>
+        <div class="form-hint">Se o acordeon já está no catálogo, selecione para vincular os custos</div>
+      </div>
+      <div class="form-group">
+        <label>Nome / Descrição do acordeon</label>
+        <input type="text" id="fCompraNome" placeholder="Ex: Scandalli Super VI — 120 Baixos">
+      </div>
+      <div class="form-group">
+        <label>Preço pago (R$)</label>
+        <input type="text" id="fCompraPreco" placeholder="Ex: 5.000">
+      </div>
+      <div class="form-group">
+        <label>Frete de entrada (R$)</label>
+        <input type="text" id="fCompraFrete" placeholder="Frete para receber o acordeon">
+      </div>
+      <div class="form-group">
+        <label>Fornecedor / Origem (opcional)</label>
+        <input type="text" id="fCompraOrigem" placeholder="Ex: João - Curitiba">
+      </div>
+      <div class="form-group">
+        <label>Data da compra</label>
+        <input type="date" id="fCompraData">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModalCompra()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarCompra()">💾 Salvar compra</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Novo/Editar Gasto -->
+<div class="modal-overlay" id="modalGasto">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 id="modalGastoTitle">📝 Registrar Gasto</h3>
+      <button class="modal-close" onclick="fecharModalGasto()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="gastoEditId">
+      <div class="form-group">
+        <label>Descrição</label>
+        <input type="text" id="fGastoDesc" placeholder="Ex: Combustível, Aluguel, Marketing...">
+      </div>
+      <div class="form-group">
+        <label>Categoria</label>
+        <select class="venda-select" id="fGastoCat">
+          <option value="operacional">Operacional</option>
+          <option value="transporte">Transporte / Combustível</option>
+          <option value="marketing">Marketing / Publicidade</option>
+          <option value="aluguel">Aluguel / Espaço</option>
+          <option value="ferramentas">Ferramentas / Equipamentos</option>
+          <option value="embalagem">Embalagem / Material</option>
+          <option value="servicos">Serviços / Terceiros</option>
+          <option value="outros">Outros</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Valor (R$)</label>
+        <input type="text" id="fGastoValor" placeholder="Ex: 150,00">
+      </div>
+      <div class="form-group">
+        <label>Data</label>
+        <input type="date" id="fGastoData">
+      </div>
+      <div class="form-group">
+        <label>Observação (opcional)</label>
+        <input type="text" id="fGastoObs" placeholder="Detalhes adicionais">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="fecharModalGasto()">Cancelar</button>
+      <button class="btn btn-primary" onclick="salvarGasto()">💾 Salvar gasto</button>
+    </div>
+  </div>
+</div>
+
 <!-- SYNC PROGRESS (floating) -->
 <div class="sync-progress" id="syncProgress">
   <button class="sp-close" onclick="closeSyncProgress()">✕</button>
@@ -625,7 +1162,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
 <script>
 /* ===== AUTH ===== */
-var ADM_USER='admin',ADM_PASS='jk2026';
+var _authToken=null;
 var editandoId=null;
 var filtroAtual='todos';
 var MAX_FOTOS=10;
@@ -636,88 +1173,132 @@ var API_URL='api.php';
 var API_KEY='jk2024acordeons';
 var _syncTimer=null;
 
+function authHeaders(){
+  var h={'Content-Type':'application/json'};
+  if(_authToken) h['X-Auth-Token']=_authToken;
+  return h;
+}
+
 function syncToServer(){
+  if(!_authToken)return;
   clearTimeout(_syncTimer);
   _syncTimer=setTimeout(function(){
     var payload={
       produtos:getProdsLocal(),
-      meta_config:getMetaConfigLocal()
+      meta_config:getMetaConfigLocal(),
+      vendedores:getVendedores(),
+      vendas:getVendas(),
+      compras:getCompras(),
+      custos_fixos:getCustosFixos(),
+      gastos:getGastos()
     };
-    fetch(API_URL+'?action=save&key='+API_KEY,{
+    fetch(API_URL+'?action=save',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:authHeaders(),
       body:JSON.stringify(payload)
     }).then(function(r){return r.json()}).then(function(resp){
+      if(resp.session_expired){forcarLogout();return}
       if(resp.ok){console.log('☁️ Dados salvos no servidor: '+resp.updated)}
-      else{console.warn('☁️ Erro ao salvar:', resp.error)}
-    }).catch(function(err){console.warn('☁️ Servidor offline, dados salvos localmente:', err.message)});
-  },1000); // debounce 1s
+      else{console.log('☁️ Erro ao salvar:', resp.error)}
+    }).catch(function(){});
+  },1000);
 }
 
-function mergeProds(serverProds,localProds){
-  // Merge: pega todos do servidor + adiciona locais que não existem no servidor
-  var merged=serverProds.slice();
-  var ids={};
-  merged.forEach(function(p){ids[p.id]=true});
-  localProds.forEach(function(p){
-    if(!ids[p.id]){merged.push(p);ids[p.id]=true}
-  });
-  return merged;
+function forcarLogout(){
+  _authToken=null;
+  try{sessionStorage.removeItem('jk_auth_token')}catch(e){}
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('loginPage').style.display='flex';
+  document.getElementById('loginErro').textContent='Sessão expirada — faça login novamente';
+  document.getElementById('loginErro').style.display='block';
 }
 
 function loadFromServer(){
-  return fetch(API_URL+'?action=load&key='+API_KEY)
-  .then(function(r){return r.json()})
+  return fetch(API_URL+'?action=load',{headers:authHeaders()})
+  .then(function(r){
+    var ct=r.headers.get('content-type')||'';
+    if(ct.indexOf('json')===-1){throw new Error('not json')}
+    return r.json();
+  })
   .then(function(data){
-    var serverProds=(data&&data.produtos)?data.produtos:[];
+    if(data.session_expired){forcarLogout();throw new Error('session_expired')}
+    return data;
+  })
+  .then(function(data){
+    if(!data) return null;
+    var serverProds=(data.produtos)||[];
     var localProds=getProdsLocal();
     var localMc=getMetaConfigLocal();
 
     console.log('☁️ Servidor: '+serverProds.length+' produto(s), Local: '+localProds.length+' produto(s)');
 
-    if(serverProds.length>0&&localProds.length>0){
-      // Ambos têm dados — merge pra não perder nenhum
-      var merged=mergeProds(serverProds,localProds);
-      localStorage.setItem('jk_prods',JSON.stringify(merged));
-      console.log('☁️ Merge: '+merged.length+' produto(s) total');
-      if(data.meta_config){
-        localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
-      }
-      // Salvar merge de volta no servidor se ganhou produtos
-      if(merged.length>serverProds.length){
-        console.log('☁️ Enviando merge ao servidor (+'+( merged.length-serverProds.length)+' novos)...');
-        var payload={produtos:merged,meta_config:data.meta_config||localMc};
-        return fetch(API_URL+'?action=save&key='+API_KEY,{
-          method:'POST',headers:{'Content-Type':'application/json'},
-          body:JSON.stringify(payload)
-        }).then(function(r){return r.json()}).then(function(resp){
-          if(resp.ok){console.log('☁️ Merge salvo no servidor!')}
-          return data;
-        });
-      }
-    }else if(serverProds.length>0){
-      // Só servidor tem dados
-      localStorage.setItem('jk_prods',JSON.stringify(serverProds));
-      console.log('☁️ '+serverProds.length+' produto(s) carregados do servidor');
-      if(data.meta_config){
-        localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
-      }
-    }else if(localProds.length>0){
-      // Só local tem dados — empurrar pro servidor
-      console.log('☁️ Servidor vazio, enviando '+localProds.length+' produto(s)...');
-      var payload={produtos:localProds,meta_config:localMc};
-      return fetch(API_URL+'?action=save&key='+API_KEY,{
-        method:'POST',headers:{'Content-Type':'application/json'},
+    // Merge genérico por ID — servidor tem prioridade, local adiciona os que faltam
+    function mergeById(serverArr,localArr){
+      if(!serverArr||!serverArr.length) return localArr||[];
+      if(!localArr||!localArr.length) return serverArr;
+      var merged=serverArr.slice();
+      var ids={};
+      merged.forEach(function(item){if(item.id)ids[item.id]=true});
+      localArr.forEach(function(item){
+        if(item.id&&!ids[item.id]){merged.push(item);ids[item.id]=true}
+      });
+      return merged;
+    }
+
+    // Merge de todas as coleções
+    var mergedProds=mergeById(serverProds,localProds);
+    var mergedVendedores=mergeById(data.vendedores,getVendedores());
+    var mergedVendas=mergeById(data.vendas,getVendas());
+    var mergedCompras=mergeById(data.compras,getCompras());
+    var mergedGastos=mergeById(data.gastos,getGastos());
+
+    // Salvar tudo localmente
+    localStorage.setItem('jk_prods',JSON.stringify(mergedProds));
+    localStorage.setItem('jk_vendedores',JSON.stringify(mergedVendedores));
+    localStorage.setItem('jk_vendas',JSON.stringify(mergedVendas));
+    localStorage.setItem('jk_compras',JSON.stringify(mergedCompras));
+    localStorage.setItem('jk_gastos',JSON.stringify(mergedGastos));
+
+    // Meta config e custos fixos: servidor sempre ganha (se existir)
+    if(data.meta_config){
+      localStorage.setItem('jk_meta_config',JSON.stringify(data.meta_config));
+    }
+    if(data.custos_fixos){
+      localStorage.setItem('jk_custos_fixos',JSON.stringify(data.custos_fixos));
+    }
+
+    console.log('☁️ Merge: '+mergedProds.length+' prod, '+mergedVendas.length+' vendas, '+mergedCompras.length+' compras, '+mergedGastos.length+' gastos');
+
+    // Se o local tinha dados que o servidor não tinha, enviar merge de volta
+    var localHadExtra=mergedProds.length>serverProds.length||
+      mergedVendedores.length>(data.vendedores||[]).length||
+      mergedVendas.length>(data.vendas||[]).length||
+      mergedCompras.length>(data.compras||[]).length||
+      mergedGastos.length>(data.gastos||[]).length;
+
+    if(localHadExtra){
+      console.log('☁️ Local tinha dados extras — enviando merge ao servidor...');
+      var payload={
+        produtos:mergedProds,
+        meta_config:getMetaConfigLocal(),
+        vendedores:mergedVendedores,
+        vendas:mergedVendas,
+        compras:mergedCompras,
+        custos_fixos:getCustosFixos(),
+        gastos:mergedGastos
+      };
+      return fetch(API_URL+'?action=save',{
+        method:'POST',headers:authHeaders(),
         body:JSON.stringify(payload)
       }).then(function(r){return r.json()}).then(function(resp){
-        if(resp.ok){console.log('☁️ Dados locais enviados ao servidor!')}
+        if(resp.ok){console.log('☁️ Merge salvo no servidor!')}
         return data;
       });
     }
     return data;
   }).catch(function(err){
-    console.warn('☁️ Servidor indisponível, usando dados locais:', err.message);
-    showToast('⚠️ Servidor offline — usando dados locais. Use "Importar do Meta" para trazer produtos de outro computador.','error');
+    if(err.message==='session_expired') return null;
+    console.log('☁️ Servidor não disponível, usando dados locais');
     return null;
   });
 }
@@ -727,13 +1308,1010 @@ function getProdsLocal(){try{return JSON.parse(localStorage.getItem('jk_prods')|
 function setProdsLocal(p){try{localStorage.setItem('jk_prods',JSON.stringify(p))}catch(e){}}
 function getMetaConfigLocal(){
   try{var c=JSON.parse(localStorage.getItem('jk_meta_config')||'null');if(c&&c.cats)return c}catch(e){}
-  return{token:'',imgbbKey:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
+  return{token:'',imgbbKey:'',ad_account_id:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
+}
+
+/* ===== VENDEDORES & VENDAS DATA ===== */
+function getVendedores(){try{return JSON.parse(localStorage.getItem('jk_vendedores')||'[]')}catch(e){return[]}}
+function setVendedores(v){try{localStorage.setItem('jk_vendedores',JSON.stringify(v))}catch(e){};syncToServer()}
+function getVendas(){try{return JSON.parse(localStorage.getItem('jk_vendas')||'[]')}catch(e){return[]}}
+function setVendas(v){try{localStorage.setItem('jk_vendas',JSON.stringify(v))}catch(e){};syncToServer()}
+
+var _mostrarInativos=false;
+function toggleInativos(){
+  _mostrarInativos=!_mostrarInativos;
+  document.getElementById('btnInativos').textContent=_mostrarInativos?'Ocultar inativos':'Mostrar inativos';
+  renderVendedores();
+}
+
+function abrirModalVendedor(id){
+  var modal=document.getElementById('modalVendedor');
+  document.getElementById('vendedorEditId').value='';
+  document.getElementById('fVendNome').value='';
+  document.getElementById('fVendComissao').value='';
+  document.getElementById('fVendTel').value='';
+  document.getElementById('modalVendedorTitle').textContent='➕ Novo vendedor';
+  if(id){
+    var v=getVendedores().find(function(x){return x.id===id});
+    if(v){
+      document.getElementById('vendedorEditId').value=v.id;
+      document.getElementById('fVendNome').value=v.nome||'';
+      document.getElementById('fVendComissao').value=v.comissao_pct||'';
+      document.getElementById('fVendTel').value=v.telefone||'';
+      document.getElementById('modalVendedorTitle').textContent='✏️ Editar vendedor';
+    }
+  }
+  modal.classList.add('on');
+}
+function fecharModalVendedor(){document.getElementById('modalVendedor').classList.remove('on')}
+
+function salvarVendedor(){
+  var nome=document.getElementById('fVendNome').value.trim();
+  if(!nome){showToast('⚠️ Informe o nome do vendedor','error');return}
+  var comissao=parseFloat(document.getElementById('fVendComissao').value)||0;
+  var tel=document.getElementById('fVendTel').value.trim();
+  var editId=document.getElementById('vendedorEditId').value;
+  var vendedores=getVendedores();
+  if(editId){
+    var v=vendedores.find(function(x){return x.id===editId});
+    if(v){v.nome=nome;v.comissao_pct=comissao;v.telefone=tel;v.atualizado=new Date().toISOString()}
+  }else{
+    vendedores.push({
+      id:'vend_'+Date.now(),
+      nome:nome,
+      comissao_pct:comissao,
+      telefone:tel,
+      ativo:true,
+      criado:new Date().toISOString(),
+      atualizado:new Date().toISOString()
+    });
+  }
+  setVendedores(vendedores);
+  fecharModalVendedor();
+  renderVendedores();
+  atualizarBadgeVendedores();
+  showToast(editId?'✅ Vendedor atualizado!':'✅ Vendedor cadastrado!');
+}
+
+function toggleAtivoVendedor(id){
+  var vendedores=getVendedores();
+  var v=vendedores.find(function(x){return x.id===id});
+  if(v){v.ativo=!v.ativo;v.atualizado=new Date().toISOString()}
+  setVendedores(vendedores);
+  renderVendedores();
+  atualizarBadgeVendedores();
+  showToast(v.ativo?'✅ '+v.nome+' ativado':'⏸️ '+v.nome+' desativado');
+}
+
+function renderVendedores(){
+  var vendedores=getVendedores();
+  var vendas=getVendas();
+  var filtrados=_mostrarInativos?vendedores:vendedores.filter(function(v){return v.ativo!==false});
+  var grid=document.getElementById('vendGrid');
+  var empty=document.getElementById('vendEmpty');
+  if(!filtrados.length){
+    grid.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+  grid.innerHTML=filtrados.map(function(v){
+    var vendasV=vendas.filter(function(vd){return vd.vendedor_id===v.id});
+    var totalVendas=vendasV.length;
+    var totalFat=vendasV.reduce(function(s,vd){return s+(vd.preco_venda||0)},0);
+    var totalCom=vendasV.reduce(function(s,vd){return s+(vd.comissao_valor||0)},0);
+    var iniciais=v.nome.split(' ').map(function(n){return n[0]}).join('').substring(0,2).toUpperCase();
+    var inativo=v.ativo===false;
+    return '<div class="vend-card" style="'+(inativo?'opacity:.5':'')+'">'+
+      '<div class="vend-card-top">'+
+        '<div class="vend-avatar"'+(inativo?' style="background:var(--r-soft);color:var(--r)"':'')+'>'+iniciais+'</div>'+
+        '<div><div class="vend-nome">'+v.nome+(inativo?' <span style="font-size:10px;color:var(--r);font-weight:400">(inativo)</span>':'')+'</div>'+
+          '<div class="vend-sub">Comissão: '+v.comissao_pct+'%'+(v.telefone?' · '+v.telefone:'')+'</div></div>'+
+      '</div>'+
+      '<div class="vend-stats">'+
+        '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--g)">'+totalVendas+'</div><div class="vend-stat-label">Vendas</div></div>'+
+        '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--y)">'+formatarValorBR(totalFat)+'</div><div class="vend-stat-label">Faturamento</div></div>'+
+        '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--b)">'+formatarValorBR(totalCom)+'</div><div class="vend-stat-label">Comissão</div></div>'+
+      '</div>'+
+      '<div class="vend-actions">'+
+        '<button onclick="abrirModalVendedor(\''+v.id+'\')" style="background:var(--b-soft);color:var(--b)">✏️ Editar</button>'+
+        '<button onclick="toggleAtivoVendedor(\''+v.id+'\')" style="background:'+(inativo?'var(--g-soft);color:var(--g)':'var(--y-soft);color:var(--y)')+'">'+
+          (inativo?'▶️ Ativar':'⏸️ Desativar')+'</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function formatarValorBR(num){
+  if(!num||isNaN(num))return 'R$ 0';
+  var cents=Math.round(num*100);
+  var reais=Math.floor(cents/100);
+  var centavos=cents%100;
+  var reaisStr=reais.toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+  return 'R$ '+reaisStr+(centavos>0?','+(centavos<10?'0'+centavos:centavos):'');
+}
+
+function parsarPrecoBR(str){
+  if(!str)return 0;
+  str=String(str).replace(/[^\d,.]/g,'');
+  if(!str)return 0;
+  if(str.indexOf(',')>-1&&str.indexOf('.')>-1){
+    return parseFloat(str.replace(/\./g,'').replace(',','.'));
+  }else if(str.indexOf(',')>-1){
+    return parseFloat(str.replace(',','.'));
+  }
+  return parseFloat(str)||0;
+}
+
+function atualizarBadgeVendedores(){
+  var vendedores=getVendedores().filter(function(v){return v.ativo!==false});
+  var badge=document.getElementById('badgeVendedores');
+  if(badge)badge.textContent=vendedores.length;
+}
+
+/* ===== MODAL VENDA ===== */
+function abrirModalVenda(prodId){
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===prodId});
+  if(!prod){showToast('⚠️ Produto não encontrado','error');return}
+  document.getElementById('vendaProdId').value=prodId;
+  document.getElementById('vendaProdNome').textContent=prod.nome;
+  document.getElementById('vendaProdPreco').textContent=prod.preco||'Consultar';
+  document.getElementById('vendaPrecoFinal').value='';
+  document.getElementById('vendaFreteSaida').value='';
+  // Reset troca
+  document.getElementById('vendaTrocaToggle').checked=false;
+  document.getElementById('vendaTrocaFields').style.display='none';
+  document.getElementById('vendaTrocaNome').value='';
+  document.getElementById('vendaTrocaValor').value='';
+  document.getElementById('vendaTrocaRevenda').value='';
+  // Popular select de vendedores
+  var vendedores=getVendedores().filter(function(v){return v.ativo!==false});
+  var sel=document.getElementById('vendaVendedorSelect');
+  sel.innerHTML='<option value="">— Selecione o vendedor —</option>';
+  vendedores.forEach(function(v){
+    sel.innerHTML+='<option value="'+v.id+'" data-com="'+v.comissao_pct+'">'+v.nome+' ('+v.comissao_pct+'%)</option>';
+  });
+  document.getElementById('vendaResumo').style.display='none';
+  document.getElementById('modalVenda').classList.add('on');
+  if(!vendedores.length){
+    showToast('⚠️ Cadastre vendedores primeiro na aba Vendedores','error');
+  }
+}
+function fecharModalVenda(){document.getElementById('modalVenda').classList.remove('on')}
+
+function toggleTrocaFields(){
+  var on=document.getElementById('vendaTrocaToggle').checked;
+  document.getElementById('vendaTrocaFields').style.display=on?'block':'none';
+  if(!on){
+    document.getElementById('vendaTrocaNome').value='';
+    document.getElementById('vendaTrocaValor').value='';
+    document.getElementById('vendaTrocaRevenda').value='';
+  }
+  atualizarResumoVenda();
+}
+
+function atualizarResumoVenda(){
+  var sel=document.getElementById('vendaVendedorSelect');
+  var opt=sel.options[sel.selectedIndex];
+  if(!opt||!opt.value){document.getElementById('vendaResumo').style.display='none';return}
+  var comPct=parseFloat(opt.getAttribute('data-com'))||0;
+  var prod=getProds().find(function(p){return p.id===document.getElementById('vendaProdId').value});
+  var precoStr=document.getElementById('vendaPrecoFinal').value.trim();
+  var preco=precoStr?parsarPrecoBR(precoStr):parsarPrecoBR(prod?prod.preco:'0');
+  var comValor=preco*(comPct/100);
+  var freteStr=document.getElementById('vendaFreteSaida').value.trim();
+  var freteSaida=freteStr?parsarPrecoBR(freteStr):0;
+  var cf=getCustosFixos();
+  var impPct=cf.imposto_pct||7.5;
+  var imposto=preco*(impPct/100);
+  // Custo de compra se existir
+  var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:0;
+  var freteEntrada=(prod&&prod.frete_entrada)?prod.frete_entrada:0;
+  var bagAlcas=cf.bag_alcas||204;
+  var custoTotal=custoCompra+freteEntrada+bagAlcas;
+  var lucro=preco-comValor-freteSaida-imposto-custoTotal;
+  document.getElementById('vrPreco').textContent=formatarValorBR(preco);
+  document.getElementById('vrPct').textContent=comPct;
+  document.getElementById('vrComissao').textContent=formatarValorBR(comValor);
+  document.getElementById('vrFrete').textContent=formatarValorBR(freteSaida);
+  document.getElementById('vrImpPct').textContent=impPct;
+  document.getElementById('vrImposto').textContent=formatarValorBR(imposto);
+  if(custoCompra>0){
+    document.getElementById('vrCustoLine').style.display='';
+    document.getElementById('vrCusto').textContent=formatarValorBR(custoTotal);
+  }else{
+    document.getElementById('vrCustoLine').style.display='none';
+  }
+  // Troca
+  var temTroca=document.getElementById('vendaTrocaToggle').checked;
+  var trocaValor=0;
+  if(temTroca){
+    trocaValor=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
+    document.getElementById('vrTrocaLine').style.display='';
+    document.getElementById('vrTroca').textContent='- '+formatarValorBR(trocaValor);
+    document.getElementById('vrDinheiroLine').style.display='';
+    document.getElementById('vrDinheiro').textContent=formatarValorBR(Math.max(0,preco-trocaValor));
+  }else{
+    document.getElementById('vrTrocaLine').style.display='none';
+    document.getElementById('vrDinheiroLine').style.display='none';
+  }
+  document.getElementById('vrLucro').textContent=formatarValorBR(lucro);
+  document.getElementById('vendaResumo').style.display='block';
+}
+
+function confirmarVenda(){
+  var prodId=document.getElementById('vendaProdId').value;
+  var sel=document.getElementById('vendaVendedorSelect');
+  var vendedorId=sel.value;
+  if(!vendedorId){showToast('⚠️ Selecione o vendedor','error');return}
+  var opt=sel.options[sel.selectedIndex];
+  var comPct=parseFloat(opt.getAttribute('data-com'))||0;
+  var vendedorNome=opt.textContent.split(' (')[0];
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===prodId});
+  if(!prod){showToast('⚠️ Produto não encontrado','error');return}
+  var precoStr=document.getElementById('vendaPrecoFinal').value.trim();
+  var precoVenda=precoStr?parsarPrecoBR(precoStr):parsarPrecoBR(prod.preco);
+  var comValor=precoVenda*(comPct/100);
+  var freteStr=document.getElementById('vendaFreteSaida').value.trim();
+  var freteSaida=freteStr?parsarPrecoBR(freteStr):0;
+  // Troca
+  var temTroca=document.getElementById('vendaTrocaToggle').checked;
+  var trocaNome='',trocaValor=0,trocaRevenda=0;
+  if(temTroca){
+    trocaNome=document.getElementById('vendaTrocaNome').value.trim();
+    trocaValor=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
+    trocaRevenda=parsarPrecoBR(document.getElementById('vendaTrocaRevenda').value)||0;
+    if(!trocaNome){showToast('⚠️ Informe o nome do acordeão recebido na troca','error');return}
+    if(!trocaValor){showToast('⚠️ Informe o valor da troca','error');return}
+  }
+  // Registrar venda
+  var vendaObj={
+    id:'v_'+Date.now(),
+    produto_id:prodId,
+    produto_nome:prod.nome,
+    preco_venda:precoVenda,
+    vendedor_id:vendedorId,
+    vendedor_nome:vendedorNome,
+    comissao_pct:comPct,
+    comissao_valor:comValor,
+    frete_saida:freteSaida,
+    data:new Date().toISOString()
+  };
+  if(temTroca){
+    vendaObj.troca=true;
+    vendaObj.troca_nome=trocaNome;
+    vendaObj.troca_valor=trocaValor;
+    vendaObj.troca_revenda=trocaRevenda;
+    vendaObj.recebido_dinheiro=Math.max(0,precoVenda-trocaValor);
+  }
+  var vendas=getVendas();
+  vendas.push(vendaObj);
+  setVendas(vendas);
+  // Marcar produto como vendido
+  prod.status='vendido';
+  prod.vendedor_id=vendedorId;
+  prod.vendedor_nome=vendedorNome;
+  prod.comissao_pct=comPct;
+  prod.comissao_valor=comValor;
+  prod.frete_saida=freteSaida;
+  prod.data_venda=new Date().toISOString();
+  prod.atualizado=new Date().toISOString();
+  setProds(prods);
+
+  // Se teve troca: auto-criar apenas a compra (produto é cadastrado manualmente depois quando chegar)
+  if(temTroca){
+    var agora=new Date().toISOString();
+    var compras=getCompras();
+    compras.push({
+      id:'comp_'+Date.now(),
+      nome:trocaNome,
+      custo_compra:trocaValor,
+      frete_entrada:0,
+      origem:'🔄 Troca — '+prod.nome,
+      data:new Date().toISOString().slice(0,10),
+      produto_id:null,
+      tipo:'troca',
+      preco_revenda_estimado:trocaRevenda||0,
+      venda_origem_id:vendaObj.id,
+      criado:agora,
+      atualizado:agora
+    });
+    setCompras(compras);
+  }
+
+  fecharModalVenda();
+  renderCatalogo();
+  atualizarStats();
+  var msgVenda='💰 '+prod.nome+' vendido por '+vendedorNome+'! Comissão: '+formatarValorBR(comValor);
+  if(temTroca){
+    msgVenda+='\n🔄 Troca: '+trocaNome+' registrado em Compras ('+formatarValorBR(trocaValor)+')';
+  }
+  showToast(msgVenda);
+  // Remove from Meta
+  removeFromMetaCatalog(prod.id,prod.nome);
+}
+
+/* ===== RANKING ===== */
+function renderRanking(){
+  var vendas=getVendas();
+  var vendedores=getVendedores();
+  var periodo=document.getElementById('rankPeriodo')?document.getElementById('rankPeriodo').value:'todos';
+  // Filtrar por período
+  if(periodo==='mes'){
+    var now=new Date();
+    var m=now.getMonth(),y=now.getFullYear();
+    vendas=vendas.filter(function(v){var d=new Date(v.data);return d.getMonth()===m&&d.getFullYear()===y});
+  }else if(periodo==='semana'){
+    var now=new Date();
+    var weekAgo=new Date(now.getTime()-7*24*60*60*1000);
+    vendas=vendas.filter(function(v){return new Date(v.data)>=weekAgo});
+  }
+  // Agrupar por vendedor
+  var ranking={};
+  vendas.forEach(function(v){
+    if(!ranking[v.vendedor_id]){
+      ranking[v.vendedor_id]={id:v.vendedor_id,nome:v.vendedor_nome,vendas:0,faturamento:0,comissao:0};
+    }
+    ranking[v.vendedor_id].vendas++;
+    ranking[v.vendedor_id].faturamento+=v.preco_venda||0;
+    ranking[v.vendedor_id].comissao+=v.comissao_valor||0;
+  });
+  // Adicionar horas dos vendedores
+  var lista=Object.keys(ranking).map(function(k){
+    var r=ranking[k];
+    var vend=vendedores.find(function(v){return v.id===r.id});
+    return r;
+  });
+  // Ordenar por faturamento
+  lista.sort(function(a,b){return b.faturamento-a.faturamento});
+
+  var podiumEl=document.getElementById('rankPodium');
+  var bodyEl=document.getElementById('rankBody');
+  var cardsEl=document.getElementById('rankCards');
+  var emptyEl=document.getElementById('rankEmpty');
+
+  if(!lista.length){
+    podiumEl.innerHTML='';
+    bodyEl.innerHTML='';
+    cardsEl.innerHTML='';
+    emptyEl.style.display='block';
+    return;
+  }
+  emptyEl.style.display='none';
+
+  // Podium (top 3)
+  var medals=['🥇','🥈','🥉'];
+  var classes=['first','second','third'];
+  var top3=lista.slice(0,3);
+  podiumEl.innerHTML=top3.map(function(r,i){
+    return '<div class="rank-spot '+classes[i]+'" style="flex:1;max-width:200px">'+
+      '<div class="rank-medal">'+medals[i]+'</div>'+
+      '<div class="rank-name">'+r.nome+'</div>'+
+      '<div class="rank-val" style="font-weight:700;color:var(--g)">'+formatarValorBR(r.faturamento)+'</div>'+
+      '<div class="rank-val">'+r.vendas+' venda(s)</div>'+
+    '</div>';
+  }).join('');
+
+  // Tabela completa
+  bodyEl.innerHTML=lista.map(function(r,i){
+    var bgColors=['rgba(243,156,18,.15)','rgba(192,192,192,.12)','rgba(205,127,50,.1)'];
+    var posStyle=i<3?'background:'+bgColors[i]:'background:rgba(255,255,255,.05)';
+    return '<tr>'+
+      '<td><span class="rank-pos" style="'+posStyle+'">'+(i+1)+'</span></td>'+
+      '<td style="font-weight:600">'+r.nome+'</td>'+
+      '<td>'+r.vendas+'</td>'+
+      '<td style="color:var(--g);font-weight:700">'+formatarValorBR(r.faturamento)+'</td>'+
+      '<td style="color:var(--y)">'+formatarValorBR(r.comissao)+'</td>'+
+    '</tr>';
+  }).join('');
+
+  // Cards resumo
+  var totalVendas=vendas.length;
+  var totalFat=vendas.reduce(function(s,v){return s+(v.preco_venda||0)},0);
+  var totalCom=vendas.reduce(function(s,v){return s+(v.comissao_valor||0)},0);
+  var ticketMedio=totalVendas>0?totalFat/totalVendas:0;
+  cardsEl.innerHTML=
+    '<div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;text-align:center">'+
+      '<div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Total de Vendas</div>'+
+      '<div style="font-size:24px;font-weight:800;color:var(--g)">'+totalVendas+'</div>'+
+    '</div>'+
+    '<div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;text-align:center">'+
+      '<div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Faturamento Total</div>'+
+      '<div style="font-size:24px;font-weight:800;color:var(--g)">'+formatarValorBR(totalFat)+'</div>'+
+    '</div>'+
+    '<div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;text-align:center">'+
+      '<div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Comissões Pagas</div>'+
+      '<div style="font-size:24px;font-weight:800;color:var(--y)">'+formatarValorBR(totalCom)+'</div>'+
+    '</div>'+
+    '<div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;text-align:center">'+
+      '<div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Ticket Médio</div>'+
+      '<div style="font-size:24px;font-weight:800">'+formatarValorBR(ticketMedio)+'</div>'+
+    '</div>';
+}
+
+/* ===== COMPRAS ===== */
+function getCompras(){try{return JSON.parse(localStorage.getItem('jk_compras')||'[]')}catch(e){return[]}}
+function setCompras(c){try{localStorage.setItem('jk_compras',JSON.stringify(c))}catch(e){};syncToServer()}
+
+function getCustosFixos(){
+  try{var c=JSON.parse(localStorage.getItem('jk_custos_fixos')||'null');if(c)return c}catch(e){}
+  return{bag_alcas:204,imposto_pct:7.5};
+}
+function setCustosFixos(c){try{localStorage.setItem('jk_custos_fixos',JSON.stringify(c))}catch(e){};syncToServer()}
+
+function salvarCustosFixos(){
+  var bag=parsarPrecoBR(document.getElementById('cfBagAlcas').value)||204;
+  var imp=parseFloat(document.getElementById('cfImposto').value)||7.5;
+  setCustosFixos({bag_alcas:bag,imposto_pct:imp});
+  showToast('⚙️ Custos fixos atualizados: Bag R$ '+bag+' | Imposto '+imp+'%');
+}
+
+function carregarCustosFixos(){
+  var cf=getCustosFixos();
+  var elBag=document.getElementById('cfBagAlcas');
+  var elImp=document.getElementById('cfImposto');
+  if(elBag)elBag.value=cf.bag_alcas;
+  if(elImp)elImp.value=cf.imposto_pct;
+}
+
+function abrirModalCompra(id){
+  var modal=document.getElementById('modalCompra');
+  document.getElementById('compraEditId').value='';
+  document.getElementById('fCompraNome').value='';
+  document.getElementById('fCompraPreco').value='';
+  document.getElementById('fCompraFrete').value='';
+  document.getElementById('fCompraOrigem').value='';
+  document.getElementById('fCompraData').value=new Date().toISOString().slice(0,10);
+  document.getElementById('modalCompraTitle').textContent='🛒 Registrar Compra';
+  // Popular select de produtos
+  var prods=getProds();
+  var sel=document.getElementById('compraProdSelect');
+  sel.innerHTML='<option value="">— Compra avulsa (sem vínculo) —</option>';
+  prods.forEach(function(p){
+    sel.innerHTML+='<option value="'+p.id+'">'+p.nome+' ('+p.preco+')</option>';
+  });
+  if(id){
+    var c=getCompras().find(function(x){return x.id===id});
+    if(c){
+      document.getElementById('compraEditId').value=c.id;
+      document.getElementById('fCompraNome').value=c.nome||'';
+      document.getElementById('fCompraPreco').value=c.custo_compra||'';
+      document.getElementById('fCompraFrete').value=c.frete_entrada||'';
+      document.getElementById('fCompraOrigem').value=c.origem||'';
+      document.getElementById('fCompraData').value=(c.data||'').slice(0,10);
+      if(c.produto_id)sel.value=c.produto_id;
+      document.getElementById('modalCompraTitle').textContent='✏️ Editar Compra';
+    }
+  }
+  modal.classList.add('on');
+}
+function fecharModalCompra(){document.getElementById('modalCompra').classList.remove('on')}
+
+function preencherCompraFromProd(){
+  var sel=document.getElementById('compraProdSelect');
+  if(!sel.value)return;
+  var prod=getProds().find(function(p){return p.id===sel.value});
+  if(prod){
+    var nome=document.getElementById('fCompraNome');
+    if(!nome.value)nome.value=prod.nome;
+  }
+}
+
+function salvarCompra(){
+  var nome=document.getElementById('fCompraNome').value.trim();
+  if(!nome){showToast('⚠️ Informe o nome do acordeon','error');return}
+  var custo=parsarPrecoBR(document.getElementById('fCompraPreco').value);
+  if(!custo){showToast('⚠️ Informe o preço de compra','error');return}
+  var frete=parsarPrecoBR(document.getElementById('fCompraFrete').value)||0;
+  var origem=document.getElementById('fCompraOrigem').value.trim();
+  var data=document.getElementById('fCompraData').value||new Date().toISOString().slice(0,10);
+  var prodId=document.getElementById('compraProdSelect').value||null;
+  var editId=document.getElementById('compraEditId').value;
+  var compras=getCompras();
+
+  if(editId){
+    var c=compras.find(function(x){return x.id===editId});
+    if(c){
+      c.nome=nome;c.custo_compra=custo;c.frete_entrada=frete;
+      c.origem=origem;c.data=data;c.produto_id=prodId;
+      c.atualizado=new Date().toISOString();
+    }
+  }else{
+    compras.push({
+      id:'comp_'+Date.now(),
+      nome:nome,
+      custo_compra:custo,
+      frete_entrada:frete,
+      origem:origem,
+      data:data,
+      produto_id:prodId,
+      criado:new Date().toISOString(),
+      atualizado:new Date().toISOString()
+    });
+  }
+  setCompras(compras);
+
+  // Vincular custos ao produto se selecionado
+  if(prodId){
+    var prods=getProds();
+    var prod=prods.find(function(p){return p.id===prodId});
+    if(prod){
+      prod.custo_compra=custo;
+      prod.frete_entrada=frete;
+      setProds(prods);
+    }
+  }
+
+  fecharModalCompra();
+  renderCompras();
+  atualizarBadgeCompras();
+  showToast(editId?'✅ Compra atualizada!':'✅ Compra registrada! '+formatarValorBR(custo));
+}
+
+function excluirCompra(id){
+  if(!confirm('Excluir esta compra?'))return;
+  var compras=getCompras().filter(function(c){return c.id!==id});
+  setCompras(compras);
+  renderCompras();
+  atualizarBadgeCompras();
+  showToast('🗑️ Compra removida');
+}
+
+function renderCompras(){
+  var compras=getCompras();
+  var cf=getCustosFixos();
+  var grid=document.getElementById('comprasGrid');
+  var empty=document.getElementById('comprasEmpty');
+
+  carregarCustosFixos();
+
+  if(!compras.length){
+    grid.innerHTML='';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+
+  // Ordenar por data (mais recente primeiro)
+  compras.sort(function(a,b){return(b.data||'').localeCompare(a.data||'')});
+
+  grid.innerHTML=compras.map(function(c){
+    var custoTotal=c.custo_compra+(c.frete_entrada||0)+cf.bag_alcas;
+    var dataFmt=c.data?new Date(c.data+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+    var vinculado=c.produto_id?'<span style="color:var(--g)">✓ vinculado</span>':'<span style="color:var(--txt3)">avulso</span>';
+    var trocaBadge=c.tipo==='troca'?'<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>':'';
+    return '<div class="compra-card"'+(c.tipo==='troca'?' style="border-left:3px solid var(--y)"':'')+'>'+
+      '<div class="compra-icon">'+(c.tipo==='troca'?'🔄':'🪗')+'</div>'+
+      '<div class="compra-info">'+
+        '<div class="compra-nome">'+c.nome+trocaBadge+'</div>'+
+        '<div class="compra-detail">'+dataFmt+(c.origem?' · '+c.origem:'')+' · '+vinculado+'</div>'+
+      '</div>'+
+      '<div class="compra-valores">'+
+        '<div class="compra-preco">'+formatarValorBR(c.custo_compra)+'</div>'+
+        '<div class="compra-frete">Frete: '+formatarValorBR(c.frete_entrada||0)+' · Total: '+formatarValorBR(custoTotal)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;flex-direction:column;gap:4px;margin-left:8px">'+
+        '<button onclick="abrirModalCompra(\''+c.id+'\')" style="background:var(--b-soft);color:var(--b);border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit">✏️</button>'+
+        '<button onclick="excluirCompra(\''+c.id+'\')" style="background:var(--r-soft);color:var(--r);border:none;border-radius:6px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit">🗑️</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+function atualizarBadgeCompras(){
+  var badge=document.getElementById('badgeCompras');
+  if(badge)badge.textContent=getCompras().length;
+}
+
+/* ===== FINANCEIRO ===== */
+function onFinPeriodoChange(){
+  var p=document.getElementById('finPeriodo').value;
+  var custom=document.getElementById('finCustomDates');
+  custom.style.display=p==='customizado'?'flex':'none';
+  if(p==='customizado'){
+    // Padrão: último mês
+    if(!document.getElementById('finDateFrom').value){
+      var now=new Date();
+      var mAgo=new Date(now.getFullYear(),now.getMonth()-1,now.getDate());
+      document.getElementById('finDateFrom').value=mAgo.toISOString().slice(0,10);
+      document.getElementById('finDateTo').value=now.toISOString().slice(0,10);
+    }
+  }
+  renderFinanceiro();
+}
+
+function getFinDateRange(periodo){
+  var now=new Date();
+  var desde=null,ate=null;
+  switch(periodo){
+    case 'semana':
+      desde=new Date(now.getTime()-7*24*60*60*1000);ate=now;break;
+    case 'mes':
+      desde=new Date(now.getFullYear(),now.getMonth(),1);ate=now;break;
+    case 'trimestre':
+      var qm=Math.floor(now.getMonth()/3)*3;
+      desde=new Date(now.getFullYear(),qm,1);ate=now;break;
+    case 'ano':
+      desde=new Date(now.getFullYear(),0,1);ate=now;break;
+    case 'mes_passado':
+      desde=new Date(now.getFullYear(),now.getMonth()-1,1);
+      ate=new Date(now.getFullYear(),now.getMonth(),0);break;
+    case 'trimestre_passado':
+      var qm2=Math.floor(now.getMonth()/3)*3;
+      desde=new Date(now.getFullYear(),qm2-3,1);
+      ate=new Date(now.getFullYear(),qm2,0);break;
+    case 'ano_passado':
+      desde=new Date(now.getFullYear()-1,0,1);
+      ate=new Date(now.getFullYear()-1,11,31);break;
+    case 'customizado':
+      var f=document.getElementById('finDateFrom').value;
+      var t=document.getElementById('finDateTo').value;
+      if(f) desde=new Date(f+'T00:00:00');
+      if(t) ate=new Date(t+'T23:59:59');
+      break;
+    default: // 'todos'
+      break;
+  }
+  return{desde:desde,ate:ate};
+}
+
+function filtrarPorPeriodo(arr,range,campoData){
+  if(!range.desde&&!range.ate) return arr;
+  return arr.filter(function(item){
+    var d=new Date(item[campoData||'data']);
+    if(isNaN(d.getTime())) return true;
+    if(range.desde&&d<range.desde) return false;
+    if(range.ate&&d>range.ate) return false;
+    return true;
+  });
+}
+
+function renderFinanceiro(){
+  var vendas=getVendas();
+  var compras=getCompras();
+  var prods=getProds();
+  var cf=getCustosFixos();
+  var periodo=document.getElementById('finPeriodo')?document.getElementById('finPeriodo').value:'todos';
+
+  // Filtrar vendas por período
+  var range=getFinDateRange(periodo);
+  vendas=filtrarPorPeriodo(vendas,range,'data');
+
+  var cardsEl=document.getElementById('finCards');
+  var bodyEl=document.getElementById('finBody');
+  var footEl=document.getElementById('finFoot');
+  var emptyEl=document.getElementById('finEmpty');
+
+  if(!vendas.length){
+    bodyEl.innerHTML='';footEl.innerHTML='';
+    emptyEl.style.display='block';
+  }else{
+    emptyEl.style.display='none';
+  }
+
+  // Mesmo sem vendas, continuar para renderizar gastos e cards parciais
+
+  // Montar detalhamento
+  var rows=[];
+  var totais={venda:0,compra:0,frete_in:0,bag:0,frete_out:0,comissao:0,imposto:0,lucro:0};
+
+  vendas.forEach(function(v){
+    // Buscar custo de compra: primeiro no produto, depois nas compras
+    var prod=prods.find(function(p){return p.id===v.produto_id});
+    var compra=compras.find(function(c){return c.produto_id===v.produto_id});
+    var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:(compra?compra.custo_compra:0);
+    var freteEntrada=(prod&&prod.frete_entrada)?prod.frete_entrada:(compra?compra.frete_entrada:0);
+    var bagAlcas=cf.bag_alcas;
+    var freteSaida=v.frete_saida||0;
+    var comissao=v.comissao_valor||0;
+    var imposto=(v.preco_venda||0)*(cf.imposto_pct/100);
+    var lucro=(v.preco_venda||0)-custoCompra-freteEntrada-bagAlcas-freteSaida-comissao-imposto;
+
+    totais.venda+=v.preco_venda||0;
+    totais.compra+=custoCompra;
+    totais.frete_in+=freteEntrada;
+    totais.bag+=bagAlcas;
+    totais.frete_out+=freteSaida;
+    totais.comissao+=comissao;
+    totais.imposto+=imposto;
+    totais.lucro+=lucro;
+
+    var margemPct=v.preco_venda>0?((lucro/v.preco_venda)*100).toFixed(1):'0';
+    var corLucro=lucro>=0?'var(--g)':'var(--r)';
+
+    var trocaBadge=v.troca?'<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>':'';
+    rows.push('<tr>'+
+      '<td style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+v.produto_nome+(v.troca?' (Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor)+')':'')+'">'+v.produto_nome+trocaBadge+'</td>'+
+      '<td>'+(custoCompra?formatarValorBR(custoCompra):'<span style="color:var(--txt3)">—</span>')+'</td>'+
+      '<td>'+(freteEntrada?formatarValorBR(freteEntrada):'<span style="color:var(--txt3)">—</span>')+'</td>'+
+      '<td>'+formatarValorBR(bagAlcas)+'</td>'+
+      '<td style="color:var(--g);font-weight:700">'+formatarValorBR(v.preco_venda)+'</td>'+
+      '<td>'+(freteSaida?formatarValorBR(freteSaida):'<span style="color:var(--txt3)">—</span>')+'</td>'+
+      '<td style="color:var(--y)">'+formatarValorBR(comissao)+'</td>'+
+      '<td>'+formatarValorBR(imposto)+'</td>'+
+      '<td style="color:'+corLucro+';font-weight:700">'+formatarValorBR(lucro)+'</td>'+
+      '<td style="color:'+corLucro+'">'+margemPct+'%</td>'+
+    '</tr>');
+  });
+
+  if(vendas.length){
+    bodyEl.innerHTML=rows.join('');
+    // Totais
+    var margemTotal=totais.venda>0?((totais.lucro/totais.venda)*100).toFixed(1):'0';
+    var corTotal=totais.lucro>=0?'var(--g)':'var(--r)';
+    footEl.innerHTML='<tr>'+
+      '<td>TOTAL ('+vendas.length+' vendas)</td>'+
+      '<td>'+formatarValorBR(totais.compra)+'</td>'+
+      '<td>'+formatarValorBR(totais.frete_in)+'</td>'+
+      '<td>'+formatarValorBR(totais.bag)+'</td>'+
+      '<td style="color:var(--g)">'+formatarValorBR(totais.venda)+'</td>'+
+      '<td>'+formatarValorBR(totais.frete_out)+'</td>'+
+      '<td style="color:var(--y)">'+formatarValorBR(totais.comissao)+'</td>'+
+      '<td>'+formatarValorBR(totais.imposto)+'</td>'+
+      '<td style="color:'+corTotal+'">'+formatarValorBR(totais.lucro)+'</td>'+
+      '<td style="color:'+corTotal+'">'+margemTotal+'%</td>'+
+    '</tr>';
+  }
+
+  // Outros gastos (filtrados pelo mesmo período)
+  var allGastos=getGastos();
+  var gastosFiltered=filtrarPorPeriodo(allGastos,range,'data');
+  var totalOutrosGastos=0;
+  gastosFiltered.forEach(function(g){totalOutrosGastos+=g.valor||0});
+
+  // Renderizar lista de gastos
+  var gastosListaEl=document.getElementById('gastosLista');
+  var gastosEmptyEl=document.getElementById('gastosEmpty');
+  if(!gastosFiltered.length){
+    gastosListaEl.innerHTML='';
+    gastosEmptyEl.style.display='block';
+  }else{
+    gastosEmptyEl.style.display='none';
+    gastosFiltered.sort(function(a,b){return(b.data||'').localeCompare(a.data||'')});
+    gastosListaEl.innerHTML=gastosFiltered.map(function(g){
+      var dataFmt=g.data?new Date(g.data+'T12:00:00').toLocaleDateString('pt-BR'):'—';
+      var catLabel=_catLabels[g.categoria]||g.categoria;
+      var catIcon=_catIcons[g.categoria]||'📌';
+      return '<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bord)">'+
+        '<span style="font-size:1.3rem">'+catIcon+'</span>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+g.descricao+'</div>'+
+          '<div style="font-size:11px;color:var(--txt3)">'+catLabel+' · '+dataFmt+(g.obs?' · '+g.obs:'')+'</div>'+
+        '</div>'+
+        '<div style="font-size:14px;font-weight:700;color:var(--r);white-space:nowrap">- '+formatarValorBR(g.valor)+'</div>'+
+        '<div style="display:flex;gap:4px;margin-left:4px">'+
+          '<button onclick="abrirModalGasto(\''+g.id+'\')" style="background:var(--b-soft);color:var(--b);border:none;border-radius:6px;padding:5px 8px;font-size:10px;cursor:pointer">✏️</button>'+
+          '<button onclick="excluirGasto(\''+g.id+'\')" style="background:var(--r-soft);color:var(--r);border:none;border-radius:6px;padding:5px 8px;font-size:10px;cursor:pointer">🗑️</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+
+  // Totais de trocas
+  var totalTrocas=0,qtdTrocas=0;
+  vendas.forEach(function(v){if(v.troca){totalTrocas+=v.troca_valor||0;qtdTrocas++}});
+
+  // Cards resumo (incluindo outros gastos) — renderizar primeiro sem ads, depois atualizar
+  function renderFinCards(adsSpend){
+    var totalAds=adsSpend?adsSpend.spend:0;
+    var custoTotalGeral=totais.compra+totais.frete_in+totais.bag+totais.frete_out+totais.comissao+totais.imposto+totalOutrosGastos+totalAds;
+    var lucroFinal=totais.venda-custoTotalGeral;
+    var margemFinal=totais.venda>0?((lucroFinal/totais.venda)*100).toFixed(1):'0';
+    var corFinal=lucroFinal>=0?'var(--g)':'var(--r)';
+    var adsCard='';
+    if(adsSpend!==null){
+      var adsSub=adsSpend?(adsSpend.impressions>0?adsSpend.impressions.toLocaleString('pt-BR')+' impressões · '+adsSpend.clicks+' cliques':'sem anúncios no período'):'';
+      adsCard='<div class="fin-card"><div class="fin-card-label">📢 Facebook Ads</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totalAds)+'</div><div class="fin-card-sub">'+adsSub+'</div></div>';
+    }else{
+      // Conta não configurada ou erro — não mostrar card
+      adsCard='';
+    }
+    cardsEl.innerHTML=
+      '<div class="fin-card"><div class="fin-card-label">Faturamento</div><div class="fin-card-val" style="color:var(--g)">'+formatarValorBR(totais.venda)+'</div><div class="fin-card-sub">'+vendas.length+' venda(s)</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Custo Total</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(custoTotalGeral)+'</div><div class="fin-card-sub">produtos+ads+outros</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Lucro Líquido</div><div class="fin-card-val" style="color:'+corFinal+'">'+formatarValorBR(lucroFinal)+'</div><div class="fin-card-sub">margem '+margemFinal+'%</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Imposto ('+cf.imposto_pct+'%)</div><div class="fin-card-val" style="color:var(--y)">'+formatarValorBR(totais.imposto)+'</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Comissões</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(totais.comissao)+'</div></div>'+
+      adsCard+
+      '<div class="fin-card"><div class="fin-card-label">Outros Gastos</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totalOutrosGastos)+'</div><div class="fin-card-sub">'+gastosFiltered.length+' lançamento(s)</div></div>'+
+      (qtdTrocas?'<div class="fin-card"><div class="fin-card-label">🔄 Trocas</div><div class="fin-card-val" style="color:var(--y)">'+formatarValorBR(totalTrocas)+'</div><div class="fin-card-sub">'+qtdTrocas+' troca(s) — não é gasto em dinheiro</div></div>':'');
+  }
+
+  // Ads section
+  var adsSection=document.getElementById('finAdsSection');
+  var adsContent=document.getElementById('finAdsContent');
+  var mc=getMetaConfig();
+  if(mc.ad_account_id&&mc.token){
+    adsSection.style.display='';
+    adsContent.innerHTML='<div style="display:flex;align-items:center;gap:12px"><span style="font-size:1.3rem">⏳</span><span style="font-size:13px;color:var(--txt3)">Carregando gastos com anúncios...</span></div>';
+    renderFinCards({spend:0,impressions:0,clicks:0});
+    fetchAdsSpend(periodo,function(adsData){
+      renderFinCards(adsData);
+      if(adsData){
+        var _periodoLabels={todos:'todo o período',semana:'esta semana',mes:'este mês',trimestre:'este trimestre',ano:'este ano',mes_passado:'mês passado',trimestre_passado:'trimestre passado',ano_passado:'ano passado',customizado:'período customizado'};
+        var periodoLabel=_periodoLabels[periodo]||'período selecionado';
+        document.getElementById('finAdsPeriodo').textContent=periodoLabel;
+        if(adsData.spend>0){
+          adsContent.innerHTML=
+            '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">'+
+              '<div style="flex:1;min-width:120px"><div style="font-size:11px;color:var(--txt3);margin-bottom:2px">Gasto total</div><div style="font-size:1.4rem;font-weight:700;color:var(--r)">'+formatarValorBR(adsData.spend)+'</div></div>'+
+              '<div style="min-width:80px"><div style="font-size:11px;color:var(--txt3);margin-bottom:2px">Impressões</div><div style="font-size:1rem;font-weight:600">'+adsData.impressions.toLocaleString('pt-BR')+'</div></div>'+
+              '<div style="min-width:80px"><div style="font-size:11px;color:var(--txt3);margin-bottom:2px">Cliques</div><div style="font-size:1rem;font-weight:600">'+adsData.clicks.toLocaleString('pt-BR')+'</div></div>'+
+              (adsData.clicks>0&&adsData.spend>0?'<div style="min-width:80px"><div style="font-size:11px;color:var(--txt3);margin-bottom:2px">CPC médio</div><div style="font-size:1rem;font-weight:600">'+formatarValorBR(adsData.spend/adsData.clicks)+'</div></div>':'')+
+            '</div>';
+        }else{
+          adsContent.innerHTML='<div style="text-align:center;padding:1rem;color:var(--txt3);font-size:13px">Nenhum gasto com anúncios no período</div>';
+        }
+      }else{
+        adsContent.innerHTML='<div style="display:flex;align-items:center;gap:8px;color:var(--y);font-size:12px"><span>⚠️</span> Não foi possível carregar dados de anúncios. Verifique se o token tem permissão <strong>ads_read</strong>.</div>';
+      }
+    });
+  }else{
+    adsSection.style.display='none';
+    renderFinCards(null);
+  }
+}
+
+/* ===== OUTROS GASTOS ===== */
+function getGastos(){try{return JSON.parse(localStorage.getItem('jk_gastos')||'[]')}catch(e){return[]}}
+function setGastos(g){localStorage.setItem('jk_gastos',JSON.stringify(g));syncToServer()}
+
+function abrirModalGasto(id){
+  var modal=document.getElementById('modalGasto');
+  document.getElementById('gastoEditId').value='';
+  document.getElementById('fGastoDesc').value='';
+  document.getElementById('fGastoCat').value='operacional';
+  document.getElementById('fGastoValor').value='';
+  document.getElementById('fGastoData').value=new Date().toISOString().slice(0,10);
+  document.getElementById('fGastoObs').value='';
+  document.getElementById('modalGastoTitle').textContent='📝 Registrar Gasto';
+  if(id){
+    var gastos=getGastos();
+    var g=gastos.find(function(x){return x.id===id});
+    if(g){
+      document.getElementById('gastoEditId').value=g.id;
+      document.getElementById('fGastoDesc').value=g.descricao||'';
+      document.getElementById('fGastoCat').value=g.categoria||'operacional';
+      document.getElementById('fGastoValor').value=g.valor?formatarValorBR(g.valor).replace('R$ ',''):'';
+      document.getElementById('fGastoData').value=g.data||'';
+      document.getElementById('fGastoObs').value=g.obs||'';
+      document.getElementById('modalGastoTitle').textContent='✏️ Editar Gasto';
+    }
+  }
+  modal.classList.add('on');
+}
+function fecharModalGasto(){document.getElementById('modalGasto').classList.remove('on')}
+
+function salvarGasto(){
+  var desc=document.getElementById('fGastoDesc').value.trim();
+  var cat=document.getElementById('fGastoCat').value;
+  var valorStr=document.getElementById('fGastoValor').value.trim();
+  var data=document.getElementById('fGastoData').value;
+  var obs=document.getElementById('fGastoObs').value.trim();
+  if(!desc){showToast('⚠️ Informe a descrição','error');return}
+  if(!valorStr){showToast('⚠️ Informe o valor','error');return}
+  var valor=parsarPrecoBR(valorStr);
+  if(!valor||valor<=0){showToast('⚠️ Valor inválido','error');return}
+  var gastos=getGastos();
+  var editId=document.getElementById('gastoEditId').value;
+  if(editId){
+    var idx=gastos.findIndex(function(g){return g.id===editId});
+    if(idx>-1){
+      gastos[idx].descricao=desc;
+      gastos[idx].categoria=cat;
+      gastos[idx].valor=valor;
+      gastos[idx].data=data;
+      gastos[idx].obs=obs;
+      gastos[idx].atualizado=new Date().toISOString();
+    }
+  }else{
+    gastos.push({
+      id:'g_'+Date.now(),
+      descricao:desc,
+      categoria:cat,
+      valor:valor,
+      data:data||new Date().toISOString().slice(0,10),
+      obs:obs,
+      criado:new Date().toISOString()
+    });
+  }
+  setGastos(gastos);
+  fecharModalGasto();
+  renderFinanceiro();
+  showToast(editId?'✏️ Gasto atualizado!':'📝 Gasto registrado!');
+}
+
+function excluirGasto(id){
+  if(!confirm('Excluir este gasto?'))return;
+  var gastos=getGastos().filter(function(g){return g.id!==id});
+  setGastos(gastos);
+  renderFinanceiro();
+  showToast('🗑️ Gasto excluído');
+}
+
+var _catLabels={operacional:'Operacional',transporte:'Transporte',marketing:'Marketing',aluguel:'Aluguel',ferramentas:'Ferramentas',embalagem:'Embalagem',servicos:'Serviços',outros:'Outros'};
+var _catIcons={operacional:'⚙️',transporte:'🚗',marketing:'📢',aluguel:'🏠',ferramentas:'🔧',embalagem:'📦',servicos:'🛠️',outros:'📌'};
+
+/* ===== CONFIG PAGE FUNCTIONS ===== */
+function alterarSenha(){
+  var atual=document.getElementById('cfgSenhaAtual').value;
+  var nova=document.getElementById('cfgSenhaNova').value;
+  var confirm=document.getElementById('cfgSenhaConfirm').value;
+  var result=document.getElementById('cfgSenhaResult');
+  if(!atual){result.innerHTML='<span style="color:var(--r)">Informe a senha atual</span>';return}
+  if(!nova||nova.length<8){result.innerHTML='<span style="color:var(--r)">Nova senha deve ter pelo menos 8 caracteres</span>';return}
+  if(nova!==confirm){result.innerHTML='<span style="color:var(--r)">As senhas não conferem</span>';return}
+  result.innerHTML='<span style="color:var(--y)">⏳ Alterando...</span>';
+  fetch(API_URL+'?action=change_password',{
+    method:'POST',
+    headers:authHeaders(),
+    body:JSON.stringify({current_pass:atual,new_pass:nova})
+  }).then(function(r){return r.json()}).then(function(resp){
+    if(resp.ok){
+      result.innerHTML='<span style="color:var(--g)">✅ Senha alterada com sucesso! Fazendo logout...</span>';
+      document.getElementById('cfgSenhaAtual').value='';
+      document.getElementById('cfgSenhaNova').value='';
+      document.getElementById('cfgSenhaConfirm').value='';
+      setTimeout(function(){logout()},2000);
+    }else{
+      result.innerHTML='<span style="color:var(--r)">❌ '+(resp.error||'Erro ao alterar senha')+'</span>';
+    }
+  }).catch(function(){
+    result.innerHTML='<span style="color:var(--r)">❌ Erro de conexão</span>';
+  });
+}
+
+function forcarSync(){
+  var status=document.getElementById('cfgSyncStatus');
+  status.textContent='⏳ Sincronizando...';
+  clearTimeout(_syncTimer);
+  var payload={
+    produtos:getProdsLocal(),
+    meta_config:getMetaConfigLocal(),
+    vendedores:getVendedores(),
+    vendas:getVendas(),
+    compras:getCompras(),
+    custos_fixos:getCustosFixos(),
+    gastos:getGastos()
+  };
+  fetch(API_URL+'?action=save',{
+    method:'POST',
+    headers:authHeaders(),
+    body:JSON.stringify(payload)
+  }).then(function(r){return r.json()}).then(function(resp){
+    if(resp.ok){
+      status.innerHTML='<span style="color:var(--g)">✅ Sincronizado em '+new Date().toLocaleString('pt-BR')+'</span>';
+      showToast('☁️ Dados sincronizados!');
+    }else{
+      status.innerHTML='<span style="color:var(--r)">❌ '+(resp.error||'Erro')+'</span>';
+    }
+  }).catch(function(){
+    status.innerHTML='<span style="color:var(--r)">❌ Erro de conexão</span>';
+  });
+}
+
+function verificarStatusSync(){
+  var status=document.getElementById('cfgSyncStatus');
+  fetch(API_URL+'?action=status&key='+API_KEY)
+  .then(function(r){return r.json()})
+  .then(function(resp){
+    if(resp.ok){
+      var info='Servidor: ';
+      info+=resp.has_data?'✅ com dados':'⚠️ sem dados';
+      if(resp.size) info+=' ('+Math.round(resp.size/1024)+' KB)';
+      if(resp.updated) info+=' · Último salvamento: '+new Date(resp.updated).toLocaleString('pt-BR');
+      status.innerHTML='<span style="color:var(--g)">'+info+'</span>';
+    }
+  }).catch(function(){
+    status.innerHTML='<span style="color:var(--r)">Servidor não disponível</span>';
+  });
 }
 
 function iniciarSessao(){
   document.getElementById('loginPage').style.display='none';
   document.getElementById('app').classList.add('on');
-  sessionStorage.setItem('jk_logado','1');
   loadFromServer().then(function(data){
     atualizarStats();
     goPage('dashboard');
@@ -754,16 +2332,41 @@ function iniciarSessao(){
 function tentarLogin(){
   var u=document.getElementById('loginUser').value.trim();
   var p=document.getElementById('loginPass').value.trim();
-  if(u===ADM_USER&&p===ADM_PASS){
-    iniciarSessao();
-  }else{
+  if(!u||!p){document.getElementById('loginErro').textContent='Preencha e-mail e senha';document.getElementById('loginErro').style.display='block';return}
+  var btn=document.getElementById('loginBtn');
+  btn.disabled=true;btn.textContent='Entrando...';
+  document.getElementById('loginErro').style.display='none';
+  fetch(API_URL+'?action=login&key='+API_KEY,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({user:u,pass:p})
+  }).then(function(r){return r.json()}).then(function(resp){
+    btn.disabled=false;btn.textContent='Entrar';
+    if(resp.ok&&resp.token){
+      _authToken=resp.token;
+      try{sessionStorage.setItem('jk_auth_token',resp.token)}catch(e){}
+      iniciarSessao();
+    }else{
+      var msg=resp.error||'E-mail ou senha incorretos';
+      if(resp.locked) msg='Conta bloqueada temporariamente. Aguarde alguns minutos.';
+      else if(resp.attempts_remaining!==undefined&&resp.attempts_remaining!==null) msg+=' ('+resp.attempts_remaining+' tentativa(s) restante(s))';
+      document.getElementById('loginErro').textContent=msg;
+      document.getElementById('loginErro').style.display='block';
+      document.getElementById('loginPass').value='';
+      document.getElementById('loginPass').focus();
+    }
+  }).catch(function(){
+    btn.disabled=false;btn.textContent='Entrar';
+    document.getElementById('loginErro').textContent='Erro de conexão — verifique sua internet';
     document.getElementById('loginErro').style.display='block';
-    document.getElementById('loginPass').value='';
-    document.getElementById('loginPass').focus();
-  }
+  });
 }
 function logout(){
-  sessionStorage.removeItem('jk_logado');
+  if(_authToken){
+    fetch(API_URL+'?action=logout',{headers:authHeaders()}).catch(function(){});
+  }
+  _authToken=null;
+  try{sessionStorage.removeItem('jk_auth_token')}catch(e){}
   document.getElementById('app').classList.remove('on');
   document.getElementById('loginPage').style.display='flex';
   document.getElementById('loginUser').value='';
@@ -773,9 +2376,13 @@ function logout(){
 
 // Auto-login se sessão ativa (não deslogar ao recarregar)
 (function(){
-  if(sessionStorage.getItem('jk_logado')==='1'){
-    iniciarSessao();
-  }
+  try{
+    var saved=sessionStorage.getItem('jk_auth_token');
+    if(saved){
+      _authToken=saved;
+      iniciarSessao();
+    }
+  }catch(e){}
 })()
 
 /* ===== NAVIGATION ===== */
@@ -786,7 +2393,7 @@ function goPage(page){
   var btnSyncTop=document.getElementById('btnSyncTop');
   if(page==='dashboard'){
     document.getElementById('pageDashboard').classList.add('on');
-    document.querySelectorAll('.sb-item')[0].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[0].classList.add('active');
     document.getElementById('topTitle').textContent='Dashboard';
     document.getElementById('topSub').textContent='Visão geral do negócio';
     topAction.style.display='none';
@@ -794,7 +2401,7 @@ function goPage(page){
     atualizarStats();
   }else if(page==='catalogo'){
     document.getElementById('pageCatalogo').classList.add('on');
-    document.querySelectorAll('.sb-item')[1].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[1].classList.add('active');
     document.getElementById('topTitle').textContent='Catálogo';
     document.getElementById('topSub').textContent='Gerencie seus acordeons';
     topAction.style.display='flex';
@@ -811,12 +2418,53 @@ function goPage(page){
     }
   }else if(page==='meta'){
     document.getElementById('pageMeta').classList.add('on');
-    document.querySelectorAll('.sb-item')[2].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[2].classList.add('active');
     document.getElementById('topTitle').textContent='WhatsApp / Meta';
     document.getElementById('topSub').textContent='Configurações da integração';
     topAction.style.display='none';
     btnSyncTop.style.display='none';
     renderMetaStatus();
+  }else if(page==='vendedores'){
+    document.getElementById('pageVendedores').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[3].classList.add('active');
+    document.getElementById('topTitle').textContent='Vendedores';
+    document.getElementById('topSub').textContent='Equipe de vendas';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderVendedores();
+  }else if(page==='compras'){
+    document.getElementById('pageCompras').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[4].classList.add('active');
+    document.getElementById('topTitle').textContent='Compras';
+    document.getElementById('topSub').textContent='Registro de aquisições';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    carregarCustosFixos();
+    renderCompras();
+  }else if(page==='ranking'){
+    document.getElementById('pageRanking').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[5].classList.add('active');
+    document.getElementById('topTitle').textContent='Ranking de Vendas';
+    document.getElementById('topSub').textContent='Desempenho da equipe';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderRanking();
+  }else if(page==='financeiro'){
+    document.getElementById('pageFinanceiro').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[6].classList.add('active');
+    document.getElementById('topTitle').textContent='Financeiro';
+    document.getElementById('topSub').textContent='Relatório de faturamento e custos';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderFinanceiro();
+  }else if(page==='config'){
+    document.getElementById('pageConfig').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
+    document.getElementById('topTitle').textContent='Configurações';
+    document.getElementById('topSub').textContent='Segurança e dados do sistema';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    verificarStatusSync();
   }
   closeSidebar();
 }
@@ -840,6 +2488,30 @@ function atualizarStats(){
   document.getElementById('statRes').textContent=res;
   document.getElementById('statVend').textContent=vend;
   document.getElementById('badgeTotal').textContent=total;
+
+  // Valor em estoque vs a caminho (só não-vendidos)
+  var naoVendidos=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'});
+  var emEstoque=naoVendidos.filter(function(p){return(p.localizacao||'em_estoque')==='em_estoque'});
+  var aCaminho=naoVendidos.filter(function(p){return(p.localizacao||'em_estoque')==='a_caminho'});
+  var valorEstoque=0,valorCaminho=0;
+  emEstoque.forEach(function(p){valorEstoque+=parsarPrecoBR(p.preco)||0});
+  aCaminho.forEach(function(p){valorCaminho+=parsarPrecoBR(p.preco)||0});
+  var elVE=document.getElementById('statValorEstoque');
+  var elVC=document.getElementById('statValorCaminho');
+  var elVT=document.getElementById('statValorTotal');
+  if(elVE){
+    elVE.textContent=formatarValorBR(valorEstoque);
+    document.getElementById('statQtdEstoque').textContent=emEstoque.length+' acordeon(s) em mãos';
+  }
+  if(elVC){
+    elVC.textContent=formatarValorBR(valorCaminho);
+    document.getElementById('statQtdCaminho').textContent=aCaminho.length+' acordeon(s) em trânsito';
+  }
+  if(elVT){
+    elVT.textContent=formatarValorBR(valorEstoque+valorCaminho);
+    document.getElementById('statQtdTotal').textContent='estoque + a caminho ('+naoVendidos.length+' acordeons)';
+  }
+
   // Meta badge
   var mc=getMetaConfig();
   var badge=document.getElementById('badgeMeta');
@@ -848,6 +2520,10 @@ function atualizarStats(){
   }else{
     badge.style.display='none';
   }
+  // Vendedores badge
+  atualizarBadgeVendedores();
+  // Compras badge
+  atualizarBadgeCompras();
 }
 
 /* ===== SYNC BAR (catálogo page) ===== */
@@ -884,7 +2560,11 @@ function renderCatalogo(){
       return(p.nome||'').toLowerCase().indexOf(busca)>-1||(p.descricao||'').toLowerCase().indexOf(busca)>-1;
     });
   }
-  if(filtroAtual!=='todos'){
+  if(filtroAtual==='em_estoque'){
+    prods=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'&&(p.localizacao||'em_estoque')==='em_estoque'});
+  }else if(filtroAtual==='a_caminho'){
+    prods=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'&&(p.localizacao||'em_estoque')==='a_caminho'});
+  }else if(filtroAtual!=='todos'){
     prods=prods.filter(function(p){return(p.status||'disponivel')===filtroAtual});
   }
   var el=document.getElementById('catGrid');
@@ -897,16 +2577,20 @@ function renderCatalogo(){
   el.innerHTML=prods.map(function(p){
     var st=p.status||'disponivel';
     var img=p.fotos&&p.fotos[0]?'<img src="'+p.fotos[0]+'" alt="'+p.nome+'">':'<div class="no-img">🪗</div>';
+    var loc=p.localizacao||'em_estoque';
+    var locBadge='';
+    if(st!=='vendido'){
+      locBadge=loc==='a_caminho'?'<span style="display:inline-block;background:rgba(243,156,18,.15);color:var(--y);font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:4px">🚚 A caminho</span>':'<span style="display:inline-block;background:rgba(37,211,102,.1);color:var(--g);font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:4px">📦 Em estoque</span>';
+    }
     return '<div class="cat-item">'+
       '<div class="cat-item-img">'+img+'<span class="cat-item-status '+statusLabel[st]+'">'+statusText[st]+'</span></div>'+
       '<div class="cat-item-body">'+
         '<div class="cat-item-name">'+p.nome+'</div>'+
-        '<div class="cat-item-price">'+p.preco+'</div>'+
+        '<div class="cat-item-price">'+p.preco+' '+locBadge+'</div>'+
         '<div class="cat-item-actions">'+
           '<button class="cat-act edit" data-edit="'+p.id+'">✏️ Editar</button>'+
           (st!=='vendido'?'<button class="cat-act vend" data-vend="'+p.id+'" style="background:var(--r-soft);color:var(--r)">💰 Vendido</button>':
           '<button class="cat-act vend" data-revend="'+p.id+'" style="background:var(--g-soft);color:var(--g)">↩️ Reativar</button>')+
-          '<button class="cat-act del" data-del="'+p.id+'">🗑️ Excluir</button>'+
         '</div>'+
       '</div></div>';
   }).join('');
@@ -914,13 +2598,10 @@ function renderCatalogo(){
     btn.addEventListener('click',function(e){e.stopPropagation();editarProd(this.getAttribute('data-edit'))});
   });
   el.querySelectorAll('[data-vend]').forEach(function(btn){
-    btn.addEventListener('click',function(e){e.stopPropagation();marcarVendido(this.getAttribute('data-vend'))});
+    btn.addEventListener('click',function(e){e.stopPropagation();abrirModalVenda(this.getAttribute('data-vend'))});
   });
   el.querySelectorAll('[data-revend]').forEach(function(btn){
     btn.addEventListener('click',function(e){e.stopPropagation();reativarProd(this.getAttribute('data-revend'))});
-  });
-  el.querySelectorAll('[data-del]').forEach(function(btn){
-    btn.addEventListener('click',function(e){e.stopPropagation();delProd(this.getAttribute('data-del'))});
   });
   atualizarStats();
   // Mostrar contagem
@@ -951,7 +2632,7 @@ function autoImportarDoMeta(){
     return fetch(url)
     .then(function(r){return r.json()})
     .then(function(resp){
-      if(resp.error){console.warn('Auto-import erro catálogo '+cat.id+':', resp.error.message);return;}
+      if(resp.error){console.log('Auto-import: catálogo '+cat.id+' sem acesso');return;}
       var items=resp.data||[];
       console.log('📥 Auto-import '+( cat.name||cat.id)+': '+items.length+' produto(s)');
       items.forEach(function(item){
@@ -969,7 +2650,7 @@ function autoImportarDoMeta(){
         });
       });
     }).catch(function(err){
-      console.warn('Auto-import erro:', err.message);
+      console.log('Auto-import: sem conexão com Meta');
     });
   }
 
@@ -1147,6 +2828,11 @@ function exportarDados(){
   var data={
     produtos:prods,
     meta_config:mc,
+    vendedores:getVendedores(),
+    vendas:getVendas(),
+    compras:getCompras(),
+    custos_fixos:getCustosFixos(),
+    gastos:getGastos(),
     exportado:new Date().toISOString(),
     total:prods.length
   };
@@ -1213,6 +2899,44 @@ function importarDados(evt){
           showToast('⚙️ Configuração Meta também importada!');
         }
       }
+      // Importar vendedores e vendas se houver
+      if(data.vendedores&&data.vendedores.length){
+        var localV=getVendedores();
+        var vIds={};localV.forEach(function(v){vIds[v.id]=true});
+        var novosV=0;
+        data.vendedores.forEach(function(v){if(!vIds[v.id]){localV.push(v);novosV++}});
+        if(novosV>0){setVendedores(localV);showToast('👥 '+novosV+' vendedor(es) importado(s)!')}
+      }
+      if(data.vendas&&data.vendas.length){
+        var localVd=getVendas();
+        var vdIds={};localVd.forEach(function(v){vdIds[v.id]=true});
+        var novosVd=0;
+        data.vendas.forEach(function(v){if(!vdIds[v.id]){localVd.push(v);novosVd++}});
+        if(novosVd>0){setVendas(localVd);showToast('💰 '+novosVd+' venda(s) importada(s)!')}
+      }
+      // Importar compras
+      if(data.compras&&data.compras.length){
+        var localC=getCompras();
+        var cIds={};localC.forEach(function(c){cIds[c.id]=true});
+        var novosC=0;
+        data.compras.forEach(function(c){if(!cIds[c.id]){localC.push(c);novosC++}});
+        if(novosC>0){setCompras(localC);showToast('🛒 '+novosC+' compra(s) importada(s)!')}
+      }
+      // Importar custos fixos
+      if(data.custos_fixos){
+        var localCf=getCustosFixos();
+        if(localCf.bag_alcas===204&&localCf.imposto_pct===7.5){
+          setCustosFixos(data.custos_fixos);
+        }
+      }
+      // Importar gastos
+      if(data.gastos&&data.gastos.length){
+        var localG=getGastos();
+        var gIds={};localG.forEach(function(g){gIds[g.id]=true});
+        var novosG=0;
+        data.gastos.forEach(function(g){if(!gIds[g.id]){localG.push(g);novosG++}});
+        if(novosG>0){setGastos(localG);showToast('📝 '+novosG+' gasto(s) importado(s)!')}
+      }
     }catch(err){
       showToast('Erro ao ler arquivo: '+err.message,'error');
     }
@@ -1229,6 +2953,7 @@ function abrirModal(id){
   document.getElementById('fNome').value='';
   document.getElementById('fPreco').value='';
   document.getElementById('fDesc').value='';
+  document.getElementById('fLocalizacao').value='em_estoque';
   renderFotosGrid();
   if(id){
     var prods=getProds();
@@ -1237,6 +2962,7 @@ function abrirModal(id){
       document.getElementById('fNome').value=p.nome||'';
       document.getElementById('fPreco').value=p.preco||'';
       document.getElementById('fDesc').value=p.descricao||'';
+      document.getElementById('fLocalizacao').value=p.localizacao||'em_estoque';
       if(p.fotos){
         p.fotos.forEach(function(f,i){
           if(f&&i<MAX_FOTOS){fotosTemp[i]=f}
@@ -1386,11 +3112,13 @@ function salvarProd(){
   var preco=document.getElementById('fPreco').value.trim();
   if(!nome||!preco){showToast('Preencha o nome e o preço!','error');return}
   var fotos=fotosTemp.filter(function(f){return f});
+  var localizacao=document.getElementById('fLocalizacao').value||'em_estoque';
   var prod={
     id:editandoId||'p'+Date.now(),
     nome:nome,
     preco:preco,
     status:'disponivel',
+    localizacao:localizacao,
     descricao:document.getElementById('fDesc').value.trim(),
     fotos:fotos,
     foto:fotos[0]||'',
@@ -1399,6 +3127,14 @@ function salvarProd(){
   };
   var prods=getProds();
   if(editandoId){
+    // Preservar campos existentes (custo, venda, etc)
+    var existing=prods.find(function(p){return p.id===editandoId});
+    if(existing){
+      ['status','custo_compra','frete_entrada','vendedor_id','vendedor_nome','comissao_pct','comissao_valor','data_venda','frete_saida'].forEach(function(k){
+        if(existing[k]!==undefined&&prod[k]===undefined) prod[k]=existing[k];
+      });
+      prod.status=existing.status||'disponivel';
+    }
     prods=prods.map(function(p){return p.id===editandoId?prod:p});
   }else{
     prods.push(prod);
@@ -1652,6 +3388,88 @@ function renderMetaStatus(){
     '</div>';
   });
   list.innerHTML=html;
+  // Preencher campo Ad Account
+  var adField=document.getElementById('metaAdAccountId');
+  if(adField) adField.value=mc.ad_account_id||'';
+}
+
+function salvarAdAccount(){
+  var id=document.getElementById('metaAdAccountId').value.trim();
+  if(id&&!id.startsWith('act_')) id='act_'+id;
+  var mc=getMetaConfig();
+  mc.ad_account_id=id;
+  setMetaConfig(mc);
+  showToast(id?'✅ Conta de anúncios salva!':'⚠️ ID removido — gastos de ads não serão puxados','');
+}
+
+function testarAdAccount(){
+  var mc=getMetaConfig();
+  var id=document.getElementById('metaAdAccountId').value.trim();
+  if(id&&!id.startsWith('act_')) id='act_'+id;
+  var resultEl=document.getElementById('adAccountTestResult');
+  if(!id){resultEl.innerHTML='<span style="color:var(--r)">⚠️ Preencha o ID da conta primeiro</span>';return}
+  if(!mc.token){resultEl.innerHTML='<span style="color:var(--r)">⚠️ Configure o token do Meta primeiro (Reconfigurar conexão)</span>';return}
+  resultEl.innerHTML='<span style="color:var(--y)">⏳ Testando conexão...</span>';
+  var url=META_API+'/'+id+'?fields=name,account_status,currency,amount_spent&access_token='+mc.token;
+  fetch(url).then(function(r){return r.json()}).then(function(data){
+    if(data.error){
+      var msg=data.error.message||'Erro desconhecido';
+      if(msg.indexOf('permission')>-1||msg.indexOf('ads_read')>-1){
+        resultEl.innerHTML='<span style="color:var(--r)">❌ Token sem permissão <strong>ads_read</strong>. Gere um novo token com essa permissão no Meta Business.</span>';
+      }else{
+        resultEl.innerHTML='<span style="color:var(--r)">❌ '+msg+'</span>';
+      }
+      return;
+    }
+    var statusMap={'1':'Ativa','2':'Desativada','3':'Não aprovada','7':'Em análise','100':'Suspensa','101':'Fechada'};
+    var statusLabel=statusMap[data.account_status]||'Status '+data.account_status;
+    resultEl.innerHTML='<span style="color:var(--g)">✅ Conectado!</span><br>'+
+      '<span style="font-size:11px;color:var(--txt2)">'+
+      '<strong>'+data.name+'</strong> · '+statusLabel+' · '+(data.currency||'BRL')+
+      ' · Total gasto: R$ '+(parseFloat(data.amount_spent||0)/100).toLocaleString('pt-BR',{minimumFractionDigits:2})+
+      '</span>';
+  }).catch(function(e){
+    resultEl.innerHTML='<span style="color:var(--r)">❌ Erro de rede: '+e.message+'</span>';
+  });
+}
+
+function fetchAdsSpend(periodo,callback){
+  var mc=getMetaConfig();
+  if(!mc.ad_account_id||!mc.token){callback(null);return}
+  var range=getFinDateRange(periodo);
+  var now=new Date();
+  var since,until;
+  if(range.desde){
+    since=range.desde.toISOString().slice(0,10);
+  }else{
+    since=new Date(now.getFullYear()-1,now.getMonth(),now.getDate()).toISOString().slice(0,10);
+  }
+  if(range.ate){
+    until=range.ate.toISOString().slice(0,10);
+  }else{
+    until=now.toISOString().slice(0,10);
+  }
+  var url=META_API+'/'+mc.ad_account_id+'/insights?fields=spend,impressions,clicks&time_range={"since":"'+since+'","until":"'+until+'"}&access_token='+mc.token;
+  fetch(url).then(function(r){return r.json()}).then(function(data){
+    if(data.error){
+      console.log('Ads API:',data.error.message);
+      callback(null);
+      return;
+    }
+    if(data.data&&data.data.length>0){
+      var row=data.data[0];
+      callback({
+        spend:parseFloat(row.spend||0),
+        impressions:parseInt(row.impressions||0),
+        clicks:parseInt(row.clicks||0)
+      });
+    }else{
+      callback({spend:0,impressions:0,clicks:0});
+    }
+  }).catch(function(e){
+    console.log('Ads API error:',e.message);
+    callback(null);
+  });
 }
 
 /* ===== WIZARD ===== */
@@ -1717,9 +3535,11 @@ function wizPrev(){
 }
 
 function wizSave(){
+  var oldMc=getMetaConfig();
   var config={
     token:document.getElementById('wizToken').value.trim(),
     imgbbKey:document.getElementById('wizImgbb').value.trim(),
+    ad_account_id:oldMc.ad_account_id||'',
     cats:[]
   };
   for(var i=0;i<3;i++){
