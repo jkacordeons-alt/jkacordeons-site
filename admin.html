@@ -1834,11 +1834,16 @@ function abrirModalCompra(id){
   document.getElementById('fCompraOrigem').value='';
   document.getElementById('fCompraData').value=new Date().toISOString().slice(0,10);
   document.getElementById('modalCompraTitle').textContent='🛒 Registrar Compra';
-  // Popular select de produtos
+  // Popular select de produtos — só os que NÃO estão vinculados a outra compra
   var prods=getProds();
+  var compras=getCompras();
+  var editId=id||'';
+  var compraAtual=editId?compras.find(function(x){return x.id===editId}):null;
+  var prodsVinculados={};
+  compras.forEach(function(c){if(c.produto_id&&c.id!==editId)prodsVinculados[c.produto_id]=true});
   var sel=document.getElementById('compraProdSelect');
   sel.innerHTML='<option value="">— Compra avulsa (sem vínculo) —</option>';
-  prods.forEach(function(p){
+  prods.filter(function(p){return !prodsVinculados[p.id]}).forEach(function(p){
     sel.innerHTML+='<option value="'+p.id+'">'+p.nome+' ('+p.preco+')</option>';
   });
   if(id){
@@ -2742,10 +2747,14 @@ function atualizarStats(){
   // Valor em estoque vs a caminho (só não-vendidos)
   var naoVendidos=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'});
   var emEstoque=naoVendidos.filter(function(p){return(p.localizacao||'em_estoque')==='em_estoque'});
-  var aCaminho=naoVendidos.filter(function(p){return(p.localizacao||'em_estoque')==='a_caminho'});
+  var aCaminhoCat=naoVendidos.filter(function(p){return(p.localizacao||'em_estoque')==='a_caminho'});
   var valorEstoque=0,valorCaminho=0;
   emEstoque.forEach(function(p){valorEstoque+=parsarPrecoBR(p.preco)||0});
-  aCaminho.forEach(function(p){valorCaminho+=parsarPrecoBR(p.preco)||0});
+  aCaminhoCat.forEach(function(p){valorCaminho+=parsarPrecoBR(p.preco)||0});
+  // Somar compras pendentes (sem vínculo = ainda não chegaram)
+  var comprasPendentes=getCompras().filter(function(c){return !c.produto_id});
+  var qtdCaminho=aCaminhoCat.length+comprasPendentes.length;
+  comprasPendentes.forEach(function(c){valorCaminho+=(c.custo_compra||0)+(c.frete_entrada||0)});
   var elVE=document.getElementById('statValorEstoque');
   var elVC=document.getElementById('statValorCaminho');
   var elVT=document.getElementById('statValorTotal');
@@ -2755,11 +2764,11 @@ function atualizarStats(){
   }
   if(elVC){
     elVC.textContent=formatarValorBR(valorCaminho);
-    document.getElementById('statQtdCaminho').textContent=aCaminho.length+' acordeon(s) em trânsito';
+    document.getElementById('statQtdCaminho').textContent=qtdCaminho+' acordeon(s) em trânsito';
   }
   if(elVT){
     elVT.textContent=formatarValorBR(valorEstoque+valorCaminho);
-    document.getElementById('statQtdTotal').textContent='estoque + a caminho ('+naoVendidos.length+' acordeons)';
+    document.getElementById('statQtdTotal').textContent='estoque + a caminho ('+(naoVendidos.length+comprasPendentes.length)+' acordeons)';
   }
 
   // Meta badge
