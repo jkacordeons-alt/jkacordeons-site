@@ -719,13 +719,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 
         <!-- Tabela detalhada por produto vendido -->
         <div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);overflow:hidden;margin-bottom:2rem">
-          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--bord)">
+          <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--bord);display:flex;justify-content:space-between;align-items:center">
             <h4 style="font-size:13px;font-weight:700">📋 Detalhamento por venda</h4>
+            <button class="btn btn-primary" onclick="abrirModalVendaFinanceiro()" style="padding:6px 14px;font-size:12px">+ Nova Venda</button>
           </div>
           <div style="overflow-x:auto">
             <table class="rank-table" id="finTable">
               <thead><tr>
-                <th>Acordeon</th><th>Compra</th><th>Manutenção</th><th>Receita</th><th>Frete↑</th><th>Comissão</th><th>Imposto</th><th>Lucro</th><th>Margem</th>
+                <th>Acordeon</th><th>Compra</th><th>Manutenção</th><th>Receita</th><th>Frete↑</th><th>Comissão</th><th>Imposto</th><th>Lucro</th><th>Margem</th><th style="width:40px"></th>
               </tr></thead>
               <tbody id="finBody"></tbody>
               <tfoot id="finFoot"></tfoot>
@@ -2036,6 +2037,113 @@ function filtrarPorPeriodo(arr,range,campoData){
   });
 }
 
+function toggleFinEdit(vendaId){
+  var editRow=document.getElementById('finEdit_'+vendaId);
+  if(!editRow)return;
+  var isOpen=editRow.style.display!=='none';
+  // Close all edit rows first
+  document.querySelectorAll('[id^="finEdit_"]').forEach(function(el){el.style.display='none'});
+  document.querySelectorAll('[id^="finRow_"]').forEach(function(el){el.style.background=''});
+  if(!isOpen){
+    editRow.style.display='';
+    var mainRow=document.getElementById('finRow_'+vendaId);
+    if(mainRow)mainRow.style.background='rgba(52,152,219,.06)';
+  }
+}
+
+function salvarFinEdit(vendaId){
+  var vendas=getVendas();
+  var idx=vendas.findIndex(function(v){return v.id===vendaId});
+  if(idx<0){showToast('⚠️ Venda não encontrada','error');return}
+  var v=vendas[idx];
+  var preco=parsarPrecoBR(document.getElementById('fe_preco_'+vendaId).value)||0;
+  var custoCompra=parsarPrecoBR(document.getElementById('fe_compra_'+vendaId).value)||0;
+  var manutencao=parsarPrecoBR(document.getElementById('fe_manut_'+vendaId).value)||0;
+  var freteIn=parsarPrecoBR(document.getElementById('fe_fretein_'+vendaId).value)||0;
+  var freteOut=parsarPrecoBR(document.getElementById('fe_freteout_'+vendaId).value)||0;
+  var comPct=parseFloat(document.getElementById('fe_compct_'+vendaId).value)||0;
+  var eletriCob=parsarPrecoBR(document.getElementById('fe_eletricob_'+vendaId).value)||0;
+  var eletriCusto=parsarPrecoBR(document.getElementById('fe_eletricusto_'+vendaId).value)||0;
+  // Update venda
+  v.preco_venda=preco;
+  v.comissao_pct=comPct;
+  v.comissao_valor=preco*(comPct/100);
+  v.frete_saida=freteOut;
+  if(eletriCob>0){
+    v.eletrificacao=true;
+    v.eletri_cobrado=eletriCob;
+    v.eletri_custo=eletriCusto;
+  }else{
+    v.eletrificacao=false;
+    v.eletri_cobrado=0;
+    v.eletri_custo=0;
+  }
+  vendas[idx]=v;
+  setVendas(vendas);
+  // Update product costs too
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===v.produto_id});
+  if(prod){
+    prod.custo_compra=custoCompra;
+    prod.frete_entrada=freteIn;
+    prod.manutencao=manutencao;
+    prod.atualizado=new Date().toISOString();
+    setProds(prods);
+  }
+  showToast('✅ Venda atualizada');
+  renderFinanceiro();
+}
+
+function excluirVendaFinanceiro(vendaId){
+  if(!confirm('Tem certeza que deseja excluir esta venda? O produto voltará para o catálogo como disponível.'))return;
+  var vendas=getVendas();
+  var venda=vendas.find(function(v){return v.id===vendaId});
+  if(!venda){showToast('⚠️ Venda não encontrada','error');return}
+  // Restaurar produto
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===venda.produto_id});
+  if(prod){
+    prod.status='disponivel';
+    delete prod.vendedor_id;
+    delete prod.vendedor_nome;
+    delete prod.comissao_pct;
+    delete prod.comissao_valor;
+    delete prod.frete_saida;
+    delete prod.data_venda;
+    prod.atualizado=new Date().toISOString();
+    setProds(prods);
+  }
+  // Remover compra de troca se existir
+  if(venda.troca){
+    var compras=getCompras();
+    compras=compras.filter(function(c){return c.venda_origem_id!==vendaId});
+    setCompras(compras);
+  }
+  vendas=vendas.filter(function(v){return v.id!==vendaId});
+  setVendas(vendas);
+  showToast('🗑 Venda excluída — produto restaurado ao catálogo');
+  renderFinanceiro();
+  renderCatalogo();
+  atualizarStats();
+}
+
+function abrirModalVendaFinanceiro(){
+  var prods=getProds().filter(function(p){return p.status!=='vendido'});
+  if(!prods.length){showToast('⚠️ Nenhum produto disponível para vender','error');return}
+  var opts=prods.map(function(p){
+    return '<option value="'+p.id+'">'+p.nome+(p.preco?' — '+p.preco:'')+'</option>';
+  }).join('');
+  var html='<div class="modal-overlay on" id="modalVendaFinSelect" onclick="if(event.target===this)this.remove()">'+
+    '<div class="modal" style="max-width:400px">'+
+      '<div class="modal-header"><h3>🪗 Selecione o acordeão</h3><button class="modal-close" onclick="document.getElementById(\'modalVendaFinSelect\').remove()">✕</button></div>'+
+      '<div class="modal-body">'+
+        '<div class="form-group"><label>Produto</label><select class="venda-select" id="finVendaProdSelect">'+opts+'</select></div>'+
+        '<button class="btn btn-primary" style="width:100%;margin-top:1rem" onclick="var s=document.getElementById(\'finVendaProdSelect\');if(s.value){document.getElementById(\'modalVendaFinSelect\').remove();abrirModalVenda(s.value)}">Continuar →</button>'+
+      '</div>'+
+    '</div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
 function renderFinanceiro(){
   var vendas=getVendas();
   var compras=getCompras();
@@ -2102,8 +2210,9 @@ function renderFinanceiro(){
     var titleExtra='';
     if(v.troca)titleExtra+=' | Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor);
     if(v.eletrificacao)titleExtra+=' | Eletri: +'+formatarValorBR(eletriReceita);
-    rows.push('<tr>'+
-      '<td style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+v.produto_nome+titleExtra+'">'+v.produto_nome+badges+'</td>'+
+    var vendaDate=v.data?new Date(v.data).toLocaleDateString('pt-BR'):'';
+    rows.push('<tr id="finRow_'+v.id+'" style="cursor:pointer" onclick="toggleFinEdit(\''+v.id+'\')">'+
+      '<td style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+v.produto_nome+titleExtra+'">'+v.produto_nome+badges+'<div style="font-size:10px;color:var(--txt3);font-weight:400">'+vendaDate+'</div></td>'+
       '<td>'+(custoCompra?formatarValorBR(custoCompra):'<span style="color:var(--txt3)">—</span>')+'</td>'+
       '<td>'+(manutencao?formatarValorBR(manutencao):'<span style="color:var(--txt3)">—</span>')+'</td>'+
       '<td style="color:var(--g);font-weight:700">'+formatarValorBR(receitaTotal)+(eletriReceita?' <span style="font-size:10px;font-weight:400;color:var(--b)">(⚡+'+formatarValorBR(eletriReceita)+')</span>':'')+'</td>'+
@@ -2112,7 +2221,29 @@ function renderFinanceiro(){
       '<td>'+formatarValorBR(imposto)+'</td>'+
       '<td style="color:'+corLucro+';font-weight:700">'+formatarValorBR(lucro)+'</td>'+
       '<td style="color:'+corLucro+'">'+margemPct+'%</td>'+
+      '<td><button onclick="event.stopPropagation();toggleFinEdit(\''+v.id+'\')" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;opacity:.6" title="Editar">✏️</button></td>'+
     '</tr>');
+    // Edit row (hidden by default)
+    rows.push('<tr id="finEdit_'+v.id+'" style="display:none"><td colspan="10" style="padding:0;border:none">'+
+      '<div style="background:rgba(52,152,219,.04);border:1px solid rgba(52,152,219,.15);border-radius:0 0 8px 8px;padding:16px 20px;margin:0 -1px">'+
+        '<div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--b)">✏️ Editar — '+v.produto_nome+'</div>'+
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Preço de venda (R$)</label><input type="text" id="fe_preco_'+v.id+'" value="'+formatarValorBR(v.preco_venda||0)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Custo compra (R$)</label><input type="text" id="fe_compra_'+v.id+'" value="'+formatarValorBR(custoCompra)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Manutenção (R$)</label><input type="text" id="fe_manut_'+v.id+'" value="'+formatarValorBR(manutencao)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Frete entrada (R$)</label><input type="text" id="fe_fretein_'+v.id+'" value="'+formatarValorBR(freteEntrada)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Frete envio (R$)</label><input type="text" id="fe_freteout_'+v.id+'" value="'+formatarValorBR(freteSaida)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Comissão %</label><input type="text" id="fe_compct_'+v.id+'" value="'+(v.comissao_pct||0)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri cobrado (R$)</label><input type="text" id="fe_eletricob_'+v.id+'" value="'+formatarValorBR(eletriReceita)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri custo (R$)</label><input type="text" id="fe_eletricusto_'+v.id+'" value="'+formatarValorBR(eletriCusto)+'" style="padding:6px 10px;font-size:12px"></div>'+
+        '</div>'+
+        '<div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">'+
+          '<button class="btn" onclick="event.stopPropagation();excluirVendaFinanceiro(\''+v.id+'\')" style="padding:6px 14px;font-size:12px;background:var(--r);color:#fff;border:none;border-radius:6px">🗑 Excluir</button>'+
+          '<button class="btn" onclick="event.stopPropagation();toggleFinEdit(\''+v.id+'\')" style="padding:6px 14px;font-size:12px;background:var(--card2);border:1px solid var(--bord);border-radius:6px">Cancelar</button>'+
+          '<button class="btn btn-primary" onclick="event.stopPropagation();salvarFinEdit(\''+v.id+'\')" style="padding:6px 14px;font-size:12px">💾 Salvar</button>'+
+        '</div>'+
+      '</div>'+
+    '</td></tr>');
   });
 
   if(vendas.length){
@@ -2131,6 +2262,7 @@ function renderFinanceiro(){
       '<td>'+formatarValorBR(totais.imposto)+'</td>'+
       '<td style="color:'+corTotal+'">'+formatarValorBR(totais.lucro)+'</td>'+
       '<td style="color:'+corTotal+'">'+margemTotal+'%</td>'+
+      '<td></td>'+
     '</tr>';
   }
 
