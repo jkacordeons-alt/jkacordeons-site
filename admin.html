@@ -585,6 +585,14 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           </div>
           <div style="padding:14px 16px">
             <div class="form-group" style="margin-bottom:12px">
+              <label style="font-size:12px;font-weight:600">Token de Anúncios (com permissão ads_read)</label>
+              <div style="display:flex;gap:8px">
+                <input type="password" id="metaAdsToken" placeholder="Token separado com permissão ads_read" style="flex:1">
+                <button class="btn btn-secondary" onclick="salvarAdsToken()" style="white-space:nowrap;font-size:12px">💾 Salvar</button>
+              </div>
+              <div class="form-hint">Gere no <strong>Graph API Explorer</strong> com a permissão <strong>ads_read</strong> marcada. Pode ser diferente do token de catálogo.</div>
+            </div>
+            <div class="form-group" style="margin-bottom:12px">
               <label style="font-size:12px;font-weight:600">ID da Conta de Anúncios</label>
               <div style="display:flex;gap:8px">
                 <input type="text" id="metaAdAccountId" placeholder="Ex: act_123456789" style="flex:1">
@@ -1036,6 +1044,13 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           </div>
         </div>
       </div>
+      <!-- SEM NOTA FISCAL -->
+      <div style="margin:1rem 0;padding:10px 14px;background:rgba(149,165,166,.08);border:1px solid rgba(149,165,166,.2);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--txt2)">
+          <input type="checkbox" id="vendaSemNota" onchange="atualizarResumoVenda()" style="accent-color:var(--txt3);width:16px;height:16px">
+          🧾 Venda sem nota fiscal <span style="font-weight:400;font-size:11px;color:var(--txt3)">(não calcula imposto)</span>
+        </label>
+      </div>
       <div class="venda-resumo" id="vendaResumo" style="display:none">
         <div class="venda-resumo-line"><span>Preço de venda</span><span id="vrPreco">—</span></div>
         <div class="venda-resumo-line"><span>Comissão (<span id="vrPct">0</span>%)</span><span id="vrComissao">—</span></div>
@@ -1334,7 +1349,7 @@ function getProdsLocal(){try{return JSON.parse(localStorage.getItem('jk_prods')|
 function setProdsLocal(p){try{localStorage.setItem('jk_prods',JSON.stringify(p))}catch(e){}}
 function getMetaConfigLocal(){
   try{var c=JSON.parse(localStorage.getItem('jk_meta_config')||'null');if(c&&c.cats)return c}catch(e){}
-  return{token:'',imgbbKey:'',ad_account_id:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
+  return{token:'',imgbbKey:'',ad_account_id:'',ads_token:'',cats:[{name:'',id:''},{name:'',id:''},{name:'',id:''}]};
 }
 
 /* ===== VENDEDORES & VENDAS DATA ===== */
@@ -1545,7 +1560,8 @@ function atualizarResumoVenda(){
   var freteSaida=freteStr?parsarPrecoBR(freteStr):0;
   var cf=getCustosFixos();
   var impPct=cf.imposto_pct||7.5;
-  var imposto=preco*(impPct/100);
+  var semNota=document.getElementById('vendaSemNota').checked;
+  var imposto=semNota?0:preco*(impPct/100);
   // Custo de compra se existir
   var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:0;
   var freteEntrada=(prod&&prod.frete_entrada)?prod.frete_entrada:0;
@@ -1564,8 +1580,8 @@ function atualizarResumoVenda(){
   document.getElementById('vrPct').textContent=comPct;
   document.getElementById('vrComissao').textContent=formatarValorBR(comValor);
   document.getElementById('vrFrete').textContent=formatarValorBR(freteSaida);
-  document.getElementById('vrImpPct').textContent=impPct;
-  document.getElementById('vrImposto').textContent=formatarValorBR(imposto);
+  document.getElementById('vrImpPct').textContent=semNota?'0':impPct;
+  document.getElementById('vrImposto').textContent=semNota?'Isento (sem NF)':formatarValorBR(imposto);
   if(custoCompra>0||manutencao>0){
     document.getElementById('vrCustoLine').style.display='';
     document.getElementById('vrCusto').textContent=formatarValorBR(custoTotal)+(manutencao>0?' (incl. manut. '+formatarValorBR(manutencao)+')':'');
@@ -1630,6 +1646,8 @@ function confirmarVenda(){
     if(!trocaNome){showToast('⚠️ Informe o nome do acordeão recebido na troca','error');return}
     if(!trocaValor){showToast('⚠️ Informe o valor da troca','error');return}
   }
+  // Sem nota fiscal
+  var semNota=document.getElementById('vendaSemNota').checked;
   // Registrar venda
   var vendaObj={
     id:'v_'+Date.now(),
@@ -1641,6 +1659,7 @@ function confirmarVenda(){
     comissao_pct:comPct,
     comissao_valor:comValor,
     frete_saida:freteSaida,
+    sem_nota:semNota,
     data:new Date().toISOString()
   };
   if(temEletri){
@@ -2104,11 +2123,13 @@ function salvarFinEdit(vendaId){
   var comPct=parseFloat(document.getElementById('fe_compct_'+vendaId).value)||0;
   var eletriCob=parsarPrecoBR(document.getElementById('fe_eletricob_'+vendaId).value)||0;
   var eletriCusto=parsarPrecoBR(document.getElementById('fe_eletricusto_'+vendaId).value)||0;
+  var semNota=document.getElementById('fe_semnota_'+vendaId).checked;
   // Update venda
   v.preco_venda=preco;
   v.comissao_pct=comPct;
   v.comissao_valor=preco*(comPct/100);
   v.frete_saida=freteOut;
+  v.sem_nota=semNota;
   if(eletriCob>0){
     v.eletrificacao=true;
     v.eletri_cobrado=eletriCob;
@@ -2223,7 +2244,7 @@ function renderFinanceiro(){
     var bagAlcas=cf.bag_alcas;
     var freteSaida=v.frete_saida||0;
     var comissao=v.comissao_valor||0;
-    var imposto=(v.preco_venda||0)*(cf.imposto_pct/100);
+    var imposto=v.sem_nota?0:(v.preco_venda||0)*(cf.imposto_pct/100);
     var eletriReceita=v.eletri_cobrado||0;
     var eletriCusto=v.eletri_custo||0;
     var receitaTotal=(v.preco_venda||0)+eletriReceita;
@@ -2247,6 +2268,7 @@ function renderFinanceiro(){
     var badges='';
     if(v.troca)badges+='<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>';
     if(v.eletrificacao)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">⚡ ELETRI</span>';
+    if(v.sem_nota)badges+='<span style="background:rgba(149,165,166,.15);color:var(--txt3);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🧾 S/NF</span>';
     var titleExtra='';
     if(v.troca)titleExtra+=' | Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor);
     if(v.eletrificacao)titleExtra+=' | Eletri: +'+formatarValorBR(eletriReceita);
@@ -2258,7 +2280,7 @@ function renderFinanceiro(){
       '<td style="color:var(--g);font-weight:700">'+formatarValorBR(receitaTotal)+(eletriReceita?' <span style="font-size:10px;font-weight:400;color:var(--b)">(⚡+'+formatarValorBR(eletriReceita)+')</span>':'')+'</td>'+
       '<td>'+(freteSaida?formatarValorBR(freteSaida):'<span style="color:var(--txt3)">—</span>')+'</td>'+
       '<td style="color:var(--y)">'+formatarValorBR(comissao)+'</td>'+
-      '<td>'+formatarValorBR(imposto)+'</td>'+
+      '<td>'+(v.sem_nota?'<span style="color:var(--txt3);font-size:11px">Isento</span>':formatarValorBR(imposto))+'</td>'+
       '<td style="color:'+corLucro+';font-weight:700">'+formatarValorBR(lucro)+'</td>'+
       '<td style="color:'+corLucro+'">'+margemPct+'%</td>'+
       '<td><button onclick="event.stopPropagation();toggleFinEdit(\''+v.id+'\')" style="background:none;border:none;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:4px;opacity:.6" title="Editar">✏️</button></td>'+
@@ -2277,6 +2299,7 @@ function renderFinanceiro(){
           '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri cobrado (R$)</label><input type="text" id="fe_eletricob_'+v.id+'" value="'+formatarValorBR(eletriReceita)+'" style="padding:6px 10px;font-size:12px"></div>'+
           '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri custo (R$)</label><input type="text" id="fe_eletricusto_'+v.id+'" value="'+formatarValorBR(eletriCusto)+'" style="padding:6px 10px;font-size:12px"></div>'+
         '</div>'+
+        '<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--txt2)"><input type="checkbox" id="fe_semnota_'+v.id+'" '+(v.sem_nota?'checked':'')+' style="accent-color:var(--txt3);width:15px;height:15px"> 🧾 Sem nota fiscal (não calcula imposto)</label></div>'+
         '<div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">'+
           '<button class="btn" onclick="event.stopPropagation();excluirVendaFinanceiro(\''+v.id+'\')" style="padding:6px 14px;font-size:12px;background:var(--r);color:#fff;border:none;border-radius:6px">🗑 Excluir</button>'+
           '<button class="btn" onclick="event.stopPropagation();toggleFinEdit(\''+v.id+'\')" style="padding:6px 14px;font-size:12px;background:var(--card2);border:1px solid var(--bord);border-radius:6px">Cancelar</button>'+
@@ -2378,7 +2401,7 @@ function renderFinanceiro(){
   var adsSection=document.getElementById('finAdsSection');
   var adsContent=document.getElementById('finAdsContent');
   var mc=getMetaConfig();
-  if(mc.ad_account_id&&mc.token){
+  if(mc.ad_account_id&&(mc.ads_token||mc.token)){
     adsSection.style.display='';
     adsContent.innerHTML='<div style="display:flex;align-items:center;gap:12px"><span style="font-size:1.3rem">⏳</span><span style="font-size:13px;color:var(--txt3)">Carregando gastos com anúncios...</span></div>';
     renderFinCards({spend:0,impressions:0,clicks:0});
@@ -3654,6 +3677,16 @@ function renderMetaStatus(){
   // Preencher campo Ad Account
   var adField=document.getElementById('metaAdAccountId');
   if(adField) adField.value=mc.ad_account_id||'';
+  var adsTokenField=document.getElementById('metaAdsToken');
+  if(adsTokenField) adsTokenField.value=mc.ads_token||'';
+}
+
+function salvarAdsToken(){
+  var t=document.getElementById('metaAdsToken').value.trim();
+  var mc=getMetaConfig();
+  mc.ads_token=t;
+  setMetaConfig(mc);
+  showToast(t?'✅ Token de anúncios salvo!':'⚠️ Token removido — gastos de ads não serão puxados');
 }
 
 function salvarAdAccount(){
@@ -3671,9 +3704,10 @@ function testarAdAccount(){
   if(id&&!id.startsWith('act_')) id='act_'+id;
   var resultEl=document.getElementById('adAccountTestResult');
   if(!id){resultEl.innerHTML='<span style="color:var(--r)">⚠️ Preencha o ID da conta primeiro</span>';return}
-  if(!mc.token){resultEl.innerHTML='<span style="color:var(--r)">⚠️ Configure o token do Meta primeiro (Reconfigurar conexão)</span>';return}
+  var adsToken=mc.ads_token||mc.token;
+  if(!adsToken){resultEl.innerHTML='<span style="color:var(--r)">⚠️ Configure o token de anúncios ou o token do Meta primeiro</span>';return}
   resultEl.innerHTML='<span style="color:var(--y)">⏳ Testando conexão...</span>';
-  var url=META_API+'/'+id+'?fields=name,account_status,currency,amount_spent&access_token='+mc.token;
+  var url=META_API+'/'+id+'?fields=name,account_status,currency,amount_spent&access_token='+adsToken;
   fetch(url).then(function(r){return r.json()}).then(function(data){
     if(data.error){
       var msg=data.error.message||'Erro desconhecido';
@@ -3698,7 +3732,8 @@ function testarAdAccount(){
 
 function fetchAdsSpend(periodo,callback){
   var mc=getMetaConfig();
-  if(!mc.ad_account_id||!mc.token){callback(null);return}
+  var adsToken=mc.ads_token||mc.token;
+  if(!mc.ad_account_id||!adsToken){callback(null);return}
   var range=getFinDateRange(periodo);
   var now=new Date();
   var since,until;
@@ -3712,7 +3747,7 @@ function fetchAdsSpend(periodo,callback){
   }else{
     until=now.toISOString().slice(0,10);
   }
-  var url=META_API+'/'+mc.ad_account_id+'/insights?fields=spend,impressions,clicks&time_range={"since":"'+since+'","until":"'+until+'"}&access_token='+mc.token;
+  var url=META_API+'/'+mc.ad_account_id+'/insights?fields=spend,impressions,clicks&time_range={"since":"'+since+'","until":"'+until+'"}&access_token='+adsToken;
   fetch(url).then(function(r){return r.json()}).then(function(data){
     if(data.error){
       console.log('Ads API:',data.error.message);
