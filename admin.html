@@ -1401,6 +1401,48 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           🧾 Venda sem nota fiscal <span style="font-weight:400;font-size:11px;color:var(--txt3)">(não calcula imposto)</span>
         </label>
       </div>
+      <!-- ENVIO / DADOS DO CLIENTE -->
+      <div style="margin:1rem 0;padding:12px 14px;background:rgba(52,73,94,.06);border:1px solid rgba(52,73,94,.18);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--txt1)">
+          <input type="checkbox" id="vendaEnvioToggle" onchange="toggleEnvioFields()" style="accent-color:var(--pri);width:16px;height:16px">
+          📦 Envio pelos Correios
+        </label>
+        <div id="vendaEnvioFields" style="display:none;margin-top:12px">
+          <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Dados do cliente</div>
+          <div class="form-group" style="margin-bottom:8px">
+            <input type="text" id="vendaCliNome" placeholder="Nome completo" style="font-size:13px">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <input type="text" id="vendaCliCpf" placeholder="CPF / CNPJ" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg)">
+            <input type="text" id="vendaCliTel" placeholder="Telefone" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg)">
+          </div>
+          <div style="display:grid;grid-template-columns:2fr 1fr;gap:8px;margin-bottom:8px">
+            <input type="text" id="vendaCliEndereco" placeholder="Endereço completo" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg)">
+            <input type="text" id="vendaCliCep" placeholder="CEP" oninput="autoCalcFreteVenda()" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg)">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <input type="text" id="vendaCliCidade" placeholder="Cidade" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg)">
+            <select id="vendaCliUf" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg);color:var(--txt1)">
+              <option value="">UF</option>
+              <option>AC</option><option>AL</option><option>AM</option><option>AP</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MG</option><option>MS</option><option>MT</option><option>PA</option><option>PB</option><option>PE</option><option>PI</option><option>PR</option><option>RJ</option><option>RN</option><option>RO</option><option>RR</option><option>RS</option><option>SC</option><option>SE</option><option>SP</option><option>TO</option>
+            </select>
+          </div>
+          <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Serviço de envio</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <select id="vendaEnvioServico" onchange="atualizarResumoVenda()" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg);color:var(--txt1)">
+              <option value="sedex">SEDEX</option>
+              <option value="pac" selected>PAC</option>
+              <option value="sedex10">SEDEX 10</option>
+              <option value="sedex12">SEDEX 12</option>
+            </select>
+            <div style="position:relative">
+              <input type="text" id="vendaFreteCalculado" placeholder="Frete (auto)" style="font-size:13px;padding:8px 12px;border:1px solid rgba(255,255,255,.08);border-radius:6px;background:var(--bg)" readonly>
+              <span id="vendaFreteLoader" style="display:none;position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px">⏳</span>
+            </div>
+          </div>
+          <div id="vendaFretePreview" style="display:none;padding:8px 12px;background:rgba(46,204,113,.08);border:1px solid rgba(46,204,113,.15);border-radius:6px;font-size:12px;color:var(--g)"></div>
+        </div>
+      </div>
       <div class="venda-resumo" id="vendaResumo" style="display:none">
         <div class="venda-resumo-line"><span>Preço de venda</span><span id="vrPreco">—</span></div>
         <div class="venda-resumo-line"><span>Comissão (<span id="vrPct">0</span>%)</span><span id="vrComissao">—</span></div>
@@ -1410,6 +1452,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         <div class="venda-resumo-line" id="vrEletriLine" style="display:none"><span>⚡ Eletrificação</span><span id="vrEletri" style="color:var(--b)">—</span></div>
         <div class="venda-resumo-line" id="vrTrocaLine" style="display:none"><span>🔄 Valor da troca</span><span id="vrTroca" style="color:var(--y)">—</span></div>
         <div class="venda-resumo-line" id="vrDinheiroLine" style="display:none"><span>💵 Recebido em dinheiro</span><span id="vrDinheiro" style="color:var(--g)">—</span></div>
+        <div class="venda-resumo-line" id="vrEnvioLine" style="display:none"><span>📦 Envio</span><span id="vrEnvio" style="color:var(--b)">—</span></div>
         <div class="venda-resumo-line"><span>Lucro líquido estimado</span><span id="vrLucro">—</span></div>
       </div>
     </div>
@@ -1861,6 +1904,19 @@ function abrirModalVenda(prodId){
   document.getElementById('vendaTrocaNome').value='';
   document.getElementById('vendaTrocaValor').value='';
   document.getElementById('vendaTrocaRevenda').value='';
+  // Reset envio
+  document.getElementById('vendaEnvioToggle').checked=false;
+  document.getElementById('vendaEnvioFields').style.display='none';
+  document.getElementById('vendaCliNome').value='';
+  document.getElementById('vendaCliCpf').value='';
+  document.getElementById('vendaCliTel').value='';
+  document.getElementById('vendaCliEndereco').value='';
+  document.getElementById('vendaCliCep').value='';
+  document.getElementById('vendaCliCidade').value='';
+  document.getElementById('vendaCliUf').value='';
+  document.getElementById('vendaFreteCalculado').value='';
+  document.getElementById('vendaFretePreview').style.display='none';
+  document.getElementById('vendaSemNota').checked=false;
   // Popular select de vendedores
   var vendedores=getVendedores().filter(function(v){return v.ativo!==false});
   var sel=document.getElementById('vendaVendedorSelect');
@@ -1895,6 +1951,59 @@ function toggleTrocaFields(){
     document.getElementById('vendaTrocaRevenda').value='';
   }
   atualizarResumoVenda();
+}
+
+function toggleEnvioFields(){
+  var on=document.getElementById('vendaEnvioToggle').checked;
+  document.getElementById('vendaEnvioFields').style.display=on?'block':'none';
+  if(!on){
+    document.getElementById('vendaCliNome').value='';
+    document.getElementById('vendaCliCpf').value='';
+    document.getElementById('vendaCliTel').value='';
+    document.getElementById('vendaCliEndereco').value='';
+    document.getElementById('vendaCliCep').value='';
+    document.getElementById('vendaCliCidade').value='';
+    document.getElementById('vendaCliUf').value='';
+    document.getElementById('vendaFreteCalculado').value='';
+    document.getElementById('vendaFreteSaida').value='';
+    document.getElementById('vendaFretePreview').style.display='none';
+  }
+  atualizarResumoVenda();
+}
+
+var _freteTimeout=null;
+function autoCalcFreteVenda(){
+  var cep=(document.getElementById('vendaCliCep').value||'').replace(/\D/g,'');
+  if(cep.length<8) return;
+  clearTimeout(_freteTimeout);
+  _freteTimeout=setTimeout(function(){
+    var cc=getCorreiosConfig();
+    var cepOrig=(cc.cep_origem||'').replace(/\D/g,'');
+    if(!cepOrig){document.getElementById('vendaFretePreview').innerHTML='<span style="color:var(--y)">⚠️ Configure o CEP de origem em Correios</span>';document.getElementById('vendaFretePreview').style.display='';return}
+    document.getElementById('vendaFreteLoader').style.display='';
+    // Estimativa baseada em distância CEP (até ter proxy real)
+    setTimeout(function(){
+      var distFactor=Math.abs(parseInt(cep.substr(0,2))-parseInt(cepOrig.substr(0,2)));
+      var peso=12; // peso médio acordeão
+      var servico=document.getElementById('vendaEnvioServico').value;
+      var frete=0;
+      if(servico==='sedex'||servico==='sedex10'||servico==='sedex12'){
+        frete=35+(peso*2.5)+(distFactor*1.8);
+        if(servico==='sedex10') frete*=1.3;
+        if(servico==='sedex12') frete*=1.2;
+      }else{
+        frete=22+(peso*1.8)+(distFactor*1.2);
+      }
+      frete=Math.round(frete*100)/100;
+      document.getElementById('vendaFreteCalculado').value=formatarValorBR(frete);
+      document.getElementById('vendaFreteSaida').value=frete.toFixed(2).replace('.',',');
+      document.getElementById('vendaFreteLoader').style.display='none';
+      var nomeServ=servico==='pac'?'PAC':servico==='sedex10'?'SEDEX 10':servico==='sedex12'?'SEDEX 12':'SEDEX';
+      document.getElementById('vendaFretePreview').innerHTML='📦 '+nomeServ+': <strong>'+formatarValorBR(frete)+'</strong> (estimativa para CEP '+cep.replace(/(\d{5})(\d{3})/,'$1-$2')+')';
+      document.getElementById('vendaFretePreview').style.display='';
+      atualizarResumoVenda();
+    },600);
+  },400);
 }
 
 function atualizarResumoVenda(){
@@ -1958,6 +2067,16 @@ function atualizarResumoVenda(){
     document.getElementById('vrTrocaLine').style.display='none';
     document.getElementById('vrDinheiroLine').style.display='none';
   }
+  // Envio
+  var temEnvio=document.getElementById('vendaEnvioToggle').checked;
+  if(temEnvio){
+    var servSel=document.getElementById('vendaEnvioServico');
+    var nomeServ=servSel.value==='pac'?'PAC':servSel.value==='sedex10'?'SEDEX 10':servSel.value==='sedex12'?'SEDEX 12':'SEDEX';
+    document.getElementById('vrEnvioLine').style.display='';
+    document.getElementById('vrEnvio').textContent=nomeServ+(freteSaida?' — '+formatarValorBR(freteSaida):'');
+  }else{
+    document.getElementById('vrEnvioLine').style.display='none';
+  }
   document.getElementById('vrLucro').textContent=formatarValorBR(lucro);
   document.getElementById('vendaResumo').style.display='block';
 }
@@ -1998,6 +2117,27 @@ function confirmarVenda(){
   }
   // Sem nota fiscal
   var semNota=document.getElementById('vendaSemNota').checked;
+  // Envio
+  var temEnvio=document.getElementById('vendaEnvioToggle').checked;
+  var comprador=null;
+  if(temEnvio){
+    var cliNome=(document.getElementById('vendaCliNome').value||'').trim();
+    var cliCpf=(document.getElementById('vendaCliCpf').value||'').trim();
+    var cliTel=(document.getElementById('vendaCliTel').value||'').trim();
+    var cliEndereco=(document.getElementById('vendaCliEndereco').value||'').trim();
+    var cliCep=(document.getElementById('vendaCliCep').value||'').trim();
+    var cliCidade=(document.getElementById('vendaCliCidade').value||'').trim();
+    var cliUf=(document.getElementById('vendaCliUf').value||'').trim();
+    if(!cliNome){showToast('⚠️ Informe o nome do cliente','error');return}
+    if(!cliCep){showToast('⚠️ Informe o CEP do cliente','error');return}
+    if(!cliEndereco){showToast('⚠️ Informe o endereço do cliente','error');return}
+    comprador={nome:cliNome,cpf:cliCpf,tel:cliTel,endereco:cliEndereco,cep:cliCep,cidade:cliCidade,uf:cliUf};
+    // Use calculated freight if manual not set
+    if(!freteSaida){
+      var frCalc=document.getElementById('vendaFreteCalculado').value;
+      if(frCalc) freteSaida=parsarPrecoBR(frCalc);
+    }
+  }
   // Registrar venda
   var vendaObj={
     id:'v_'+Date.now(),
@@ -2010,8 +2150,11 @@ function confirmarVenda(){
     comissao_valor:comValor,
     frete_saida:freteSaida,
     sem_nota:semNota,
+    envio:temEnvio,
+    envio_servico:temEnvio?(document.getElementById('vendaEnvioServico').value||'pac'):'',
     data:new Date().toISOString()
   };
+  if(comprador) vendaObj.comprador=comprador;
   if(temEletri){
     vendaObj.eletrificacao=true;
     vendaObj.eletri_cobrado=eletriCobrado;
@@ -2069,6 +2212,83 @@ function confirmarVenda(){
   showToast(msgVenda);
   // Remove from Meta
   removeFromMetaCatalog(prod.id,prod.nome);
+  // Pós-venda: NF-e e Envio
+  setTimeout(function(){mostrarPosVenda(vendaObj,prod)},600);
+}
+
+function mostrarPosVenda(v,prod){
+  var bc=getBlingConfig();
+  var cc=getCorreiosConfig();
+  var temNf=!v.sem_nota;
+  var temEnvio=v.envio;
+  if(!temNf&&!temEnvio) return; // Nada a fazer
+  var html='<div class="modal-overlay on" id="modalPosVenda" onclick="if(event.target===this)this.remove()">';
+  html+='<div class="modal" style="max-width:500px"><div class="modal-header"><h3>✅ Venda registrada — próximos passos</h3>';
+  html+='<button class="modal-close" onclick="document.getElementById(\'modalPosVenda\').remove()">✕</button></div>';
+  html+='<div class="modal-body">';
+  html+='<div style="background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.15);border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px">';
+  html+='<strong>'+prod.nome+'</strong> vendido por <strong>'+formatarValorBR(v.preco_venda)+'</strong>';
+  if(v.comprador) html+=' para <strong>'+v.comprador.nome+'</strong>';
+  html+='</div>';
+  // NF-e Section
+  if(temNf){
+    html+='<div style="margin-bottom:16px">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🧾 Nota Fiscal</div>';
+    if(bc.access_token&&bc.token_expires&&Date.now()<bc.token_expires){
+      html+='<div style="display:flex;gap:8px">';
+      html+='<button onclick="gerarNfSaidaBling(\''+v.id+'\');document.getElementById(\'modalPosVenda\').remove()" style="flex:1;padding:10px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Emitir NF-e de Saída</button>';
+      html+='</div>';
+    }else if(bc.client_id){
+      html+='<div style="padding:10px;background:rgba(243,156,18,.08);border-radius:6px;font-size:12px;color:var(--y)">⚠️ Token Bling expirado. <a href="#" onclick="goPage(\'bling\');document.getElementById(\'modalPosVenda\').remove();return false" style="color:var(--pri);text-decoration:underline">Reconectar →</a></div>';
+    }else{
+      html+='<div style="padding:10px;background:rgba(149,165,166,.08);border-radius:6px;font-size:12px;color:var(--txt3)">Bling não configurado. <a href="#" onclick="goPage(\'bling\');document.getElementById(\'modalPosVenda\').remove();return false" style="color:var(--pri);text-decoration:underline">Configurar →</a></div>';
+    }
+    html+='</div>';
+  }
+  // Envio Section
+  if(temEnvio&&v.comprador){
+    var nomeServ=v.envio_servico==='pac'?'PAC':v.envio_servico==='sedex10'?'SEDEX 10':v.envio_servico==='sedex12'?'SEDEX 12':'SEDEX';
+    html+='<div style="margin-bottom:16px">';
+    html+='<div style="font-size:12px;font-weight:700;color:var(--b);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📦 Envio — '+nomeServ+'</div>';
+    html+='<div style="background:var(--bg);border-radius:8px;padding:12px;font-size:12px;line-height:1.8">';
+    html+='<strong>'+v.comprador.nome+'</strong><br>';
+    if(v.comprador.cpf) html+='CPF: '+v.comprador.cpf+'<br>';
+    html+=v.comprador.endereco+'<br>';
+    if(v.comprador.cidade) html+=v.comprador.cidade+(v.comprador.uf?' — '+v.comprador.uf:'')+'<br>';
+    html+='CEP: '+v.comprador.cep;
+    if(v.comprador.tel) html+='<br>Tel: '+v.comprador.tel;
+    html+='</div>';
+    html+='<div style="display:flex;gap:8px;margin-top:10px">';
+    if(cc.usuario&&cc.token_api){
+      html+='<button onclick="copiarDadosEnvio(\''+v.id+'\');document.getElementById(\'modalPosVenda\').remove()" style="flex:1;padding:10px;background:var(--b);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">📋 Copiar dados</button>';
+      html+='<button onclick="irParaEtiqueta(\''+v.id+'\');document.getElementById(\'modalPosVenda\').remove()" style="flex:1;padding:10px;background:var(--g);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">🏷️ Gerar etiqueta</button>';
+    }else{
+      html+='<button onclick="copiarDadosEnvio(\''+v.id+'\');document.getElementById(\'modalPosVenda\').remove()" style="flex:1;padding:10px;background:var(--b);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">📋 Copiar dados do envio</button>';
+    }
+    html+='</div>';
+    if(v.frete_saida) html+='<div style="text-align:center;margin-top:8px;font-size:13px;color:var(--txt2)">Frete: <strong style="color:var(--pri)">'+formatarValorBR(v.frete_saida)+'</strong></div>';
+    html+='</div>';
+  }
+  html+='<div style="text-align:center;margin-top:8px"><button onclick="document.getElementById(\'modalPosVenda\').remove()" style="padding:8px 24px;background:rgba(255,255,255,.06);color:var(--txt2);border:1px solid rgba(255,255,255,.1);border-radius:6px;font-size:12px;cursor:pointer">Fechar</button></div>';
+  html+='</div></div></div>';
+  document.body.insertAdjacentHTML('beforeend',html);
+}
+
+function copiarDadosEnvio(vendaId){
+  var v=getVendas().find(function(vd){return vd.id===vendaId});
+  if(!v||!v.comprador){showToast('Dados do comprador não encontrados','⚠️');return}
+  var c=v.comprador;
+  var texto=c.nome+'\n'+(c.cpf?'CPF: '+c.cpf+'\n':'')+(c.tel?'Tel: '+c.tel+'\n':'')+c.endereco+'\n'+(c.cidade?c.cidade+(c.uf?' — '+c.uf:'')+'\n':'')+'CEP: '+c.cep;
+  if(navigator.clipboard){navigator.clipboard.writeText(texto)}else{var ta=document.createElement('textarea');ta.value=texto;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta)}
+  showToast('📋 Dados do envio copiados!','✅');
+}
+
+function irParaEtiqueta(vendaId){
+  goPage('correios');
+  setTimeout(function(){
+    var sel=document.getElementById('etqVenda');
+    if(sel){sel.value=vendaId;preencherDadosEtiqueta()}
+  },200);
 }
 
 /* ===== RANKING ===== */
@@ -2619,6 +2839,8 @@ function renderFinanceiro(){
     if(v.troca)badges+='<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>';
     if(v.eletrificacao)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">⚡ ELETRI</span>';
     if(v.sem_nota)badges+='<span style="background:rgba(149,165,166,.15);color:var(--txt3);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🧾 S/NF</span>';
+    if(v.envio)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">📦 Envio</span>';
+    if(v.comprador)badges+='<span style="background:rgba(46,204,113,.12);color:var(--g);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">👤 '+v.comprador.nome.split(' ')[0]+'</span>';
     var titleExtra='';
     if(v.troca)titleExtra+=' | Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor);
     if(v.eletrificacao)titleExtra+=' | Eletri: +'+formatarValorBR(eletriReceita);
@@ -2650,6 +2872,7 @@ function renderFinanceiro(){
           '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri custo (R$)</label><input type="text" id="fe_eletricusto_'+v.id+'" value="'+formatarValorBR(eletriCusto)+'" style="padding:6px 10px;font-size:12px"></div>'+
         '</div>'+
         '<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--txt2)"><input type="checkbox" id="fe_semnota_'+v.id+'" '+(v.sem_nota?'checked':'')+' style="accent-color:var(--txt3);width:15px;height:15px"> 🧾 Sem nota fiscal (não calcula imposto)</label></div>'+
+        (v.comprador?'<div style="margin-top:12px;padding:10px;background:rgba(52,152,219,.06);border:1px solid rgba(52,152,219,.12);border-radius:6px"><div style="font-size:11px;font-weight:700;color:var(--b);margin-bottom:6px">📦 Dados do cliente</div><div style="font-size:12px;line-height:1.7;color:var(--txt2)">'+v.comprador.nome+(v.comprador.cpf?'<br>CPF: '+v.comprador.cpf:'')+(v.comprador.tel?'<br>Tel: '+v.comprador.tel:'')+'<br>'+v.comprador.endereco+(v.comprador.cidade?'<br>'+v.comprador.cidade+(v.comprador.uf?' — '+v.comprador.uf:''):'')+'<br>CEP: '+v.comprador.cep+'</div></div>':'')+
         '<div style="display:flex;gap:8px;margin-top:14px;justify-content:flex-end">'+
           '<button class="btn" onclick="event.stopPropagation();excluirVendaFinanceiro(\''+v.id+'\')" style="padding:6px 14px;font-size:12px;background:var(--r);color:#fff;border:none;border-radius:6px">🗑 Excluir</button>'+
           '<button class="btn" onclick="event.stopPropagation();toggleFinEdit(\''+v.id+'\')" style="padding:6px 14px;font-size:12px;background:var(--card2);border:1px solid var(--bord);border-radius:6px">Cancelar</button>'+
