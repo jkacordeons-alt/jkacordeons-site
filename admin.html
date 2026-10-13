@@ -345,6 +345,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
   .sync-progress{min-width:auto;left:1rem;right:1rem;transform:none}
   .wizard{margin:0}
   .wiz-cat-row{grid-template-columns:1fr}
+  .sim-grid{grid-template-columns:1fr!important}
 }
 </style>
 </head>
@@ -414,6 +415,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         </div>
         <div class="sb-item" onclick="goPage('financeiro')">
           <span class="sb-icon">💹</span> Financeiro
+        </div>
+        <div class="sb-item" onclick="goPage('simulador')">
+          <span class="sb-icon">🧮</span> Simulador
         </div>
       </div>
       <div class="sb-section">
@@ -770,6 +774,78 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <div class="cat-empty-icon">💹</div>
           <p>Nenhuma venda com dados de custo ainda</p>
           <span>Registre compras e vendas para ver o relatório</span>
+        </div>
+      </div>
+
+      <!-- PAGE: Simulador de Compra -->
+      <div class="page" id="pageSimulador">
+        <div class="dash-welcome" style="border-color:rgba(155,89,182,.15);background:linear-gradient(135deg,rgba(155,89,182,.08),rgba(155,89,182,.02))">
+          <h2>🧮 Simulador de Compra</h2>
+          <p>Calcule se vale a pena comprar antes de fechar negócio.</p>
+        </div>
+
+        <div class="sim-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-top:1rem">
+          <!-- COLUNA ESQUERDA: INPUTS -->
+          <div class="card" style="padding:20px">
+            <h3 style="margin:0 0 16px;font-size:15px;color:var(--txt)">📥 Dados da compra</h3>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Valor de compra (R$) *</label>
+              <input type="text" id="simCompra" placeholder="Quanto vai pagar pela gaita" oninput="calcularSimulacao()" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Frete de entrada (R$)</label>
+              <input type="text" id="simFreteIn" placeholder="Frete pra gaita chegar até você" oninput="calcularSimulacao()" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Manutenção estimada (R$)</label>
+              <input type="text" id="simManut" placeholder="Afinação, regulagem, limpeza..." oninput="calcularSimulacao()" style="padding:8px 12px">
+            </div>
+
+            <h3 style="margin:18px 0 14px;font-size:15px;color:var(--txt)">📤 Projeção de venda</h3>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Preço de venda pretendido (R$) *</label>
+              <input type="text" id="simVenda" placeholder="Quanto pretende vender" oninput="calcularSimulacao()" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Frete de envio ao comprador (R$)</label>
+              <input type="text" id="simFreteOut" placeholder="Frete para o cliente" oninput="calcularSimulacao()" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Comissão do vendedor (%)</label>
+              <input type="text" id="simComPct" placeholder="Ex: 10" oninput="calcularSimulacao()" style="padding:8px 12px">
+            </div>
+
+            <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--txt2)">
+                <input type="checkbox" id="simSemNota" onchange="calcularSimulacao()" style="accent-color:var(--txt3);width:15px;height:15px">
+                🧾 Sem nota fiscal
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;color:var(--b)">
+                <input type="checkbox" id="simEletri" onchange="calcularSimulacao()" style="accent-color:var(--b);width:15px;height:15px">
+                ⚡ Com eletrificação
+              </label>
+            </div>
+            <div id="simEletriFields" style="display:none;margin-top:10px;padding:10px 12px;background:rgba(52,152,219,.05);border-radius:8px">
+              <div class="form-group" style="margin-bottom:8px">
+                <label style="font-size:11px">Valor cobrado do cliente (R$)</label>
+                <input type="text" id="simEletriCob" placeholder="Ex: 1.200" oninput="calcularSimulacao()" style="padding:6px 10px;font-size:12px">
+              </div>
+              <div class="form-group" style="margin-bottom:0">
+                <label style="font-size:11px">Custo da eletrificação (R$)</label>
+                <input type="text" id="simEletriCusto" placeholder="Ex: 600" oninput="calcularSimulacao()" style="padding:6px 10px;font-size:12px">
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUNA DIREITA: RESULTADO -->
+          <div>
+            <div class="card" id="simResultado" style="padding:20px">
+              <div style="text-align:center;padding:2rem 0;color:var(--txt3)">
+                <div style="font-size:2rem;margin-bottom:8px">🧮</div>
+                <p style="margin:0;font-size:13px">Preencha os valores ao lado para ver a simulação</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -2735,9 +2811,16 @@ function goPage(page){
     topAction.style.display='none';
     btnSyncTop.style.display='none';
     renderFinanceiro();
+  }else if(page==='simulador'){
+    document.getElementById('pageSimulador').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
+    document.getElementById('topTitle').textContent='Simulador de Compra';
+    document.getElementById('topSub').textContent='Calcule se vale a pena antes de comprar';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
   }else if(page==='config'){
     document.getElementById('pageConfig').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[8].classList.add('active');
     document.getElementById('topTitle').textContent='Configurações';
     document.getElementById('topSub').textContent='Segurança e dados do sistema';
     topAction.style.display='none';
@@ -2755,6 +2838,100 @@ function getProds(){return getProdsLocal()}
 function setProds(p){setProdsLocal(p);syncToServer()}
 
 /* ===== STATS ===== */
+// ===== SIMULADOR DE COMPRA =====
+function calcularSimulacao(){
+  // Toggle eletri fields
+  var temEletri=document.getElementById('simEletri').checked;
+  document.getElementById('simEletriFields').style.display=temEletri?'':'none';
+
+  var compra=parsarPrecoBR(document.getElementById('simCompra').value)||0;
+  var venda=parsarPrecoBR(document.getElementById('simVenda').value)||0;
+  var el=document.getElementById('simResultado');
+
+  if(!compra||!venda){
+    el.innerHTML='<div style="text-align:center;padding:2rem 0;color:var(--txt3)"><div style="font-size:2rem;margin-bottom:8px">🧮</div><p style="margin:0;font-size:13px">Preencha pelo menos compra e venda</p></div>';
+    return;
+  }
+
+  var freteIn=parsarPrecoBR(document.getElementById('simFreteIn').value)||0;
+  var manut=parsarPrecoBR(document.getElementById('simManut').value)||0;
+  var freteOut=parsarPrecoBR(document.getElementById('simFreteOut').value)||0;
+  var comPct=parseFloat(document.getElementById('simComPct').value)||0;
+  var semNota=document.getElementById('simSemNota').checked;
+  var cf=getCustosFixos();
+  var bagAlcas=cf.bag_alcas||204;
+  var impPct=cf.imposto_pct||7.5;
+
+  var comValor=venda*(comPct/100);
+  var imposto=semNota?0:venda*(impPct/100);
+
+  var eletriCob=0,eletriCusto=0;
+  if(temEletri){
+    eletriCob=parsarPrecoBR(document.getElementById('simEletriCob').value)||0;
+    eletriCusto=parsarPrecoBR(document.getElementById('simEletriCusto').value)||0;
+  }
+  var eletriLucro=eletriCob-eletriCusto;
+
+  var custoTotal=compra+freteIn+bagAlcas+manut+freteOut+comValor+imposto+eletriCusto;
+  var receitaTotal=venda+eletriCob;
+  var lucro=receitaTotal-custoTotal;
+  var margem=receitaTotal>0?((lucro/receitaTotal)*100).toFixed(1):'0';
+  var vale=lucro>0;
+  var corLucro=vale?'var(--g)':'var(--r)';
+
+  var h='';
+  // Veredicto
+  h+='<div style="text-align:center;padding:16px;margin-bottom:16px;border-radius:10px;background:'+(vale?'rgba(37,211,102,.08)':'rgba(231,76,60,.08)')+';border:1px solid '+(vale?'rgba(37,211,102,.2)':'rgba(231,76,60,.2)')+'">'+
+    '<div style="font-size:2rem;margin-bottom:4px">'+(vale?'✅':'❌')+'</div>'+
+    '<div style="font-size:18px;font-weight:800;color:'+corLucro+'">'+(vale?'VALE A PENA':'NÃO VALE A PENA')+'</div>'+
+    '<div style="font-size:13px;color:var(--txt2);margin-top:4px">Lucro: <strong style="color:'+corLucro+'">'+formatarValorBR(lucro)+'</strong> · Margem: <strong style="color:'+corLucro+'">'+margem+'%</strong></div>'+
+  '</div>';
+
+  // Detalhamento
+  h+='<div style="font-size:13px">';
+  h+='<div style="font-weight:700;margin-bottom:10px;color:var(--g);font-size:14px">📈 Receita</div>';
+  h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bord)"><span>Preço de venda</span><strong>'+formatarValorBR(venda)+'</strong></div>';
+  if(temEletri&&eletriCob>0){
+    h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bord)"><span>⚡ Eletrificação cobrada</span><strong style="color:var(--b)">+'+formatarValorBR(eletriCob)+'</strong></div>';
+  }
+  h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bord);font-weight:700;color:var(--g)"><span>Total receita</span><span>'+formatarValorBR(receitaTotal)+'</span></div>';
+
+  h+='<div style="font-weight:700;margin:16px 0 10px;color:var(--r);font-size:14px">📉 Custos</div>';
+  var custos=[
+    ['Compra da gaita',compra],
+    ['Frete de entrada',freteIn],
+    ['Bag + alças (fixo)',bagAlcas],
+    ['Manutenção',manut],
+    ['Frete de envio',freteOut],
+    ['Comissão ('+comPct+'%)',comValor],
+    [semNota?'Imposto (isento — sem NF)':'Imposto ('+impPct+'%)',imposto]
+  ];
+  if(temEletri) custos.push(['⚡ Custo eletrificação',eletriCusto]);
+
+  custos.forEach(function(c){
+    var val=c[1];
+    var style=val>0?'':'color:var(--txt3)';
+    h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bord);'+style+'"><span>'+c[0]+'</span><span>-'+formatarValorBR(val)+'</span></div>';
+  });
+  h+='<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bord);font-weight:700;color:var(--r)"><span>Total custos</span><span>-'+formatarValorBR(custoTotal)+'</span></div>';
+
+  h+='<div style="display:flex;justify-content:space-between;padding:10px 0;font-size:16px;font-weight:800;color:'+corLucro+'"><span>💰 Lucro líquido</span><span>'+formatarValorBR(lucro)+'</span></div>';
+
+  // Dica do preço mínimo de venda
+  var custoSemComImp=compra+freteIn+bagAlcas+manut+freteOut+eletriCusto;
+  var fatorDivisor=1-(comPct/100)-(semNota?0:impPct/100);
+  var precoMinimo=fatorDivisor>0?(custoSemComImp/fatorDivisor):0;
+  if(precoMinimo>0){
+    h+='<div style="margin-top:14px;padding:10px 14px;background:rgba(52,152,219,.06);border-radius:8px;border:1px solid rgba(52,152,219,.15);font-size:12px;color:var(--txt2)">'+
+      '💡 <strong>Preço mínimo</strong> pra não ter prejuízo: <strong style="color:var(--b)">'+formatarValorBR(precoMinimo)+'</strong>'+
+      (eletriCob>0?' <span style="font-size:11px">(sem contar receita de eletrificação)</span>':'')+
+    '</div>';
+  }
+
+  h+='</div>';
+  el.innerHTML=h;
+}
+
 function atualizarStats(){
   var prods=getProds();
   var total=prods.length;
