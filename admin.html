@@ -3370,7 +3370,7 @@ function renderBlingStatus(){
   }
   // Set callback URL
   var cbField=document.getElementById('blingCallbackUrl');
-  if(cbField) cbField.value=window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.html';
+  if(cbField) cbField.value=window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.php';
   // Fill form fields
   if(bc.client_id) document.getElementById('blingClientId').value=bc.client_id;
   if(bc.client_secret) document.getElementById('blingClientSecret').value=bc.client_secret;
@@ -3419,7 +3419,7 @@ function iniciarAuthBling(){
 function completarAuthBling(code){
   var bc=getBlingConfig();
   if(!bc.client_id||!bc.client_secret){showToast('Credenciais não encontradas','⚠️');return}
-  var cbUrl=document.getElementById('blingCallbackUrl')?document.getElementById('blingCallbackUrl').value:(window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.html');
+  var cbUrl=document.getElementById('blingCallbackUrl')?document.getElementById('blingCallbackUrl').value:(window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.php');
   // Exchange code for token — needs server-side proxy due to CORS
   // For now, show instructions
   showToast('Código recebido: '+code+'. A troca por token requer proxy server (CORS). Configure um endpoint /api/bling_token.php','⚠️');
