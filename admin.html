@@ -3382,6 +3382,35 @@ function renderBlingStatus(){
     if(bc.emitente.cep) document.getElementById('blingCep').value=bc.emitente.cep;
   }
   renderBlingNotas();
+  // Verificar token no servidor (proxy)
+  blingApiCall('/situacoes/modulos','GET',null,function(ok,data){
+    if(ok&&!data.error){
+      icon.textContent='✅';title.textContent='Conectado ao Bling';
+      sub.textContent='API respondendo — token válido no servidor';
+      document.getElementById('badgeBling').style.display='';
+      if(data._token_info){
+        var bc2=getBlingConfig();
+        bc2.access_token='server_managed';
+        bc2.token_expires=data._token_info.expires_at;
+        setBlingConfig(bc2);
+      }
+    }
+  });
+}
+
+function blingApiCall(endpoint,method,body,callback){
+  var baseProxy=window.location.origin+window.location.pathname.replace('admin.html','')+'bling_api.php';
+  var url=baseProxy+'?endpoint='+encodeURIComponent(endpoint)+'&method='+(method||'GET');
+  var opts={method:method||'GET',headers:{'Accept':'application/json'}};
+  if(body&&(method==='POST'||method==='PUT'||method==='PATCH')){
+    opts.headers['Content-Type']='application/json';
+    opts.body=JSON.stringify(body);
+  }
+  fetch(url,opts).then(function(r){return r.json().then(function(d){return{ok:r.ok,data:d}})}).then(function(res){
+    if(callback) callback(res.ok,res.data);
+  }).catch(function(err){
+    if(callback) callback(false,{error:err.message});
+  });
 }
 
 function toggleBlingConfig(){
@@ -3417,12 +3446,9 @@ function iniciarAuthBling(){
 }
 
 function completarAuthBling(code){
-  var bc=getBlingConfig();
-  if(!bc.client_id||!bc.client_secret){showToast('Credenciais não encontradas','⚠️');return}
-  var cbUrl=document.getElementById('blingCallbackUrl')?document.getElementById('blingCallbackUrl').value:(window.location.origin+window.location.pathname.replace('admin.html','')+'bling_callback.php');
-  // Exchange code for token — needs server-side proxy due to CORS
-  // For now, show instructions
-  showToast('Código recebido: '+code+'. A troca por token requer proxy server (CORS). Configure um endpoint /api/bling_token.php','⚠️');
+  // O bling_callback.php já faz a troca automaticamente no servidor.
+  // Esta função é chamada manualmente caso precise trocar um code avulso.
+  showToast('A troca de código é feita automaticamente pelo bling_callback.php no servidor.','ℹ️');
 }
 
 function salvarBlingEmitente(){
@@ -3457,8 +3483,61 @@ function emitirNfEntrada(){
 
 function gerarNfEntradaBling(compraId){
   var bc=getBlingConfig();
-  if(!bc.access_token){showToast('Token Bling expirado','⚠️');return}
-  showToast('⏳ Emissão de NF-e de entrada requer proxy server para API Bling (CORS). Endpoint: POST /Api/v3/nfe','ℹ️');
+  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
+  var compra=getCompras().find(function(c){return c.id===compraId});
+  if(!compra){showToast('Compra não encontrada','⚠️');return}
+  var prod=getProds().find(function(p){return p.id===compra.produto_id});
+  var emitente=bc.emitente||{};
+  if(!emitente.cnpj){showToast('Configure os dados do emitente primeiro','⚠️');return}
+  showToast('⏳ Buscando natureza de operação...','🔄');
+  // 1. Buscar naturezas de operação
+  blingApiCall('/naturezas-de-operacoes?pagina=1&limite=100','GET',null,function(okN,dataN){
+    var natOp=null;
+    if(okN&&dataN.data&&dataN.data.length){
+      // Procurar "compra" ou "entrada" na descrição
+      natOp=dataN.data.find(function(n){return /compra|entrada/i.test(n.descricao)});
+      if(!natOp) natOp=dataN.data[0]; // fallback: primeira
+    }
+    // 2. Montar NF-e de entrada
+    var nfeBody={
+      tipo:0, // 0=entrada, 1=saída
+      numero:null, // auto
+      dataOperacao:new Date().toISOString().split('T')[0],
+      contato:{
+        nome:compra.fornecedor||'Fornecedor',
+        tipoPessoa:'J'
+      },
+      naturezaOperacao:natOp?{id:natOp.id}:undefined,
+      itens:[{
+        codigo:prod?(prod.id||'PROD'):'PROD',
+        descricao:prod?(prod.marca+' '+prod.modelo):'Acordeon',
+        unidade:'UN',
+        quantidade:1,
+        valor:compra.valor||0
+      }]
+    };
+    showToast('⏳ Emitindo NF-e de entrada...','🔄');
+    blingApiCall('/nfe','POST',nfeBody,function(ok,data){
+      if(ok&&data.data&&data.data.id){
+        // Sucesso — salvar número da NF na compra
+        var compras=getCompras();
+        var idx=compras.findIndex(function(c){return c.id===compraId});
+        if(idx>=0){
+          compras[idx].nf_entrada=data.data.numero||data.data.id;
+          compras[idx].nf_entrada_id=data.data.id;
+          localStorage.setItem('jk_compras',JSON.stringify(compras));
+          syncToServer();
+        }
+        showToast('NF-e de entrada #'+(data.data.numero||data.data.id)+' emitida!','✅');
+        renderBlingNotas();
+        emitirNfEntrada(); // Refresh lista
+      }else{
+        var errMsg=data.error||(data.data&&data.data.erros?JSON.stringify(data.data.erros):'Erro desconhecido');
+        showToast('Erro ao emitir NF-e: '+errMsg,'❌');
+        console.error('Bling NF-e erro:',data);
+      }
+    });
+  });
 }
 
 function emitirNfSaida(){
@@ -3479,8 +3558,83 @@ function emitirNfSaida(){
 
 function gerarNfSaidaBling(vendaId){
   var bc=getBlingConfig();
-  if(!bc.access_token){showToast('Token Bling expirado','⚠️');return}
-  showToast('⏳ Emissão de NF-e de saída requer proxy server para API Bling (CORS). Endpoint: POST /Api/v3/nfe','ℹ️');
+  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
+  var venda=getVendas().find(function(v){return v.id===vendaId});
+  if(!venda){showToast('Venda não encontrada','⚠️');return}
+  var prod=getProds().find(function(p){return p.id===venda.produto_id});
+  var emitente=bc.emitente||{};
+  if(!emitente.cnpj){showToast('Configure os dados do emitente primeiro','⚠️');return}
+  showToast('⏳ Buscando natureza de operação...','🔄');
+  blingApiCall('/naturezas-de-operacoes?pagina=1&limite=100','GET',null,function(okN,dataN){
+    var natOp=null;
+    if(okN&&dataN.data&&dataN.data.length){
+      natOp=dataN.data.find(function(n){return /venda|sa[ií]da/i.test(n.descricao)});
+      if(!natOp) natOp=dataN.data[0];
+    }
+    // Montar contato (comprador)
+    var contato={nome:'Consumidor Final',tipoPessoa:'F'};
+    if(venda.comprador){
+      contato.nome=venda.comprador.nome||'Consumidor';
+      if(venda.comprador.cpf){
+        contato.numeroDocumento=venda.comprador.cpf.replace(/\D/g,'');
+        contato.tipoPessoa=contato.numeroDocumento.length>11?'J':'F';
+      }
+      if(venda.comprador.tel) contato.telefone=venda.comprador.tel;
+      if(venda.comprador.endereco){
+        contato.endereco={
+          endereco:venda.comprador.endereco,
+          cep:(venda.comprador.cep||'').replace(/\D/g,''),
+          municipio:venda.comprador.cidade||'',
+          uf:venda.comprador.uf||''
+        };
+      }
+    }
+    var nfeBody={
+      tipo:1, // saída
+      numero:null,
+      dataOperacao:venda.data_venda||new Date().toISOString().split('T')[0],
+      contato:contato,
+      naturezaOperacao:natOp?{id:natOp.id}:undefined,
+      itens:[{
+        codigo:prod?(prod.id||'PROD'):'PROD',
+        descricao:prod?(prod.marca+' '+prod.modelo):'Acordeon',
+        unidade:'UN',
+        quantidade:1,
+        valor:venda.preco_venda||0
+      }]
+    };
+    // Se tem frete, adicionar
+    if(venda.envio&&venda.frete_valor){
+      nfeBody.transporte={
+        fretePorConta:0, // 0=emitente, 1=destinatário
+        volumes:[{
+          quantidade:1,
+          especie:'CAIXA',
+          pesoBruto:prod&&prod.peso?parseFloat(prod.peso):15
+        }]
+      };
+    }
+    showToast('⏳ Emitindo NF-e de saída...','🔄');
+    blingApiCall('/nfe','POST',nfeBody,function(ok,data){
+      if(ok&&data.data&&data.data.id){
+        var vendas=getVendas();
+        var idx=vendas.findIndex(function(v){return v.id===vendaId});
+        if(idx>=0){
+          vendas[idx].nf_saida=data.data.numero||data.data.id;
+          vendas[idx].nf_saida_id=data.data.id;
+          localStorage.setItem('jk_vendas',JSON.stringify(vendas));
+          syncToServer();
+        }
+        showToast('NF-e de saída #'+(data.data.numero||data.data.id)+' emitida!','✅');
+        renderBlingNotas();
+        emitirNfSaida();
+      }else{
+        var errMsg=data.error||(data.data&&data.data.erros?JSON.stringify(data.data.erros):'Erro desconhecido');
+        showToast('Erro ao emitir NF-e: '+errMsg,'❌');
+        console.error('Bling NF-e erro:',data);
+      }
+    });
+  });
 }
 
 function renderBlingNotas(){
