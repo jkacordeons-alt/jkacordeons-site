@@ -725,7 +725,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <div style="overflow-x:auto">
             <table class="rank-table" id="finTable">
               <thead><tr>
-                <th>Acordeon</th><th>Compra</th><th>Frete↓</th><th>Bag+Alças</th><th>Venda</th><th>Frete↑</th><th>Comissão</th><th>Imposto</th><th>Lucro</th><th>Margem</th>
+                <th>Acordeon</th><th>Compra</th><th>Manutenção</th><th>Receita</th><th>Frete↑</th><th>Comissão</th><th>Imposto</th><th>Lucro</th><th>Margem</th>
               </tr></thead>
               <tbody id="finBody"></tbody>
               <tfoot id="finFoot"></tfoot>
@@ -876,6 +876,12 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       </div>
 
       <div class="form-group">
+        <label>Custo de manutenção / reparo (R$)</label>
+        <input type="text" id="fManutencao" placeholder="Ex: 500 (afinação, troca de palhetas, etc)">
+        <div class="form-hint">Valor gasto para deixar o acordeão pronto pra venda</div>
+      </div>
+
+      <div class="form-group">
         <label>Descrição</label>
         <textarea id="fDesc" placeholder="Descreva o acordeon: som, estado de conservação, diferenciais..."></textarea>
       </div>
@@ -989,6 +995,24 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         <label>Frete de envio ao cliente (R$)</label>
         <input type="text" id="vendaFreteSaida" placeholder="Custo do frete para o comprador" oninput="atualizarResumoVenda()">
       </div>
+      <!-- ELETRIFICAÇÃO -->
+      <div style="margin:1rem 0;padding:12px 14px;background:rgba(52,152,219,.06);border:1px solid rgba(52,152,219,.18);border-radius:8px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--b)">
+          <input type="checkbox" id="vendaEletriToggle" onchange="toggleEletriFields()" style="accent-color:var(--b);width:16px;height:16px">
+          ⚡ Vendeu com eletrificação
+        </label>
+        <div id="vendaEletriFields" style="display:none;margin-top:12px">
+          <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:12px">Valor cobrado do cliente pela eletrificação (R$)</label>
+            <input type="text" id="vendaEletriCobrado" placeholder="Ex: 1.200" oninput="atualizarResumoVenda()">
+          </div>
+          <div class="form-group" style="margin-bottom:0">
+            <label style="font-size:12px">Custo pago na eletrificação (R$)</label>
+            <input type="text" id="vendaEletriCusto" placeholder="Ex: 600 (quanto pagou pro técnico)">
+            <div class="form-hint">A diferença entre cobrado e custo entra como lucro</div>
+          </div>
+        </div>
+      </div>
       <!-- TROCA -->
       <div style="margin:1rem 0;padding:12px 14px;background:rgba(243,156,18,.06);border:1px solid rgba(243,156,18,.18);border-radius:8px">
         <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--y)">
@@ -1017,6 +1041,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         <div class="venda-resumo-line"><span>Frete de envio</span><span id="vrFrete">—</span></div>
         <div class="venda-resumo-line"><span>Imposto (<span id="vrImpPct">7.5</span>%)</span><span id="vrImposto">—</span></div>
         <div class="venda-resumo-line" id="vrCustoLine" style="display:none"><span>Custo total (compra+frete+bag)</span><span id="vrCusto">—</span></div>
+        <div class="venda-resumo-line" id="vrEletriLine" style="display:none"><span>⚡ Eletrificação</span><span id="vrEletri" style="color:var(--b)">—</span></div>
         <div class="venda-resumo-line" id="vrTrocaLine" style="display:none"><span>🔄 Valor da troca</span><span id="vrTroca" style="color:var(--y)">—</span></div>
         <div class="venda-resumo-line" id="vrDinheiroLine" style="display:none"><span>💵 Recebido em dinheiro</span><span id="vrDinheiro" style="color:var(--g)">—</span></div>
         <div class="venda-resumo-line"><span>Lucro líquido estimado</span><span id="vrLucro">—</span></div>
@@ -1459,6 +1484,11 @@ function abrirModalVenda(prodId){
   document.getElementById('vendaProdPreco').textContent=prod.preco||'Consultar';
   document.getElementById('vendaPrecoFinal').value='';
   document.getElementById('vendaFreteSaida').value='';
+  // Reset eletrificação
+  document.getElementById('vendaEletriToggle').checked=false;
+  document.getElementById('vendaEletriFields').style.display='none';
+  document.getElementById('vendaEletriCobrado').value='';
+  document.getElementById('vendaEletriCusto').value='';
   // Reset troca
   document.getElementById('vendaTrocaToggle').checked=false;
   document.getElementById('vendaTrocaFields').style.display='none';
@@ -1479,6 +1509,16 @@ function abrirModalVenda(prodId){
   }
 }
 function fecharModalVenda(){document.getElementById('modalVenda').classList.remove('on')}
+
+function toggleEletriFields(){
+  var on=document.getElementById('vendaEletriToggle').checked;
+  document.getElementById('vendaEletriFields').style.display=on?'block':'none';
+  if(!on){
+    document.getElementById('vendaEletriCobrado').value='';
+    document.getElementById('vendaEletriCusto').value='';
+  }
+  atualizarResumoVenda();
+}
 
 function toggleTrocaFields(){
   var on=document.getElementById('vendaTrocaToggle').checked;
@@ -1508,20 +1548,35 @@ function atualizarResumoVenda(){
   // Custo de compra se existir
   var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:0;
   var freteEntrada=(prod&&prod.frete_entrada)?prod.frete_entrada:0;
+  var manutencao=(prod&&prod.manutencao)?prod.manutencao:0;
   var bagAlcas=cf.bag_alcas||204;
-  var custoTotal=custoCompra+freteEntrada+bagAlcas;
-  var lucro=preco-comValor-freteSaida-imposto-custoTotal;
+  var custoTotal=custoCompra+freteEntrada+bagAlcas+manutencao;
+  // Eletrificação
+  var temEletri=document.getElementById('vendaEletriToggle').checked;
+  var eletriCobrado=0,eletriCusto=0;
+  if(temEletri){
+    eletriCobrado=parsarPrecoBR(document.getElementById('vendaEletriCobrado').value)||0;
+    eletriCusto=parsarPrecoBR(document.getElementById('vendaEletriCusto').value)||0;
+  }
+  var lucro=(preco+eletriCobrado)-comValor-freteSaida-imposto-custoTotal-eletriCusto;
   document.getElementById('vrPreco').textContent=formatarValorBR(preco);
   document.getElementById('vrPct').textContent=comPct;
   document.getElementById('vrComissao').textContent=formatarValorBR(comValor);
   document.getElementById('vrFrete').textContent=formatarValorBR(freteSaida);
   document.getElementById('vrImpPct').textContent=impPct;
   document.getElementById('vrImposto').textContent=formatarValorBR(imposto);
-  if(custoCompra>0){
+  if(custoCompra>0||manutencao>0){
     document.getElementById('vrCustoLine').style.display='';
-    document.getElementById('vrCusto').textContent=formatarValorBR(custoTotal);
+    document.getElementById('vrCusto').textContent=formatarValorBR(custoTotal)+(manutencao>0?' (incl. manut. '+formatarValorBR(manutencao)+')':'');
   }else{
     document.getElementById('vrCustoLine').style.display='none';
+  }
+  // Eletrificação no resumo
+  if(temEletri&&eletriCobrado>0){
+    document.getElementById('vrEletriLine').style.display='';
+    document.getElementById('vrEletri').textContent='+'+formatarValorBR(eletriCobrado)+' (custo: '+formatarValorBR(eletriCusto)+')';
+  }else{
+    document.getElementById('vrEletriLine').style.display='none';
   }
   // Troca
   var temTroca=document.getElementById('vendaTrocaToggle').checked;
@@ -1556,6 +1611,14 @@ function confirmarVenda(){
   var comValor=precoVenda*(comPct/100);
   var freteStr=document.getElementById('vendaFreteSaida').value.trim();
   var freteSaida=freteStr?parsarPrecoBR(freteStr):0;
+  // Eletrificação
+  var temEletri=document.getElementById('vendaEletriToggle').checked;
+  var eletriCobrado=0,eletriCusto=0;
+  if(temEletri){
+    eletriCobrado=parsarPrecoBR(document.getElementById('vendaEletriCobrado').value)||0;
+    eletriCusto=parsarPrecoBR(document.getElementById('vendaEletriCusto').value)||0;
+    if(!eletriCobrado){showToast('⚠️ Informe o valor cobrado pela eletrificação','error');return}
+  }
   // Troca
   var temTroca=document.getElementById('vendaTrocaToggle').checked;
   var trocaNome='',trocaValor=0,trocaRevenda=0;
@@ -1579,6 +1642,11 @@ function confirmarVenda(){
     frete_saida:freteSaida,
     data:new Date().toISOString()
   };
+  if(temEletri){
+    vendaObj.eletrificacao=true;
+    vendaObj.eletri_cobrado=eletriCobrado;
+    vendaObj.eletri_custo=eletriCusto;
+  }
   if(temTroca){
     vendaObj.troca=true;
     vendaObj.troca_nome=trocaNome;
@@ -1995,7 +2063,7 @@ function renderFinanceiro(){
 
   // Montar detalhamento
   var rows=[];
-  var totais={venda:0,compra:0,frete_in:0,bag:0,frete_out:0,comissao:0,imposto:0,lucro:0};
+  var totais={venda:0,compra:0,frete_in:0,bag:0,frete_out:0,comissao:0,imposto:0,manutencao:0,eletri_receita:0,eletri_custo:0,lucro:0};
 
   vendas.forEach(function(v){
     // Buscar custo de compra: primeiro no produto, depois nas compras
@@ -2003,11 +2071,15 @@ function renderFinanceiro(){
     var compra=compras.find(function(c){return c.produto_id===v.produto_id});
     var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:(compra?compra.custo_compra:0);
     var freteEntrada=(prod&&prod.frete_entrada)?prod.frete_entrada:(compra?compra.frete_entrada:0);
+    var manutencao=(prod&&prod.manutencao)?prod.manutencao:0;
     var bagAlcas=cf.bag_alcas;
     var freteSaida=v.frete_saida||0;
     var comissao=v.comissao_valor||0;
     var imposto=(v.preco_venda||0)*(cf.imposto_pct/100);
-    var lucro=(v.preco_venda||0)-custoCompra-freteEntrada-bagAlcas-freteSaida-comissao-imposto;
+    var eletriReceita=v.eletri_cobrado||0;
+    var eletriCusto=v.eletri_custo||0;
+    var receitaTotal=(v.preco_venda||0)+eletriReceita;
+    var lucro=receitaTotal-custoCompra-freteEntrada-bagAlcas-manutencao-freteSaida-comissao-imposto-eletriCusto;
 
     totais.venda+=v.preco_venda||0;
     totais.compra+=custoCompra;
@@ -2016,18 +2088,25 @@ function renderFinanceiro(){
     totais.frete_out+=freteSaida;
     totais.comissao+=comissao;
     totais.imposto+=imposto;
+    totais.manutencao+=manutencao;
+    totais.eletri_receita+=eletriReceita;
+    totais.eletri_custo+=eletriCusto;
     totais.lucro+=lucro;
 
-    var margemPct=v.preco_venda>0?((lucro/v.preco_venda)*100).toFixed(1):'0';
+    var margemPct=receitaTotal>0?((lucro/receitaTotal)*100).toFixed(1):'0';
     var corLucro=lucro>=0?'var(--g)':'var(--r)';
 
-    var trocaBadge=v.troca?'<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>':'';
+    var badges='';
+    if(v.troca)badges+='<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">🔄 TROCA</span>';
+    if(v.eletrificacao)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">⚡ ELETRI</span>';
+    var titleExtra='';
+    if(v.troca)titleExtra+=' | Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor);
+    if(v.eletrificacao)titleExtra+=' | Eletri: +'+formatarValorBR(eletriReceita);
     rows.push('<tr>'+
-      '<td style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+v.produto_nome+(v.troca?' (Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor)+')':'')+'">'+v.produto_nome+trocaBadge+'</td>'+
+      '<td style="font-weight:600;max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="'+v.produto_nome+titleExtra+'">'+v.produto_nome+badges+'</td>'+
       '<td>'+(custoCompra?formatarValorBR(custoCompra):'<span style="color:var(--txt3)">—</span>')+'</td>'+
-      '<td>'+(freteEntrada?formatarValorBR(freteEntrada):'<span style="color:var(--txt3)">—</span>')+'</td>'+
-      '<td>'+formatarValorBR(bagAlcas)+'</td>'+
-      '<td style="color:var(--g);font-weight:700">'+formatarValorBR(v.preco_venda)+'</td>'+
+      '<td>'+(manutencao?formatarValorBR(manutencao):'<span style="color:var(--txt3)">—</span>')+'</td>'+
+      '<td style="color:var(--g);font-weight:700">'+formatarValorBR(receitaTotal)+(eletriReceita?' <span style="font-size:10px;font-weight:400;color:var(--b)">(⚡+'+formatarValorBR(eletriReceita)+')</span>':'')+'</td>'+
       '<td>'+(freteSaida?formatarValorBR(freteSaida):'<span style="color:var(--txt3)">—</span>')+'</td>'+
       '<td style="color:var(--y)">'+formatarValorBR(comissao)+'</td>'+
       '<td>'+formatarValorBR(imposto)+'</td>'+
@@ -2039,14 +2118,14 @@ function renderFinanceiro(){
   if(vendas.length){
     bodyEl.innerHTML=rows.join('');
     // Totais
-    var margemTotal=totais.venda>0?((totais.lucro/totais.venda)*100).toFixed(1):'0';
+    var receitaTotal=totais.venda+totais.eletri_receita;
+    var margemTotal=receitaTotal>0?((totais.lucro/receitaTotal)*100).toFixed(1):'0';
     var corTotal=totais.lucro>=0?'var(--g)':'var(--r)';
     footEl.innerHTML='<tr>'+
       '<td>TOTAL ('+vendas.length+' vendas)</td>'+
       '<td>'+formatarValorBR(totais.compra)+'</td>'+
-      '<td>'+formatarValorBR(totais.frete_in)+'</td>'+
-      '<td>'+formatarValorBR(totais.bag)+'</td>'+
-      '<td style="color:var(--g)">'+formatarValorBR(totais.venda)+'</td>'+
+      '<td>'+formatarValorBR(totais.manutencao)+'</td>'+
+      '<td style="color:var(--g)">'+formatarValorBR(receitaTotal)+(totais.eletri_receita?' <span style="font-size:10px;opacity:.7">(⚡+'+formatarValorBR(totais.eletri_receita)+')</span>':'')+'</td>'+
       '<td>'+formatarValorBR(totais.frete_out)+'</td>'+
       '<td style="color:var(--y)">'+formatarValorBR(totais.comissao)+'</td>'+
       '<td>'+formatarValorBR(totais.imposto)+'</td>'+
@@ -2096,9 +2175,10 @@ function renderFinanceiro(){
   // Cards resumo (incluindo outros gastos) — renderizar primeiro sem ads, depois atualizar
   function renderFinCards(adsSpend){
     var totalAds=adsSpend?adsSpend.spend:0;
-    var custoTotalGeral=totais.compra+totais.frete_in+totais.bag+totais.frete_out+totais.comissao+totais.imposto+totalOutrosGastos+totalAds;
-    var lucroFinal=totais.venda-custoTotalGeral;
-    var margemFinal=totais.venda>0?((lucroFinal/totais.venda)*100).toFixed(1):'0';
+    var custoTotalGeral=totais.compra+totais.frete_in+totais.bag+totais.manutencao+totais.frete_out+totais.comissao+totais.imposto+totais.eletri_custo+totalOutrosGastos+totalAds;
+    var receitaGeral=totais.venda+totais.eletri_receita;
+    var lucroFinal=receitaGeral-custoTotalGeral;
+    var margemFinal=receitaGeral>0?((lucroFinal/receitaGeral)*100).toFixed(1):'0';
     var corFinal=lucroFinal>=0?'var(--g)':'var(--r)';
     var adsCard='';
     if(adsSpend!==null){
@@ -2108,12 +2188,15 @@ function renderFinanceiro(){
       // Conta não configurada ou erro — não mostrar card
       adsCard='';
     }
+    var eletriLucro=totais.eletri_receita-totais.eletri_custo;
     cardsEl.innerHTML=
-      '<div class="fin-card"><div class="fin-card-label">Faturamento</div><div class="fin-card-val" style="color:var(--g)">'+formatarValorBR(totais.venda)+'</div><div class="fin-card-sub">'+vendas.length+' venda(s)</div></div>'+
-      '<div class="fin-card"><div class="fin-card-label">Custo Total</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(custoTotalGeral)+'</div><div class="fin-card-sub">produtos+ads+outros</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Faturamento</div><div class="fin-card-val" style="color:var(--g)">'+formatarValorBR(receitaGeral)+'</div><div class="fin-card-sub">'+vendas.length+' venda(s)'+(totais.eletri_receita?' · ⚡+'+formatarValorBR(totais.eletri_receita):'')+'</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Custo Total</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(custoTotalGeral)+'</div><div class="fin-card-sub">produtos+manutenção+ads+outros</div></div>'+
       '<div class="fin-card"><div class="fin-card-label">Lucro Líquido</div><div class="fin-card-val" style="color:'+corFinal+'">'+formatarValorBR(lucroFinal)+'</div><div class="fin-card-sub">margem '+margemFinal+'%</div></div>'+
       '<div class="fin-card"><div class="fin-card-label">Imposto ('+cf.imposto_pct+'%)</div><div class="fin-card-val" style="color:var(--y)">'+formatarValorBR(totais.imposto)+'</div></div>'+
       '<div class="fin-card"><div class="fin-card-label">Comissões</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(totais.comissao)+'</div></div>'+
+      (totais.manutencao?'<div class="fin-card"><div class="fin-card-label">🔧 Manutenção</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totais.manutencao)+'</div><div class="fin-card-sub">custo de reparo dos acordeons vendidos</div></div>':'')+
+      (totais.eletri_receita?'<div class="fin-card"><div class="fin-card-label">⚡ Eletrificação</div><div class="fin-card-val" style="color:'+(eletriLucro>=0?'var(--g)':'var(--r)')+'">'+formatarValorBR(eletriLucro)+'</div><div class="fin-card-sub">cobrado '+formatarValorBR(totais.eletri_receita)+' · custo '+formatarValorBR(totais.eletri_custo)+'</div></div>':'')+
       adsCard+
       '<div class="fin-card"><div class="fin-card-label">Outros Gastos</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totalOutrosGastos)+'</div><div class="fin-card-sub">'+gastosFiltered.length+' lançamento(s)</div></div>'+
       (qtdTrocas?'<div class="fin-card"><div class="fin-card-label">🔄 Trocas</div><div class="fin-card-val" style="color:var(--y)">'+formatarValorBR(totalTrocas)+'</div><div class="fin-card-sub">'+qtdTrocas+' troca(s) — não é gasto em dinheiro</div></div>':'');
@@ -2953,6 +3036,7 @@ function abrirModal(id){
   document.getElementById('fNome').value='';
   document.getElementById('fPreco').value='';
   document.getElementById('fDesc').value='';
+  document.getElementById('fManutencao').value='';
   document.getElementById('fLocalizacao').value='em_estoque';
   renderFotosGrid();
   if(id){
@@ -2962,6 +3046,7 @@ function abrirModal(id){
       document.getElementById('fNome').value=p.nome||'';
       document.getElementById('fPreco').value=p.preco||'';
       document.getElementById('fDesc').value=p.descricao||'';
+      document.getElementById('fManutencao').value=p.manutencao?formatarValorBR(p.manutencao):'';
       document.getElementById('fLocalizacao').value=p.localizacao||'em_estoque';
       if(p.fotos){
         p.fotos.forEach(function(f,i){
@@ -3113,12 +3198,14 @@ function salvarProd(){
   if(!nome||!preco){showToast('Preencha o nome e o preço!','error');return}
   var fotos=fotosTemp.filter(function(f){return f});
   var localizacao=document.getElementById('fLocalizacao').value||'em_estoque';
+  var manutencao=parsarPrecoBR(document.getElementById('fManutencao').value)||0;
   var prod={
     id:editandoId||'p'+Date.now(),
     nome:nome,
     preco:preco,
     status:'disponivel',
     localizacao:localizacao,
+    manutencao:manutencao,
     descricao:document.getElementById('fDesc').value.trim(),
     fotos:fotos,
     foto:fotos[0]||'',
@@ -3130,7 +3217,7 @@ function salvarProd(){
     // Preservar campos existentes (custo, venda, etc)
     var existing=prods.find(function(p){return p.id===editandoId});
     if(existing){
-      ['status','custo_compra','frete_entrada','vendedor_id','vendedor_nome','comissao_pct','comissao_valor','data_venda','frete_saida'].forEach(function(k){
+      ['status','custo_compra','frete_entrada','vendedor_id','vendedor_nome','comissao_pct','comissao_valor','data_venda','frete_saida','origem_troca','venda_origem_id'].forEach(function(k){
         if(existing[k]!==undefined&&prod[k]===undefined) prod[k]=existing[k];
       });
       prod.status=existing.status||'disponivel';
