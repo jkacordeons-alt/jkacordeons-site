@@ -965,161 +965,65 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <!-- PAGE: Correios -->
       <div class="page" id="pageCorreios">
         <div class="dash-welcome" style="border-color:rgba(52,152,219,.15);background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02))">
-          <h2>📦 Correios — Frete e Etiquetas</h2>
-          <p>Calcule frete, gere etiquetas e rastreie encomendas.</p>
+          <h2>📦 Correios — Envios</h2>
+          <p>Prepare envios para postar pelo app Meu Correios e acompanhe rastreios.</p>
         </div>
 
-        <!-- Status -->
+        <!-- Config simples: só CEP origem -->
         <div class="card" style="padding:16px;margin-bottom:1.5rem">
-          <div style="display:flex;align-items:center;gap:12px">
-            <div id="correiosStatusIcon" style="width:40px;height:40px;border-radius:10px;background:rgba(149,165,166,.1);display:flex;align-items:center;justify-content:center;font-size:1.3rem">🔌</div>
-            <div style="flex:1">
-              <div id="correiosStatusTitle" style="font-weight:700;font-size:14px">Não conectado</div>
-              <div id="correiosStatusSub" style="font-size:12px;color:var(--txt3)">Configure suas credenciais dos Correios</div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div style="flex:1;min-width:200px">
+              <label style="font-size:11px;font-weight:600;display:block;margin-bottom:4px">CEP de origem (remetente)</label>
+              <input type="text" id="correiosCepOrigem" placeholder="00000-000" maxlength="9" style="padding:6px 10px;font-size:12px;width:160px" onchange="salvarCorreiosConfig()">
             </div>
-            <button class="btn btn-secondary" onclick="toggleCorreiosConfig()" style="font-size:12px" id="btnCorreiosConfig">⚙️ Configurar</button>
+            <a href="https://app.correios.com.br" target="_blank" class="btn btn-primary" style="font-size:12px;text-decoration:none">📱 Abrir Meu Correios</a>
           </div>
         </div>
 
-        <!-- Config -->
-        <div id="correiosConfigPanel" style="display:none;margin-bottom:1.5rem">
-          <div class="card" style="padding:20px">
-            <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">🔐 Credenciais da API dos Correios</h4>
-            <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Use suas credenciais do <a href="https://cws.correios.com.br" target="_blank" style="color:var(--b)">CWS Correios</a> (contrato comercial PJ).</p>
-
-            <div class="form-group" style="margin-bottom:10px">
-              <label style="font-size:12px;font-weight:600">Usuário (Meu Correios)</label>
-              <input type="text" id="correiosUser" placeholder="Seu login do Meu Correios" style="padding:8px 12px">
-            </div>
-            <div class="form-group" style="margin-bottom:10px">
-              <label style="font-size:12px;font-weight:600">Código de acesso (API)</label>
-              <input type="password" id="correiosToken" placeholder="Token gerado no CWS" style="padding:8px 12px">
-            </div>
-            <div class="form-group" style="margin-bottom:10px">
-              <label style="font-size:12px;font-weight:600">Nº do contrato</label>
-              <input type="text" id="correiosContrato" placeholder="Número do contrato comercial" style="padding:8px 12px">
-            </div>
-            <div class="form-group" style="margin-bottom:10px">
-              <label style="font-size:12px;font-weight:600">Nº do cartão de postagem</label>
-              <input type="text" id="correiosCartao" placeholder="Número do cartão de postagem" style="padding:8px 12px">
-            </div>
-            <div class="form-group" style="margin-bottom:10px">
-              <label style="font-size:12px;font-weight:600">CEP de origem</label>
-              <input type="text" id="correiosCepOrigem" placeholder="CEP do remetente (seu CEP)" style="padding:8px 12px">
-            </div>
-
-            <div style="display:flex;gap:8px;margin-top:14px">
-              <button class="btn btn-primary" onclick="salvarCorreiosConfig()" style="font-size:12px">💾 Salvar credenciais</button>
-              <button class="btn btn-secondary" onclick="testarCorreios()" id="btnTestarCorreios" style="font-size:12px;display:none">🧪 Testar conexão</button>
-            </div>
-            <div id="correiosConfigResult" style="margin-top:8px;font-size:12px"></div>
-
-            <div style="margin-top:16px;padding:12px;background:rgba(52,152,219,.05);border-radius:8px;border:1px solid rgba(52,152,219,.12)">
-              <div style="font-size:12px;font-weight:700;color:var(--b);margin-bottom:6px">📋 Passo a passo</div>
-              <ol style="margin:0;padding-left:18px;font-size:11px;color:var(--txt2);line-height:1.8">
-                <li>Tenha um <strong>contrato comercial</strong> com os Correios (CNPJ)</li>
-                <li>Acesse <a href="https://cws.correios.com.br" target="_blank" style="color:var(--b)">cws.correios.com.br</a></li>
-                <li>Em "Permissão de Acesso", gere um <strong>código de acesso</strong> para a API</li>
-                <li>Cole as credenciais acima e salve</li>
-                <li>Teste a conexão para verificar se está tudo certo</li>
-              </ol>
-            </div>
-          </div>
-        </div>
-
-        <!-- Calculadora de frete -->
+        <!-- Envios Pendentes -->
         <div class="card" style="padding:20px;margin-bottom:1.5rem">
-          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🧮 Calcular frete</h4>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">CEP de destino</label>
-              <input type="text" id="frCepDestino" placeholder="00000-000" maxlength="9" style="padding:6px 10px;font-size:12px">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">Peso (kg)</label>
-              <input type="text" id="frPeso" placeholder="Ex: 12" value="12" style="padding:6px 10px;font-size:12px">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">Comprimento (cm)</label>
-              <input type="text" id="frComprimento" placeholder="Ex: 50" value="50" style="padding:6px 10px;font-size:12px">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">Largura (cm)</label>
-              <input type="text" id="frLargura" placeholder="Ex: 45" value="45" style="padding:6px 10px;font-size:12px">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">Altura (cm)</label>
-              <input type="text" id="frAltura" placeholder="Ex: 25" value="25" style="padding:6px 10px;font-size:12px">
-            </div>
-            <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">Valor declarado (R$)</label>
-              <input type="text" id="frValorDeclarado" placeholder="Ex: 5000" style="padding:6px 10px;font-size:12px">
-            </div>
-          </div>
-          <button class="btn btn-primary" onclick="calcularFreteCorreios()" style="font-size:12px;margin-top:12px">📦 Calcular frete</button>
-          <div id="frResultado" style="margin-top:14px"></div>
+          <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">📬 Envios pendentes</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Vendas com envio que ainda não têm código de rastreio.</p>
+          <div id="correiosPendentes"></div>
         </div>
 
-        <!-- Gerar etiqueta -->
+        <!-- Preparar envio manual -->
         <div class="card" style="padding:20px;margin-bottom:1.5rem">
-          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🏷️ Gerar etiqueta de envio</h4>
+          <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">🏷️ Preparar envio</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Selecione uma venda para copiar os dados e postar pelo app dos Correios.</p>
+          <div class="form-group" style="margin:0 0 12px">
+            <label style="font-size:11px;font-weight:600">Venda</label>
+            <select id="etqVenda" class="venda-select" style="padding:6px 10px;font-size:12px" onchange="prepararEnvioCorreios()">
+              <option value="">Selecione uma venda...</option>
+            </select>
+          </div>
+          <div id="correiosEnvioPrep" style="display:none"></div>
+        </div>
+
+        <!-- Registrar rastreio -->
+        <div class="card" style="padding:20px;margin-bottom:1.5rem">
+          <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">📋 Registrar código de rastreio</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Após postar pelo app, cole o código de rastreio aqui.</p>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
             <div class="form-group" style="margin:0">
               <label style="font-size:11px;font-weight:600">Venda</label>
-              <select id="etqVenda" class="venda-select" style="padding:6px 10px;font-size:12px" onchange="preencherDadosEtiqueta()">
-                <option value="">Selecione uma venda...</option>
+              <select id="rastreioVenda" class="venda-select" style="padding:6px 10px;font-size:12px">
+                <option value="">Selecione...</option>
               </select>
             </div>
             <div class="form-group" style="margin:0">
-              <label style="font-size:11px;font-weight:600">Serviço</label>
-              <select id="etqServico" class="venda-select" style="padding:6px 10px;font-size:12px">
-                <option value="03220">SEDEX</option>
-                <option value="03298">PAC</option>
-                <option value="03204">SEDEX 10</option>
-                <option value="03158">SEDEX 12</option>
-              </select>
+              <label style="font-size:11px;font-weight:600">Código de rastreio</label>
+              <input type="text" id="rastreioCodigo" placeholder="Ex: BR123456789BR" style="padding:6px 10px;font-size:12px">
             </div>
           </div>
-
-          <div style="margin-top:12px">
-            <div style="font-size:12px;font-weight:700;margin-bottom:8px;color:var(--txt2)">📬 Destinatário</div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-              <div class="form-group" style="margin:0">
-                <label style="font-size:11px">Nome</label>
-                <input type="text" id="etqNome" placeholder="Nome do comprador" style="padding:6px 10px;font-size:12px">
-              </div>
-              <div class="form-group" style="margin:0">
-                <label style="font-size:11px">CPF/CNPJ</label>
-                <input type="text" id="etqCpf" placeholder="000.000.000-00" style="padding:6px 10px;font-size:12px">
-              </div>
-              <div class="form-group" style="margin:0">
-                <label style="font-size:11px">Telefone</label>
-                <input type="text" id="etqTel" placeholder="(00) 00000-0000" style="padding:6px 10px;font-size:12px">
-              </div>
-              <div class="form-group" style="margin:0">
-                <label style="font-size:11px">CEP</label>
-                <input type="text" id="etqCep" placeholder="00000-000" maxlength="9" style="padding:6px 10px;font-size:12px">
-              </div>
-              <div class="form-group" style="margin:0;grid-column:1/-1">
-                <label style="font-size:11px">Endereço completo</label>
-                <input type="text" id="etqEndereco" placeholder="Rua, número, complemento, bairro, cidade - UF" style="padding:6px 10px;font-size:12px">
-              </div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px">
-            <button class="btn btn-primary" onclick="gerarEtiquetaCorreios()" style="font-size:12px">🏷️ Gerar etiqueta</button>
-          </div>
-          <div id="etqResultado" style="margin-top:12px"></div>
+          <button class="btn btn-primary" onclick="salvarRastreio()" style="font-size:12px;margin-top:10px">💾 Salvar rastreio</button>
         </div>
 
-        <!-- Rastreamento -->
+        <!-- Histórico de envios -->
         <div class="card" style="padding:20px">
-          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">🔍 Rastrear encomenda</h4>
-          <div style="display:flex;gap:8px">
-            <input type="text" id="rastreioCodigo" placeholder="Código de rastreio (Ex: BR123456789BR)" style="padding:8px 12px;flex:1">
-            <button class="btn btn-primary" onclick="rastrearEncomenda()" style="font-size:12px;white-space:nowrap">🔍 Rastrear</button>
-          </div>
-          <div id="rastreioResultado" style="margin-top:14px"></div>
+          <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">📦 Histórico de envios</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Vendas com envio já postado.</p>
+          <div id="correiosHistorico"></div>
         </div>
       </div>
 
@@ -2014,12 +1918,22 @@ function atualizarResumoVenda(){
   var prod=getProds().find(function(p){return p.id===document.getElementById('vendaProdId').value});
   var precoStr=document.getElementById('vendaPrecoFinal').value.trim();
   var preco=precoStr?parsarPrecoBR(precoStr):parsarPrecoBR(prod?prod.preco:'0');
-  var comValor=preco*(comPct/100);
   var freteStr=document.getElementById('vendaFreteSaida').value.trim();
   var freteSaida=freteStr?parsarPrecoBR(freteStr):0;
   var cf=getCustosFixos();
   var impPct=cf.imposto_pct||7.5;
   var semNota=document.getElementById('vendaSemNota').checked;
+  // Troca — calcular antes porque afeta comissão e imposto
+  var temTroca=document.getElementById('vendaTrocaToggle').checked;
+  var trocaValor=0;
+  var recebidoDinheiro=preco;
+  if(temTroca){
+    trocaValor=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
+    recebidoDinheiro=Math.max(0,preco-trocaValor);
+  }
+  // Comissão sobre o dinheiro que realmente entra (na troca, só sobre a diferença)
+  var comValor=recebidoDinheiro*(comPct/100);
+  // Imposto sobre o preço da NF (preço cheio)
   var imposto=semNota?0:preco*(impPct/100);
   // Custo de compra se existir
   var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:0;
@@ -2034,10 +1948,20 @@ function atualizarResumoVenda(){
     eletriCobrado=parsarPrecoBR(document.getElementById('vendaEletriCobrado').value)||0;
     eletriCusto=parsarPrecoBR(document.getElementById('vendaEletriCusto').value)||0;
   }
-  var lucro=(preco+eletriCobrado)-comValor-freteSaida-imposto-custoTotal-eletriCusto;
+  // Lucro: na troca, o acordeão recebido compensa parte do custo.
+  // Receita real = dinheiro recebido + eletri cobrado
+  // O acordeão da troca já é registrado como compra separada com seu próprio custo/lucro futuro
+  var lucro=recebidoDinheiro+eletriCobrado-comValor-freteSaida-imposto-custoTotal-eletriCusto;
+  // Se tem troca, somar o valor da troca de volta ao lucro pois o acordeão recebido cobre parte do custo
+  // Lógica: vendeu por preco, recebeu trocaValor em acordeão + recebidoDinheiro em cash
+  // O acordeão da troca vai virar receita futura, mas AGORA ele cobre parte do "pagamento" pelo acordeão vendido
+  // Então: lucro desta venda = (recebidoDinheiro + trocaValor) - custos = preco - custos (mesma coisa mas comissão menor)
+  if(temTroca){
+    lucro=(preco+eletriCobrado)-comValor-freteSaida-imposto-custoTotal-eletriCusto;
+  }
   document.getElementById('vrPreco').textContent=formatarValorBR(preco);
   document.getElementById('vrPct').textContent=comPct;
-  document.getElementById('vrComissao').textContent=formatarValorBR(comValor);
+  document.getElementById('vrComissao').textContent=formatarValorBR(comValor)+(temTroca?' (sobre '+formatarValorBR(recebidoDinheiro)+')':'');
   document.getElementById('vrFrete').textContent=formatarValorBR(freteSaida);
   document.getElementById('vrImpPct').textContent=semNota?'0':impPct;
   document.getElementById('vrImposto').textContent=semNota?'Isento (sem NF)':formatarValorBR(imposto);
@@ -2054,15 +1978,12 @@ function atualizarResumoVenda(){
   }else{
     document.getElementById('vrEletriLine').style.display='none';
   }
-  // Troca
-  var temTroca=document.getElementById('vendaTrocaToggle').checked;
-  var trocaValor=0;
+  // Troca no resumo
   if(temTroca){
-    trocaValor=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
     document.getElementById('vrTrocaLine').style.display='';
-    document.getElementById('vrTroca').textContent='- '+formatarValorBR(trocaValor);
+    document.getElementById('vrTroca').textContent='- '+formatarValorBR(trocaValor)+' (acordeão recebido)';
     document.getElementById('vrDinheiroLine').style.display='';
-    document.getElementById('vrDinheiro').textContent=formatarValorBR(Math.max(0,preco-trocaValor));
+    document.getElementById('vrDinheiro').textContent=formatarValorBR(recebidoDinheiro)+' (comissão calculada sobre este valor)';
   }else{
     document.getElementById('vrTrocaLine').style.display='none';
     document.getElementById('vrDinheiroLine').style.display='none';
@@ -2094,7 +2015,6 @@ function confirmarVenda(){
   if(!prod){showToast('⚠️ Produto não encontrado','error');return}
   var precoStr=document.getElementById('vendaPrecoFinal').value.trim();
   var precoVenda=precoStr?parsarPrecoBR(precoStr):parsarPrecoBR(prod.preco);
-  var comValor=precoVenda*(comPct/100);
   var freteStr=document.getElementById('vendaFreteSaida').value.trim();
   var freteSaida=freteStr?parsarPrecoBR(freteStr):0;
   // Eletrificação
@@ -2115,6 +2035,9 @@ function confirmarVenda(){
     if(!trocaNome){showToast('⚠️ Informe o nome do acordeão recebido na troca','error');return}
     if(!trocaValor){showToast('⚠️ Informe o valor da troca','error');return}
   }
+  // Comissão: na troca, calcula sobre o dinheiro que o cliente pagou (preço - valor da troca)
+  var baseComissao=temTroca?Math.max(0,precoVenda-trocaValor):precoVenda;
+  var comValor=baseComissao*(comPct/100);
   // Sem nota fiscal
   var semNota=document.getElementById('vendaSemNota').checked;
   // Envio
@@ -2166,6 +2089,7 @@ function confirmarVenda(){
     vendaObj.troca_valor=trocaValor;
     vendaObj.troca_revenda=trocaRevenda;
     vendaObj.recebido_dinheiro=Math.max(0,precoVenda-trocaValor);
+    vendaObj.base_comissao=baseComissao;
   }
   var vendas=getVendas();
   vendas.push(vendaObj);
@@ -2697,7 +2621,15 @@ function salvarFinEdit(vendaId){
   // Update venda
   v.preco_venda=preco;
   v.comissao_pct=comPct;
-  v.comissao_valor=preco*(comPct/100);
+  // Comissão: se tem troca, calcular sobre o dinheiro recebido (preço - valor da troca)
+  if(v.troca&&v.troca_valor){
+    var baseComissao=Math.max(0,preco-v.troca_valor);
+    v.comissao_valor=baseComissao*(comPct/100);
+    v.base_comissao=baseComissao;
+    v.recebido_dinheiro=baseComissao;
+  }else{
+    v.comissao_valor=preco*(comPct/100);
+  }
   v.frete_saida=freteOut;
   v.sem_nota=semNota;
   if(eletriCob>0){
@@ -2813,10 +2745,15 @@ function renderFinanceiro(){
     var manutencao=(prod&&prod.manutencao)?prod.manutencao:0;
     var bagAlcas=cf.bag_alcas;
     var freteSaida=v.frete_saida||0;
-    var comissao=v.comissao_valor||0;
-    var imposto=v.sem_nota?0:(v.preco_venda||0)*(cf.imposto_pct/100);
     var eletriReceita=v.eletri_cobrado||0;
     var eletriCusto=v.eletri_custo||0;
+    // Comissão: se tem troca, recalcular sobre o dinheiro recebido (não sobre preço cheio)
+    var comissao=v.comissao_valor||0;
+    if(v.troca&&v.comissao_pct){
+      var baseComissao=v.base_comissao||Math.max(0,(v.preco_venda||0)-(v.troca_valor||0));
+      comissao=baseComissao*(v.comissao_pct/100);
+    }
+    var imposto=v.sem_nota?0:(v.preco_venda||0)*(cf.imposto_pct/100);
     var receitaTotal=(v.preco_venda||0)+eletriReceita;
     var lucro=receitaTotal-custoCompra-freteEntrada-bagAlcas-manutencao-freteSaida-comissao-imposto-eletriCusto;
 
@@ -3287,7 +3224,7 @@ function goPage(page){
     document.getElementById('pageCorreios').classList.add('on');
     document.querySelectorAll('.sb-item:not(.disabled)')[4].classList.add('active');
     document.getElementById('topTitle').textContent='Correios';
-    document.getElementById('topSub').textContent='Frete e rastreamento';
+    document.getElementById('topSub').textContent='Envios via Meu Correios';
     topAction.style.display='none';
     btnSyncTop.style.display='none';
     renderCorreiosStatus();
@@ -3664,148 +3601,214 @@ function renderBlingNotas(){
 function getCorreiosConfig(){try{return JSON.parse(localStorage.getItem('jk_correios_config'))||{}}catch(e){return{}}}
 function setCorreiosConfig(c){localStorage.setItem('jk_correios_config',JSON.stringify(c));syncToServer()}
 
-function renderCorreiosStatus(){
-  var cc=getCorreiosConfig();
-  var icon=document.getElementById('correiosStatusIcon');
-  var title=document.getElementById('correiosStatusTitle');
-  var sub=document.getElementById('correiosStatusSub');
-  if(cc.token&&cc.token_expires&&Date.now()<cc.token_expires){
-    icon.textContent='✅';title.textContent='Conectado aos Correios';
-    sub.textContent='Token válido até '+new Date(cc.token_expires).toLocaleString('pt-BR');
-    document.getElementById('badgeCorreios').style.display='';
-  }else if(cc.usuario&&cc.token_api){
-    icon.textContent='🔶';title.textContent='Configurado — autenticação pendente';
-    sub.textContent='Clique em "Testar Conexão"';
-    document.getElementById('badgeCorreios').style.display='none';
-  }else{
-    icon.textContent='⚪';title.textContent='Não configurado';
-    sub.textContent='Configure suas credenciais dos Correios';
-    document.getElementById('badgeCorreios').style.display='none';
-  }
-  // Fill fields
-  if(cc.usuario) document.getElementById('correiosUser').value=cc.usuario;
-  if(cc.token_api) document.getElementById('correiosToken').value=cc.token_api;
-  if(cc.contrato) document.getElementById('correiosContrato').value=cc.contrato;
-  if(cc.cartao) document.getElementById('correiosCartao').value=cc.cartao;
-  if(cc.cep_origem) document.getElementById('correiosCepOrigem').value=cc.cep_origem;
-  // Populate venda select for etiqueta
-  populateEtqVendaSelect();
-}
-
-function toggleCorreiosConfig(){
-  var p=document.getElementById('correiosConfigPanel');
-  p.style.display=p.style.display==='none'?'':'none';
-}
-
 function salvarCorreiosConfig(){
   var cc=getCorreiosConfig();
-  cc.usuario=(document.getElementById('correiosUser').value||'').trim();
-  cc.token_api=(document.getElementById('correiosToken').value||'').trim();
-  cc.contrato=(document.getElementById('correiosContrato').value||'').trim();
-  cc.cartao=(document.getElementById('correiosCartao').value||'').trim();
-  cc.cep_origem=(document.getElementById('correiosCepOrigem').value||'').trim();
-  if(!cc.usuario||!cc.token_api){showToast('Preencha usuário e token','⚠️');return}
+  cc.cep_origem=(document.getElementById('correiosCepOrigem').value||'').replace(/\D/g,'');
   setCorreiosConfig(cc);
-  showToast('Configurações dos Correios salvas!','✅');
-  renderCorreiosStatus();
+  if(cc.cep_origem) showToast('CEP de origem salvo!','✅');
 }
 
-function testarCorreios(){
+function renderCorreiosStatus(){
   var cc=getCorreiosConfig();
-  if(!cc.usuario||!cc.token_api){showToast('Salve as configurações primeiro','⚠️');return}
-  showToast('⏳ Testando conexão com Correios...','📦');
-  // POST https://api.correios.com.br/token/v1/autentica/cartaopostagem
-  // Requires server-side proxy due to CORS
-  // Simulated test
-  setTimeout(function(){
-    showToast('⚠️ Teste de conexão requer proxy server (CORS). Endpoint: POST /token/v1/autentica/cartaopostagem com header Authorization: Basic base64(usuario:token_api)','ℹ️');
-  },800);
+  var cepInput=document.getElementById('correiosCepOrigem');
+  if(cepInput&&cc.cep_origem) cepInput.value=cc.cep_origem;
+  // Badge
+  var vendas=getVendas();
+  var pendentes=vendas.filter(function(v){return v.envio&&!v.rastreio});
+  var badge=document.getElementById('badgeCorreios');
+  if(badge) badge.style.display=pendentes.length?'':'none';
+  if(badge&&pendentes.length) badge.textContent=pendentes.length;
+  // Populate selects and lists
+  populateCorreiosSelects();
+  renderCorreiosPendentes();
+  renderCorreiosHistorico();
 }
 
-function calcularFreteCorreios(){
-  var cc=getCorreiosConfig();
-  var cepDest=(document.getElementById('frCepDestino').value||'').replace(/\D/g,'');
-  var cepOrig=(cc.cep_origem||'').replace(/\D/g,'');
-  if(!cepOrig){showToast('Configure o CEP de origem primeiro','⚠️');return}
-  if(cepDest.length!==8){showToast('CEP de destino inválido','⚠️');return}
-  var peso=parseFloat(document.getElementById('frPeso').value)||12;
-  var comp=parseFloat(document.getElementById('frComprimento').value)||50;
-  var larg=parseFloat(document.getElementById('frLargura').value)||45;
-  var alt=parseFloat(document.getElementById('frAltura').value)||25;
-  var vlDecl=parseFloat(document.getElementById('frValorDeclarado').value)||0;
-  document.getElementById('frResultado').innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3)">⏳ Calculando frete...</div>';
-  // Correios API: POST /preco/v1/nacional
-  // Needs server-side proxy. Fallback: estimate based on weight+distance
-  setTimeout(function(){
-    // Estimated values for demonstration
-    var distFactor=Math.abs(parseInt(cepDest.substr(0,2))-parseInt(cepOrig.substr(0,2)));
-    var baseSedex=35+(peso*2.5)+(distFactor*1.8);
-    var basePac=22+(peso*1.8)+(distFactor*1.2);
-    var html='<div style="display:grid;gap:8px">';
-    html+='<div style="padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--r)">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
-    html+='<div><strong style="font-size:13px">SEDEX</strong><br><span style="font-size:11px;color:var(--txt3)">3-5 dias úteis</span></div>';
-    html+='<strong style="color:var(--pri);font-size:16px">'+formatarValorBR(baseSedex)+'</strong></div></div>';
-    html+='<div style="padding:12px;background:var(--bg);border-radius:8px;border-left:3px solid var(--b)">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center">';
-    html+='<div><strong style="font-size:13px">PAC</strong><br><span style="font-size:11px;color:var(--txt3)">8-15 dias úteis</span></div>';
-    html+='<strong style="color:var(--pri);font-size:16px">'+formatarValorBR(basePac)+'</strong></div></div>';
-    html+='<p style="font-size:10px;color:var(--txt3);text-align:center;margin:8px 0 0">⚠️ Valores estimados. Para preços reais, configure o proxy server para a API dos Correios.</p>';
-    html+='</div>';
-    document.getElementById('frResultado').innerHTML=html;
-  },1000);
+function populateCorreiosSelects(){
+  var vendas=getVendas();
+  // Preparar envio select — vendas com comprador
+  var selPrep=document.getElementById('etqVenda');
+  if(selPrep){
+    selPrep.innerHTML='<option value="">Selecione uma venda...</option>';
+    vendas.filter(function(v){return v.comprador}).sort(function(a,b){return(b.data_venda||'').localeCompare(a.data_venda||'')}).forEach(function(v){
+      var p=getProds().find(function(pr){return pr.id===v.produto_id});
+      var nome=p?p.modelo:'Venda #'+v.id;
+      var dFmt=v.data_venda?new Date(v.data_venda+'T12:00:00').toLocaleDateString('pt-BR'):'';
+      var tag=v.rastreio?' [rastreio: '+v.rastreio+']':'';
+      selPrep.innerHTML+='<option value="'+v.id+'">'+nome+' — '+formatarValorBR(v.preco_venda)+(dFmt?' ('+dFmt+')':'')+tag+'</option>';
+    });
+  }
+  // Registrar rastreio select — vendas com envio mas sem rastreio
+  var selRast=document.getElementById('rastreioVenda');
+  if(selRast){
+    selRast.innerHTML='<option value="">Selecione...</option>';
+    vendas.filter(function(v){return v.envio&&!v.rastreio}).sort(function(a,b){return(b.data_venda||'').localeCompare(a.data_venda||'')}).forEach(function(v){
+      var p=getProds().find(function(pr){return pr.id===v.produto_id});
+      var nome=p?p.modelo:'Venda #'+v.id;
+      selRast.innerHTML+='<option value="'+v.id+'">'+nome+' — '+formatarValorBR(v.preco_venda)+'</option>';
+    });
+  }
 }
 
-function populateEtqVendaSelect(){
-  var sel=document.getElementById('etqVenda');
-  if(!sel) return;
-  sel.innerHTML='<option value="">Selecione uma venda...</option>';
-  var vendas=getVendas().filter(function(v){return !v.sem_nota});
-  vendas.sort(function(a,b){return (b.data_venda||'').localeCompare(a.data_venda||'')});
+function renderCorreiosPendentes(){
+  var el=document.getElementById('correiosPendentes');
+  if(!el) return;
+  var vendas=getVendas().filter(function(v){return v.envio&&!v.rastreio});
+  if(!vendas.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3);font-size:13px">Nenhum envio pendente</div>';return}
+  var html='';
   vendas.forEach(function(v){
     var p=getProds().find(function(pr){return pr.id===v.produto_id});
     var nome=p?p.modelo:'Venda #'+v.id;
-    var dFmt=v.data_venda?new Date(v.data_venda+'T12:00:00').toLocaleDateString('pt-BR'):'';
-    sel.innerHTML+='<option value="'+v.id+'">'+nome+' — '+formatarValorBR(v.preco_venda)+(dFmt?' ('+dFmt+')':'')+'</option>';
+    var comp=v.comprador||{};
+    html+='<div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--warn)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:start;flex-wrap:wrap;gap:8px">';
+    html+='<div><strong style="font-size:13px">'+nome+'</strong><br>';
+    html+='<span style="font-size:11px;color:var(--txt3)">'+(comp.nome||'Sem comprador')+(comp.cep?' — CEP '+comp.cep:'')+'</span></div>';
+    html+='<div style="display:flex;gap:6px">';
+    html+='<button class="btn btn-secondary" onclick="prepararEnvioById(\''+v.id+'\')" style="font-size:11px;padding:4px 10px">📋 Dados</button>';
+    html+='<button class="btn btn-primary" onclick="promptRastreio(\''+v.id+'\')" style="font-size:11px;padding:4px 10px">📝 Rastreio</button>';
+    html+='</div></div></div>';
   });
+  el.innerHTML=html;
 }
 
-function preencherDadosEtiqueta(){
+function renderCorreiosHistorico(){
+  var el=document.getElementById('correiosHistorico');
+  if(!el) return;
+  var vendas=getVendas().filter(function(v){return v.rastreio});
+  if(!vendas.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3);font-size:13px">Nenhum envio registrado</div>';return}
+  vendas.sort(function(a,b){return(b.data_venda||'').localeCompare(a.data_venda||'')});
+  var html='';
+  vendas.forEach(function(v){
+    var p=getProds().find(function(pr){return pr.id===v.produto_id});
+    var nome=p?p.modelo:'Venda #'+v.id;
+    var comp=v.comprador||{};
+    html+='<div style="padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px;border-left:3px solid var(--g)">';
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">';
+    html+='<div><strong style="font-size:13px">'+nome+'</strong>';
+    html+='<br><span style="font-size:11px;color:var(--txt3)">'+(comp.nome||'')+'</span></div>';
+    html+='<div style="text-align:right">';
+    html+='<code style="font-size:12px;background:rgba(52,152,219,.1);padding:2px 8px;border-radius:4px;cursor:pointer" onclick="copiarTexto(\''+v.rastreio+'\');showToast(\'Código copiado!\',\'📋\')" title="Clique para copiar">'+v.rastreio+'</code>';
+    html+='<br><a href="https://www.linkcorreios.com.br/?id='+v.rastreio+'" target="_blank" style="font-size:10px;color:var(--b)">Rastrear</a>';
+    html+='</div></div></div>';
+  });
+  el.innerHTML=html;
+}
+
+function prepararEnvioCorreios(){
   var vendaId=document.getElementById('etqVenda').value;
-  if(!vendaId) return;
+  var el=document.getElementById('correiosEnvioPrep');
+  if(!vendaId){el.style.display='none';return}
+  var v=getVendas().find(function(vd){return vd.id===vendaId});
+  if(!v){el.style.display='none';return}
+  renderEnvioPrep(v,el);
+}
+
+function prepararEnvioById(vendaId){
+  // Set select and render
+  var sel=document.getElementById('etqVenda');
+  if(sel) sel.value=vendaId;
   var v=getVendas().find(function(vd){return vd.id===vendaId});
   if(!v) return;
-  // If venda has buyer data, fill it
-  if(v.comprador){
-    if(v.comprador.nome) document.getElementById('etqNome').value=v.comprador.nome;
-    if(v.comprador.cpf) document.getElementById('etqCpf').value=v.comprador.cpf;
-    if(v.comprador.tel) document.getElementById('etqTel').value=v.comprador.tel;
-    if(v.comprador.cep) document.getElementById('etqCep').value=v.comprador.cep;
-    if(v.comprador.endereco) document.getElementById('etqEndereco').value=v.comprador.endereco;
-  }
+  var el=document.getElementById('correiosEnvioPrep');
+  renderEnvioPrep(v,el);
+  // Scroll to the card
+  el.scrollIntoView({behavior:'smooth',block:'center'});
 }
 
-function gerarEtiquetaCorreios(){
+function renderEnvioPrep(v,el){
+  var p=getProds().find(function(pr){return pr.id===v.produto_id});
+  var nome=p?p.modelo:'Produto';
+  var comp=v.comprador||{};
   var cc=getCorreiosConfig();
-  var vendaId=document.getElementById('etqVenda').value;
-  var servico=document.getElementById('etqServico').value;
-  var nome=(document.getElementById('etqNome').value||'').trim();
-  var cep=(document.getElementById('etqCep').value||'').replace(/\D/g,'');
-  var endereco=(document.getElementById('etqEndereco').value||'').trim();
-  if(!vendaId){showToast('Selecione uma venda','⚠️');return}
-  if(!nome||cep.length!==8||!endereco){showToast('Preencha todos os dados do destinatário','⚠️');return}
-  showToast('⏳ Geração de etiqueta requer proxy server para API Correios. Endpoint: POST /prepostagem/v1/prepostagens','ℹ️');
+
+  var dados={
+    destinatario:comp.nome||'',
+    cpf:comp.cpf||'',
+    telefone:comp.tel||'',
+    cep:comp.cep||'',
+    endereco:comp.endereco||'',
+    produto:nome,
+    valor:formatarValorBR(v.preco_venda),
+    frete:v.frete_saida?formatarValorBR(v.frete_saida):'',
+    cepOrigem:cc.cep_origem||''
+  };
+
+  var html='<div style="background:var(--bg);border-radius:10px;padding:16px;margin-top:12px">';
+  html+='<div style="font-size:12px;font-weight:700;color:var(--pri);margin-bottom:12px">📋 Dados para postagem — '+nome+'</div>';
+
+  // Info cards with copy buttons
+  var campos=[
+    {label:'Destinatário',val:dados.destinatario,key:'dest'},
+    {label:'CPF/CNPJ',val:dados.cpf,key:'cpf'},
+    {label:'Telefone',val:dados.telefone,key:'tel'},
+    {label:'CEP Destino',val:dados.cep,key:'cep'},
+    {label:'Endereço',val:dados.endereco,key:'end'},
+    {label:'Valor declarado',val:dados.valor,key:'vl'}
+  ];
+
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">';
+  campos.forEach(function(c){
+    var safeVal=(c.val||'').replace(/'/g,"\\'");
+    html+='<div style="padding:8px 10px;background:var(--card);border-radius:6px;position:relative">';
+    html+='<div style="font-size:10px;color:var(--txt3);margin-bottom:2px">'+c.label+'</div>';
+    html+='<div style="font-size:12px;font-weight:600;padding-right:28px">'+(c.val||'<em style="color:var(--txt3)">—</em>')+'</div>';
+    if(c.val){
+      html+='<button onclick="copiarTexto(\''+safeVal+'\');showToast(\''+c.label+' copiado!\',\'📋\')" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:14px;padding:0" title="Copiar">📋</button>';
+    }
+    html+='</div>';
+  });
+  html+='</div>';
+
+  // Copy all at once
+  var tudo=dados.destinatario+'\n'+dados.cpf+'\n'+dados.telefone+'\n'+dados.cep+'\n'+dados.endereco+'\nValor: '+dados.valor;
+  var safeTudo=tudo.replace(/'/g,"\\'").replace(/\n/g,"\\n");
+  html+='<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">';
+  html+='<button class="btn btn-primary" onclick="copiarTexto(\''+safeTudo+'\');showToast(\'Todos os dados copiados!\',\'✅\')" style="font-size:12px">📋 Copiar tudo</button>';
+  html+='<a href="https://app.correios.com.br" target="_blank" class="btn btn-secondary" style="font-size:12px;text-decoration:none">📱 Abrir Meu Correios</a>';
+  if(v.rastreio){
+    html+='<span style="font-size:11px;color:var(--g);align-self:center">Rastreio: <strong>'+v.rastreio+'</strong></span>';
+  }
+  html+='</div></div>';
+
+  el.innerHTML=html;
+  el.style.display='';
 }
 
-function rastrearEncomenda(){
+function promptRastreio(vendaId){
+  var sel=document.getElementById('rastreioVenda');
+  if(sel) sel.value=vendaId;
+  document.getElementById('rastreioCodigo').value='';
+  document.getElementById('rastreioCodigo').focus();
+  sel.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+function salvarRastreio(){
+  var vendaId=document.getElementById('rastreioVenda').value;
   var codigo=(document.getElementById('rastreioCodigo').value||'').trim().toUpperCase();
-  if(!codigo||codigo.length<13){showToast('Código de rastreio inválido','⚠️');return}
-  document.getElementById('rastreioResultado').innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3)">⏳ Rastreando...</div>';
-  // Correios API: GET /srorastro/v1/objetos/{codigo}
-  // Needs server-side proxy
-  setTimeout(function(){
-    document.getElementById('rastreioResultado').innerHTML='<div style="text-align:center;padding:20px;color:var(--txt3)">⚠️ Rastreamento requer proxy server para API Correios (CORS).<br><br><a href="https://www.linkcorreios.com.br/?id='+codigo+'" target="_blank" style="color:var(--pri);text-decoration:underline">Rastrear no site dos Correios →</a></div>';
-  },800);
+  if(!vendaId){showToast('Selecione uma venda','⚠️');return}
+  if(!codigo||codigo.length<10){showToast('Código de rastreio inválido','⚠️');return}
+  var vendas=getVendas();
+  var v=vendas.find(function(vd){return vd.id===vendaId});
+  if(!v){showToast('Venda não encontrada','⚠️');return}
+  v.rastreio=codigo;
+  v.data_postagem=new Date().toISOString().slice(0,10);
+  setVendas(vendas);
+  showToast('Rastreio salvo: '+codigo,'✅');
+  document.getElementById('rastreioCodigo').value='';
+  renderCorreiosStatus();
+}
+
+function copiarTexto(texto){
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(texto);
+  }else{
+    var ta=document.createElement('textarea');
+    ta.value=texto;ta.style.position='fixed';ta.style.left='-9999px';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy')}catch(e){}
+    document.body.removeChild(ta);
+  }
 }
 
 /* ===== DATA ===== */
