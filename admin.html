@@ -1284,16 +1284,22 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         </label>
         <div id="vendaTrocaFields" style="display:none;margin-top:12px">
           <div class="form-group" style="margin-bottom:10px">
+            <label style="font-size:12px;font-weight:600;color:var(--g)">💵 Valor recebido em dinheiro do cliente (R$)</label>
+            <input type="text" id="vendaTrocaDinheiro" placeholder="Quanto o cliente pagou em dinheiro além da troca" oninput="atualizarResumoVenda()">
+            <div class="form-hint">Ex: Acordeão custa R$ 10.900, cliente dá o dele + R$ 5.900 em dinheiro</div>
+          </div>
+          <div class="form-group" style="margin-bottom:10px">
             <label style="font-size:12px">Nome do acordeão recebido na troca</label>
             <input type="text" id="vendaTrocaNome" placeholder="Ex: Todeschini Super 5 — 80 Baixos" oninput="atualizarResumoVenda()">
           </div>
           <div class="form-group" style="margin-bottom:10px">
-            <label style="font-size:12px">Valor da troca / crédito ao cliente (R$)</label>
-            <input type="text" id="vendaTrocaValor" placeholder="Quanto deu de desconto pela troca" oninput="atualizarResumoVenda()">
+            <label style="font-size:12px;font-weight:600;color:var(--y)">🔄 Valor de avaliação da troca (R$)</label>
+            <input type="text" id="vendaTrocaValor" placeholder="Quanto você avaliou o acordeão do cliente" oninput="atualizarResumoVenda()">
+            <div class="form-hint">Crédito dado ao cliente pelo acordeão dele. Dinheiro + avaliação = preço de venda</div>
           </div>
           <div class="form-group" style="margin-bottom:0">
             <label style="font-size:12px">Preço estimado de revenda (R$)</label>
-            <input type="text" id="vendaTrocaRevenda" placeholder="Quanto pretende vender esse acordeão">
+            <input type="text" id="vendaTrocaRevenda" placeholder="Por quanto pretende vender o acordeão recebido">
             <div class="form-hint">Referência para quando cadastrar no catálogo depois</div>
           </div>
         </div>
@@ -1348,7 +1354,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         </div>
       </div>
       <div class="venda-resumo" id="vendaResumo" style="display:none">
-        <div class="venda-resumo-line"><span>Preço de venda</span><span id="vrPreco">—</span></div>
+        <div class="venda-resumo-line"><span id="vrPrecoLabel">Preço de venda</span><span id="vrPreco">—</span></div>
         <div class="venda-resumo-line"><span>Comissão (<span id="vrPct">0</span>%)</span><span id="vrComissao">—</span></div>
         <div class="venda-resumo-line"><span>Frete de envio</span><span id="vrFrete">—</span></div>
         <div class="venda-resumo-line"><span>Imposto (<span id="vrImpPct">7.5</span>%)</span><span id="vrImposto">—</span></div>
@@ -1805,9 +1811,13 @@ function abrirModalVenda(prodId){
   // Reset troca
   document.getElementById('vendaTrocaToggle').checked=false;
   document.getElementById('vendaTrocaFields').style.display='none';
+  document.getElementById('vendaTrocaDinheiro').value='';
   document.getElementById('vendaTrocaNome').value='';
   document.getElementById('vendaTrocaValor').value='';
   document.getElementById('vendaTrocaRevenda').value='';
+  // Reexibir campo preço de venda
+  var precoField=document.getElementById('vendaPrecoFinal').parentElement;
+  if(precoField) precoField.style.display='';
   // Reset envio
   document.getElementById('vendaEnvioToggle').checked=false;
   document.getElementById('vendaEnvioFields').style.display='none';
@@ -1849,10 +1859,14 @@ function toggleEletriFields(){
 function toggleTrocaFields(){
   var on=document.getElementById('vendaTrocaToggle').checked;
   document.getElementById('vendaTrocaFields').style.display=on?'block':'none';
+  // Esconde o campo "preço de venda" quando troca está ativa (o preço é calculado: dinheiro + avaliação)
+  var precoField=document.getElementById('vendaPrecoFinal').parentElement;
+  if(precoField) precoField.style.display=on?'none':'';
   if(!on){
     document.getElementById('vendaTrocaNome').value='';
     document.getElementById('vendaTrocaValor').value='';
     document.getElementById('vendaTrocaRevenda').value='';
+    document.getElementById('vendaTrocaDinheiro').value='';
   }
   atualizarResumoVenda();
 }
@@ -1923,17 +1937,18 @@ function atualizarResumoVenda(){
   var cf=getCustosFixos();
   var impPct=cf.imposto_pct||7.5;
   var semNota=document.getElementById('vendaSemNota').checked;
-  // Troca — calcular antes porque afeta comissão e imposto
+  // Troca — quando ativa, o preço de venda = dinheiro recebido + valor de avaliação da troca
   var temTroca=document.getElementById('vendaTrocaToggle').checked;
-  var trocaValor=0;
-  var recebidoDinheiro=preco;
+  var trocaDinheiro=0,trocaAvaliacao=0,recebidoDinheiro=preco;
   if(temTroca){
-    trocaValor=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
-    recebidoDinheiro=Math.max(0,preco-trocaValor);
+    trocaDinheiro=parsarPrecoBR(document.getElementById('vendaTrocaDinheiro').value)||0;
+    trocaAvaliacao=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
+    recebidoDinheiro=trocaDinheiro;
+    preco=trocaDinheiro+trocaAvaliacao; // preço real = dinheiro + avaliação do acordeão recebido
   }
-  // Comissão sobre o dinheiro que realmente entra (na troca, só sobre a diferença)
+  // Comissão sobre o dinheiro que realmente entra (na troca, só sobre o cash)
   var comValor=recebidoDinheiro*(comPct/100);
-  // Imposto sobre o preço da NF (preço cheio)
+  // Imposto sobre o preço da NF (preço cheio = dinheiro + avaliação)
   var imposto=semNota?0:preco*(impPct/100);
   // Custo de compra se existir
   var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:0;
@@ -1948,20 +1963,12 @@ function atualizarResumoVenda(){
     eletriCobrado=parsarPrecoBR(document.getElementById('vendaEletriCobrado').value)||0;
     eletriCusto=parsarPrecoBR(document.getElementById('vendaEletriCusto').value)||0;
   }
-  // Lucro: na troca, o acordeão recebido compensa parte do custo.
-  // Receita real = dinheiro recebido + eletri cobrado
-  // O acordeão da troca já é registrado como compra separada com seu próprio custo/lucro futuro
-  var lucro=recebidoDinheiro+eletriCobrado-comValor-freteSaida-imposto-custoTotal-eletriCusto;
-  // Se tem troca, somar o valor da troca de volta ao lucro pois o acordeão recebido cobre parte do custo
-  // Lógica: vendeu por preco, recebeu trocaValor em acordeão + recebidoDinheiro em cash
-  // O acordeão da troca vai virar receita futura, mas AGORA ele cobre parte do "pagamento" pelo acordeão vendido
-  // Então: lucro desta venda = (recebidoDinheiro + trocaValor) - custos = preco - custos (mesma coisa mas comissão menor)
-  if(temTroca){
-    lucro=(preco+eletriCobrado)-comValor-freteSaida-imposto-custoTotal-eletriCusto;
-  }
+  // Lucro: preco já inclui dinheiro + avaliação da troca (se houver)
+  var lucro=preco+eletriCobrado-comValor-freteSaida-imposto-custoTotal-eletriCusto;
+  document.getElementById('vrPrecoLabel').textContent=temTroca?'Preço de venda (dinheiro + troca)':'Preço de venda';
   document.getElementById('vrPreco').textContent=formatarValorBR(preco);
   document.getElementById('vrPct').textContent=comPct;
-  document.getElementById('vrComissao').textContent=formatarValorBR(comValor)+(temTroca?' (sobre '+formatarValorBR(recebidoDinheiro)+')':'');
+  document.getElementById('vrComissao').textContent=formatarValorBR(comValor)+(temTroca?' (sobre '+formatarValorBR(recebidoDinheiro)+' em dinheiro)':'');
   document.getElementById('vrFrete').textContent=formatarValorBR(freteSaida);
   document.getElementById('vrImpPct').textContent=semNota?'0':impPct;
   document.getElementById('vrImposto').textContent=semNota?'Isento (sem NF)':formatarValorBR(imposto);
@@ -1981,7 +1988,7 @@ function atualizarResumoVenda(){
   // Troca no resumo
   if(temTroca){
     document.getElementById('vrTrocaLine').style.display='';
-    document.getElementById('vrTroca').textContent='- '+formatarValorBR(trocaValor)+' (acordeão recebido)';
+    document.getElementById('vrTroca').textContent=formatarValorBR(trocaAvaliacao)+' (avaliação do acordeão recebido)';
     document.getElementById('vrDinheiroLine').style.display='';
     document.getElementById('vrDinheiro').textContent=formatarValorBR(recebidoDinheiro)+' (comissão calculada sobre este valor)';
   }else{
@@ -2027,16 +2034,19 @@ function confirmarVenda(){
   }
   // Troca
   var temTroca=document.getElementById('vendaTrocaToggle').checked;
-  var trocaNome='',trocaValor=0,trocaRevenda=0;
+  var trocaNome='',trocaAvaliacao=0,trocaDinheiro=0,trocaRevenda=0;
   if(temTroca){
+    trocaDinheiro=parsarPrecoBR(document.getElementById('vendaTrocaDinheiro').value)||0;
     trocaNome=document.getElementById('vendaTrocaNome').value.trim();
-    trocaValor=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
+    trocaAvaliacao=parsarPrecoBR(document.getElementById('vendaTrocaValor').value)||0;
     trocaRevenda=parsarPrecoBR(document.getElementById('vendaTrocaRevenda').value)||0;
     if(!trocaNome){showToast('⚠️ Informe o nome do acordeão recebido na troca','error');return}
-    if(!trocaValor){showToast('⚠️ Informe o valor da troca','error');return}
+    if(!trocaDinheiro&&!trocaAvaliacao){showToast('⚠️ Informe o dinheiro recebido ou o valor da avaliação','error');return}
+    // Na troca, o preço de venda real = dinheiro + avaliação da troca
+    precoVenda=trocaDinheiro+trocaAvaliacao;
   }
-  // Comissão: na troca, calcula sobre o dinheiro que o cliente pagou (preço - valor da troca)
-  var baseComissao=temTroca?Math.max(0,precoVenda-trocaValor):precoVenda;
+  // Comissão: na troca, calcula sobre o dinheiro que o cliente pagou (só o cash)
+  var baseComissao=temTroca?trocaDinheiro:precoVenda;
   var comValor=baseComissao*(comPct/100);
   // Sem nota fiscal
   var semNota=document.getElementById('vendaSemNota').checked;
@@ -2086,9 +2096,11 @@ function confirmarVenda(){
   if(temTroca){
     vendaObj.troca=true;
     vendaObj.troca_nome=trocaNome;
-    vendaObj.troca_valor=trocaValor;
+    vendaObj.troca_avaliacao=trocaAvaliacao;
+    vendaObj.troca_valor=trocaAvaliacao; // compatibilidade
+    vendaObj.troca_dinheiro=trocaDinheiro;
     vendaObj.troca_revenda=trocaRevenda;
-    vendaObj.recebido_dinheiro=Math.max(0,precoVenda-trocaValor);
+    vendaObj.recebido_dinheiro=trocaDinheiro;
     vendaObj.base_comissao=baseComissao;
   }
   var vendas=getVendas();
@@ -2112,7 +2124,7 @@ function confirmarVenda(){
     compras.push({
       id:'comp_'+Date.now(),
       nome:trocaNome,
-      custo_compra:trocaValor,
+      custo_compra:trocaAvaliacao,
       frete_entrada:0,
       origem:'🔄 Troca — '+prod.nome,
       data:new Date().toISOString().slice(0,10),
@@ -2621,9 +2633,14 @@ function salvarFinEdit(vendaId){
   // Update venda
   v.preco_venda=preco;
   v.comissao_pct=comPct;
-  // Comissão: se tem troca, calcular sobre o dinheiro recebido (preço - valor da troca)
-  if(v.troca&&v.troca_valor){
-    var baseComissao=Math.max(0,preco-v.troca_valor);
+  // Comissão: se tem troca, calcular sobre o dinheiro recebido (cash direto do cliente)
+  if(v.troca&&v.troca_dinheiro!=null){
+    v.comissao_valor=v.troca_dinheiro*(comPct/100);
+    v.base_comissao=v.troca_dinheiro;
+    v.recebido_dinheiro=v.troca_dinheiro;
+  }else if(v.troca&&v.troca_valor){
+    // compatibilidade com vendas antigas: recebido = preco - troca_valor
+    var baseComissao=Math.max(0,preco-(v.troca_valor||0));
     v.comissao_valor=baseComissao*(comPct/100);
     v.base_comissao=baseComissao;
     v.recebido_dinheiro=baseComissao;
@@ -2747,10 +2764,10 @@ function renderFinanceiro(){
     var freteSaida=v.frete_saida||0;
     var eletriReceita=v.eletri_cobrado||0;
     var eletriCusto=v.eletri_custo||0;
-    // Comissão: se tem troca, recalcular sobre o dinheiro recebido (não sobre preço cheio)
+    // Comissão: se tem troca, recalcular sobre o dinheiro recebido (cash do cliente)
     var comissao=v.comissao_valor||0;
     if(v.troca&&v.comissao_pct){
-      var baseComissao=v.base_comissao||Math.max(0,(v.preco_venda||0)-(v.troca_valor||0));
+      var baseComissao=v.troca_dinheiro!=null?v.troca_dinheiro:(v.base_comissao||Math.max(0,(v.preco_venda||0)-(v.troca_valor||0)));
       comissao=baseComissao*(v.comissao_pct/100);
     }
     var imposto=v.sem_nota?0:(v.preco_venda||0)*(cf.imposto_pct/100);
@@ -2779,7 +2796,11 @@ function renderFinanceiro(){
     if(v.envio)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">📦 Envio</span>';
     if(v.comprador)badges+='<span style="background:rgba(46,204,113,.12);color:var(--g);font-size:9px;padding:2px 5px;border-radius:4px;margin-left:4px;font-weight:700">👤 '+v.comprador.nome.split(' ')[0]+'</span>';
     var titleExtra='';
-    if(v.troca)titleExtra+=' | Troca: '+v.troca_nome+' — '+formatarValorBR(v.troca_valor);
+    if(v.troca){
+      var trocaInfo=v.troca_nome+' (aval. '+formatarValorBR(v.troca_avaliacao||v.troca_valor)+')';
+      if(v.troca_dinheiro!=null) trocaInfo+=' + '+formatarValorBR(v.troca_dinheiro)+' dinheiro';
+      titleExtra+=' | Troca: '+trocaInfo;
+    }
     if(v.eletrificacao)titleExtra+=' | Eletri: +'+formatarValorBR(eletriReceita);
     var vendaDate=v.data?new Date(v.data).toLocaleDateString('pt-BR'):'';
     rows.push('<tr id="finRow_'+v.id+'" style="cursor:pointer" onclick="toggleFinEdit(\''+v.id+'\')">'+
@@ -2875,7 +2896,7 @@ function renderFinanceiro(){
 
   // Totais de trocas
   var totalTrocas=0,qtdTrocas=0;
-  vendas.forEach(function(v){if(v.troca){totalTrocas+=v.troca_valor||0;qtdTrocas++}});
+  vendas.forEach(function(v){if(v.troca){totalTrocas+=(v.troca_avaliacao||v.troca_valor||0);qtdTrocas++}});
 
   // Cards resumo (incluindo outros gastos) — renderizar primeiro sem ads, depois atualizar
   function renderFinCards(adsSpend){
