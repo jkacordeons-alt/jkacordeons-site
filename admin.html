@@ -4053,6 +4053,7 @@ function renderCatalogo(){
           (st!=='vendido'?'<button class="cat-act vend" data-vend="'+p.id+'" style="background:var(--r-soft);color:var(--r)">💰 Vendido</button>':
           '<button class="cat-act" data-removemeta="'+p.id+'" style="background:rgba(52,152,219,.12);color:var(--b);font-size:10px">📱 Remover do WhatsApp</button>'+
           '<button class="cat-act vend" data-revend="'+p.id+'" style="background:var(--g-soft);color:var(--g)">↩️ Reativar</button>')+
+          '<button class="cat-act" data-delete="'+p.id+'" style="background:rgba(231,76,60,.1);color:var(--r);font-size:10px">🗑️ Excluir</button>'+
         '</div>'+
       '</div></div>';
   }).join('');
@@ -4064,6 +4065,20 @@ function renderCatalogo(){
   });
   el.querySelectorAll('[data-revend]').forEach(function(btn){
     btn.addEventListener('click',function(e){e.stopPropagation();reativarProd(this.getAttribute('data-revend'))});
+  });
+  el.querySelectorAll('[data-delete]').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var pid=this.getAttribute('data-delete');
+      var prods=getProds();
+      var prod=prods.find(function(p){return p.id===pid});
+      if(!prod)return;
+      if(!confirm('Tem certeza que deseja EXCLUIR "'+prod.nome+'" permanentemente do sistema?\n\nEssa ação não pode ser desfeita.'))return;
+      prods=prods.filter(function(p){return p.id!==pid});
+      setProds(prods);
+      showToast('🗑️ "'+prod.nome+'" excluído do sistema');
+      renderCatalogo();
+    });
   });
   el.querySelectorAll('[data-removemeta]').forEach(function(btn){
     btn.addEventListener('click',function(e){
