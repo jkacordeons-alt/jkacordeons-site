@@ -541,8 +541,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             <input type="text" id="catBusca" placeholder="Buscar acordeon..." oninput="renderCatalogo()">
           </div>
           <div class="cat-filters">
-            <button class="cat-filter active" onclick="setFilter('todos',this)">Todos</button>
-            <button class="cat-filter" onclick="setFilter('disponivel',this)">Disponíveis</button>
+            <button class="cat-filter" onclick="setFilter('todos',this)">Todos</button>
+            <button class="cat-filter active" onclick="setFilter('disponivel',this)">Disponíveis</button>
             <button class="cat-filter" onclick="setFilter('em_estoque',this)">📦 Em estoque</button>
             <button class="cat-filter" onclick="setFilter('a_caminho',this)">🚚 A caminho</button>
             <button class="cat-filter" onclick="setFilter('reservado',this)">Reservados</button>
@@ -1508,7 +1508,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
 /* ===== AUTH ===== */
 var _authToken=null;
 var editandoId=null;
-var filtroAtual='todos';
+var filtroAtual='disponivel';
 var MAX_FOTOS=10;
 var fotosTemp=Array(MAX_FOTOS).fill(null);
 
@@ -3281,6 +3281,9 @@ function goPage(page){
     document.getElementById('topSub').textContent='Relatório de faturamento e custos';
     topAction.style.display='none';
     btnSyncTop.style.display='none';
+    // Default: Este mês
+    var finSel=document.getElementById('finPeriodo');
+    if(finSel&&finSel.value==='todos'){finSel.value='mes'}
     renderFinanceiro();
   }else if(page==='simulador'){
     document.getElementById('pageSimulador').classList.add('on');
@@ -4048,6 +4051,7 @@ function renderCatalogo(){
         '<div class="cat-item-actions">'+
           '<button class="cat-act edit" data-edit="'+p.id+'">✏️ Editar</button>'+
           (st!=='vendido'?'<button class="cat-act vend" data-vend="'+p.id+'" style="background:var(--r-soft);color:var(--r)">💰 Vendido</button>':
+          '<button class="cat-act" data-removemeta="'+p.id+'" style="background:rgba(52,152,219,.12);color:var(--b);font-size:10px">📱 Remover do WhatsApp</button>'+
           '<button class="cat-act vend" data-revend="'+p.id+'" style="background:var(--g-soft);color:var(--g)">↩️ Reativar</button>')+
         '</div>'+
       '</div></div>';
@@ -4060,6 +4064,21 @@ function renderCatalogo(){
   });
   el.querySelectorAll('[data-revend]').forEach(function(btn){
     btn.addEventListener('click',function(e){e.stopPropagation();reativarProd(this.getAttribute('data-revend'))});
+  });
+  el.querySelectorAll('[data-removemeta]').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      e.stopPropagation();
+      var pid=this.getAttribute('data-removemeta');
+      var prods=getProds();
+      var prod=prods.find(function(p){return p.id===pid});
+      if(!prod)return;
+      var b=this;b.disabled=true;b.textContent='⏳ Removendo...';
+      removeFromMetaCatalogRetry(prod.id,prod.nome,function(ok){
+        b.disabled=false;
+        b.textContent=ok?'✅ Removido':'❌ Falhou';
+        setTimeout(function(){b.textContent='📱 Remover do WhatsApp'},3000);
+      });
+    });
   });
   atualizarStats();
   // Mostrar contagem
@@ -4647,6 +4666,35 @@ function removeFromMetaCatalog(prodId,prodNome){
   });
 }
 
+function removeFromMetaCatalogRetry(prodId,prodNome,callback){
+  var mc=getMetaConfig();
+  if(!mc||!mc.token){showToast('Configure o Meta primeiro!','error');if(callback)callback(false);return}
+  var activeCats=mc.cats.filter(function(c){return c.id});
+  if(!activeCats.length){showToast('Nenhum catálogo configurado!','error');if(callback)callback(false);return}
+  var ok=0,fail=0;
+  var promises=[];
+  activeCats.forEach(function(cat){
+    var body=new FormData();
+    body.append('access_token',mc.token);
+    body.append('item_type','PRODUCT_ITEM');
+    body.append('requests',JSON.stringify([{method:'DELETE',data:{id:prodId}}]));
+    promises.push(
+      fetch(META_API+'/'+cat.id+'/items_batch',{method:'POST',body:body})
+      .then(function(r){return r.json()})
+      .then(function(resp){
+        if(resp.error){fail++;console.warn('Catálogo '+cat.id+': '+resp.error.message)}
+        else{ok++}
+      })
+      .catch(function(err){fail++;console.warn('META DELETE error ('+cat.id+'):', err.message)})
+    );
+  });
+  Promise.all(promises).then(function(){
+    if(ok>0){showToast('📱 '+prodNome+' removido de '+ok+' catálogo(s)')}
+    if(fail>0&&ok===0){showToast('❌ Falha ao remover '+prodNome+' dos catálogos','error')}
+    if(callback)callback(ok>0);
+  });
+}
+
 function marcarVendido(id){
   var prods=getProds();
   var prod=prods.find(function(p){return p.id===id});
@@ -4802,7 +4850,7 @@ function mostrarSyncAsk(){
   var div=document.createElement('div');
   div.className='sync-ask';
   div.innerHTML='<p><strong>Produto salvo!</strong> Quer atualizar os catálogos do WhatsApp agora?</p>'+
-    '<button class="btn btn-primary" onclick="this.parentElement.remove();syncAllToMeta()">📱 Sincronizar</button>'+
+    '<button class="btn btn-primary" onclick="this.parentElement.remove();abrirSeletorCatalogos(function(c){syncAllToMeta(c)})">📱 Sincronizar</button>'+
     '<button class="btn btn-secondary" onclick="this.parentElement.remove()">Depois</button>';
   grid.parentElement.insertBefore(div,grid.nextSibling);
   // Auto-remove after 10s
@@ -5134,14 +5182,51 @@ function closeSyncProgress(){
   document.getElementById('syncProgress').classList.remove('on');
 }
 
-function syncAllToMeta(){
+function abrirSeletorCatalogos(afterSelect){
   var mc=getMetaConfig();
-  if(!mc||!mc.token){
-    // Não configurado → abrir wizard
-    abrirWizard();
+  if(!mc||!mc.token){abrirWizard();return}
+  var activeCats=mc.cats.filter(function(c){return c.id});
+  if(!activeCats.length){abrirWizard();return}
+  if(activeCats.length===1){afterSelect(activeCats);return}
+  var overlay=document.createElement('div');
+  overlay.className='modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:10000;display:flex;align-items:center;justify-content:center';
+  var box=document.createElement('div');
+  box.style.cssText='background:var(--card);border:1px solid var(--bord);border-radius:var(--radius);padding:24px;max-width:420px;width:90%';
+  var html='<h3 style="margin:0 0 6px;font-size:16px">📋 Selecionar catálogos</h3>';
+  html+='<p style="margin:0 0 16px;font-size:13px;color:var(--txt3)">Escolha quais catálogos deseja atualizar:</p>';
+  activeCats.forEach(function(cat,i){
+    html+='<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--bord);border-radius:8px;margin-bottom:8px;cursor:pointer;background:var(--card2)">';
+    html+='<input type="checkbox" checked class="catSelectorCb" data-cat-idx="'+i+'" style="width:18px;height:18px;accent-color:var(--acc)">';
+    html+='<div><strong style="font-size:14px">'+(cat.name||'Catálogo '+(i+1))+'</strong>';
+    html+='<div style="font-size:11px;color:var(--txt3)">ID: '+cat.id+'</div></div></label>';
+  });
+  html+='<div style="display:flex;gap:8px;margin-top:16px">';
+  html+='<button class="btn btn-primary" id="catSelectorOk" style="flex:1">🔄 Sincronizar selecionados</button>';
+  html+='<button class="btn btn-secondary" id="catSelectorCancel" style="flex:1">Cancelar</button></div>';
+  box.innerHTML=html;
+  overlay.appendChild(box);
+  document.body.appendChild(overlay);
+  overlay.querySelector('#catSelectorCancel').onclick=function(){overlay.remove()};
+  overlay.addEventListener('click',function(e){if(e.target===overlay)overlay.remove()});
+  overlay.querySelector('#catSelectorOk').onclick=function(){
+    var cbs=overlay.querySelectorAll('.catSelectorCb');
+    var selected=[];
+    cbs.forEach(function(cb){if(cb.checked)selected.push(activeCats[parseInt(cb.getAttribute('data-cat-idx'))])});
+    overlay.remove();
+    if(!selected.length){showToast('Selecione ao menos 1 catálogo!','error');return}
+    afterSelect(selected);
+  };
+}
+
+function syncAllToMeta(selectedCats){
+  var mc=getMetaConfig();
+  if(!mc||!mc.token){abrirWizard();return}
+  if(!selectedCats){
+    abrirSeletorCatalogos(function(cats){syncAllToMeta(cats)});
     return;
   }
-  var activeCats=mc.cats.filter(function(c){return c.id});
+  var activeCats=selectedCats;
   if(!activeCats.length){abrirWizard();return}
   var allProds=getProds();
   var prods=allProds.filter(function(p){return(p.status||'disponivel')!=='vendido'});
