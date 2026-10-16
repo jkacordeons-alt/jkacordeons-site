@@ -860,8 +860,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <!-- PAGE: Bling (NF-e) -->
       <div class="page" id="pageBling">
         <div class="dash-welcome" style="border-color:rgba(37,211,102,.15);background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(37,211,102,.02))">
-          <h2>🧾 Bling — Notas Fiscais</h2>
-          <p>Emita NF-e de entrada e saída direto pelo painel.</p>
+          <h2>🧾 Bling — ERP Integrado</h2>
+          <p>Cadastre produtos, emita NF-e de compra e venda direto pelo painel.</p>
         </div>
 
         <!-- Status da conexão -->
@@ -943,15 +943,240 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <button class="btn btn-primary" onclick="salvarBlingEmitente()" style="font-size:12px;margin-top:12px">💾 Salvar dados</button>
         </div>
 
-        <!-- Notas emitidas -->
-        <div class="card" style="padding:20px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-            <h4 style="margin:0;font-size:14px;font-weight:700">📄 Notas emitidas</h4>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-secondary" onclick="emitirNfEntrada()" style="font-size:11px;padding:5px 10px">📥 NF Entrada</button>
-              <button class="btn btn-primary" onclick="emitirNfSaida()" style="font-size:11px;padding:5px 10px">📤 NF Saída</button>
+        <!-- ABAS: Cadastro / NF Compra / NF Venda / Notas -->
+        <div style="display:flex;gap:0;margin-bottom:0;border-bottom:2px solid var(--brd);overflow-x:auto">
+          <button class="blingTab active" onclick="switchBlingTab('cadastro')" id="blingTabCadastro" style="flex:1;padding:12px 8px;border:none;background:none;font-size:13px;font-weight:700;color:var(--pri);cursor:pointer;border-bottom:3px solid var(--pri);transition:all .2s;white-space:nowrap">📦 Cadastro Produto</button>
+          <button class="blingTab" onclick="switchBlingTab('nfCompra')" id="blingTabNfCompra" style="flex:1;padding:12px 8px;border:none;background:none;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap">📥 NF-e Compra</button>
+          <button class="blingTab" onclick="switchBlingTab('nfVenda')" id="blingTabNfVenda" style="flex:1;padding:12px 8px;border:none;background:none;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap">📤 NF-e Venda</button>
+          <button class="blingTab" onclick="switchBlingTab('notas')" id="blingTabNotas" style="flex:1;padding:12px 8px;border:none;background:none;font-size:13px;font-weight:600;color:var(--txt3);cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap">📄 Notas</button>
+        </div>
+
+        <!-- TAB: Cadastro de Produto no Bling -->
+        <div id="blingSecCadastro" class="card" style="padding:20px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0">
+          <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color:var(--pri)">📦 Cadastrar Acordeão no Bling</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Selecione um produto do sistema para cadastrá-lo no Bling como produto fiscal.</p>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:600">Selecionar produto</label>
+            <select id="blingCadProduto" onchange="preencherCadastroBling()" style="padding:10px 12px;font-size:13px">
+              <option value="">— Selecione um acordeão —</option>
+            </select>
+          </div>
+
+          <div id="blingCadDetalhes" style="display:none">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label style="font-size:11px;font-weight:600">Descrição do produto</label>
+                <input type="text" id="blingCadDescricao" placeholder="Ex: Acordeão Scandalli Super VI" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Código (SKU)</label>
+                <input type="text" id="blingCadCodigo" placeholder="Código interno" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Preço de venda (R$)</label>
+                <input type="text" id="blingCadPreco" placeholder="0,00" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">NCM</label>
+                <input type="text" id="blingCadNcm" placeholder="9205.10.00" value="9205.10.00" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">CEST</label>
+                <input type="text" id="blingCadCest" placeholder="" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Unidade</label>
+                <input type="text" id="blingCadUnidade" value="UN" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Peso (kg)</label>
+                <input type="text" id="blingCadPeso" placeholder="0.00" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Origem</label>
+                <select id="blingCadOrigem" style="padding:8px 12px;font-size:13px">
+                  <option value="0">0 - Nacional</option>
+                  <option value="1">1 - Estrangeira (importação direta)</option>
+                  <option value="2">2 - Estrangeira (adquirida no mercado interno)</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label style="font-size:11px;font-weight:600">Observações</label>
+                <textarea id="blingCadObs" placeholder="Observações adicionais sobre o produto" style="padding:8px 12px;font-size:12px;min-height:60px;resize:vertical"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="cadastrarProdutoBling()" style="width:100%;padding:12px;font-size:14px;font-weight:700">📦 Cadastrar no Bling</button>
+            <div id="blingCadResult" style="margin-top:10px;font-size:12px"></div>
+          </div>
+
+          <!-- Produtos já cadastrados -->
+          <div style="margin-top:20px;border-top:1px solid var(--brd);padding-top:16px">
+            <h4 style="margin:0 0 10px;font-size:13px;font-weight:700;color:var(--txt2)">Produtos cadastrados no Bling</h4>
+            <div id="blingCadLista" style="font-size:12px;color:var(--txt3)">Carregando...</div>
+          </div>
+        </div>
+
+        <!-- TAB: NF-e de Compra (entrada) -->
+        <div id="blingSecNfCompra" class="card" style="padding:20px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;display:none">
+          <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color:var(--b)">📥 NF-e de Compra (Entrada)</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Selecione uma compra do sistema ou preencha manualmente os dados para emitir NF-e de entrada.</p>
+
+          <div class="form-group" style="margin-bottom:12px">
+            <label style="font-size:12px;font-weight:600">Selecionar compra do sistema</label>
+            <select id="blingNfCompraSelect" onchange="preencherNfCompra()" style="padding:10px 12px;font-size:13px">
+              <option value="">— Selecione ou preencha manualmente —</option>
+            </select>
+          </div>
+
+          <div style="font-size:12px;font-weight:700;color:var(--b);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🏭 Dados do fornecedor</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600">Nome / Razão Social do fornecedor</label>
+              <input type="text" id="nfCompFornNome" placeholder="Nome do fornecedor" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">CPF / CNPJ</label>
+              <input type="text" id="nfCompFornDoc" placeholder="000.000.000-00" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Telefone</label>
+              <input type="text" id="nfCompFornTel" placeholder="(00) 00000-0000" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600">Endereço</label>
+              <input type="text" id="nfCompFornEndereco" placeholder="Rua, número, bairro" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">CEP</label>
+              <input type="text" id="nfCompFornCep" placeholder="00000-000" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Cidade</label>
+              <input type="text" id="nfCompFornCidade" placeholder="Cidade" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">UF</label>
+              <select id="nfCompFornUf" style="padding:8px 12px;font-size:13px">
+                <option value="">UF</option>
+                <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+                <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+                <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+                <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+                <option>SE</option><option>TO</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Nº</label>
+              <input type="text" id="nfCompFornNumero" placeholder="Nº" style="padding:8px 12px;font-size:13px">
             </div>
           </div>
+
+          <div style="font-size:12px;font-weight:700;color:var(--b);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">🎵 Dados do produto / compra</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div class="form-group" style="margin:0;grid-column:1/-1">
+              <label style="font-size:11px;font-weight:600">Descrição do produto</label>
+              <input type="text" id="nfCompProdDescricao" placeholder="Ex: Acordeão Scandalli Super VI" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Valor da compra (R$)</label>
+              <input type="text" id="nfCompProdValor" placeholder="0,00" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Data da compra</label>
+              <input type="date" id="nfCompProdData" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">NCM</label>
+              <input type="text" id="nfCompProdNcm" value="9205.10.00" style="padding:8px 12px;font-size:13px">
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">CFOP</label>
+              <input type="text" id="nfCompProdCfop" value="1102" placeholder="1102" style="padding:8px 12px;font-size:13px">
+            </div>
+          </div>
+          <input type="hidden" id="nfCompCompraId">
+          <button class="btn btn-primary" onclick="emitirNfCompraForm()" style="width:100%;padding:12px;font-size:14px;font-weight:700">📥 Emitir NF-e de Entrada</button>
+          <div id="nfCompResult" style="margin-top:10px;font-size:12px"></div>
+        </div>
+
+        <!-- TAB: NF-e de Venda (saída) -->
+        <div id="blingSecNfVenda" class="card" style="padding:20px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;display:none">
+          <h4 style="margin:0 0 6px;font-size:14px;font-weight:700;color:var(--g)">📤 NF-e de Venda (Saída)</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Selecione uma venda para emitir a NF-e de saída com os dados do cliente.</p>
+
+          <!-- Lista de vendas pendentes de NF -->
+          <div id="blingVendasPendentes"></div>
+
+          <!-- Formulário NF-e de Saída (aparece ao selecionar venda) -->
+          <div id="blingNfForm" style="display:none;border:2px solid rgba(37,211,102,.3);border-radius:10px;padding:16px;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+              <h4 style="margin:0;font-size:14px;font-weight:700;color:var(--g)">🧾 Dados da NF-e de Saída</h4>
+              <button onclick="fecharFormNf()" style="background:none;border:none;font-size:18px;cursor:pointer;color:var(--txt3)">✕</button>
+            </div>
+            <input type="hidden" id="nfVendaId">
+            <!-- Produto (readonly) -->
+            <div style="background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.15);border-radius:8px;padding:12px;margin-bottom:16px">
+              <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--txt3);margin-bottom:4px">Produto</div>
+              <div id="nfProdutoInfo" style="font-size:14px;font-weight:600"></div>
+              <div id="nfValorInfo" style="font-size:13px;color:var(--g);margin-top:2px"></div>
+            </div>
+            <!-- Dados do cliente -->
+            <div style="font-size:12px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">👤 Dados do cliente (destinatário)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label style="font-size:11px;font-weight:600">Nome completo / Razão Social</label>
+                <input type="text" id="nfCliNome" placeholder="Nome do cliente" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">CPF / CNPJ</label>
+                <input type="text" id="nfCliDoc" placeholder="000.000.000-00" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Telefone</label>
+                <input type="text" id="nfCliTel" placeholder="(00) 00000-0000" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0;grid-column:1/-1">
+                <label style="font-size:11px;font-weight:600">Endereço</label>
+                <input type="text" id="nfCliEndereco" placeholder="Rua, número, bairro" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">CEP</label>
+                <input type="text" id="nfCliCep" placeholder="00000-000" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Cidade</label>
+                <input type="text" id="nfCliCidade" placeholder="Cidade" style="padding:8px 12px;font-size:13px">
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">UF</label>
+                <select id="nfCliUf" style="padding:8px 12px;font-size:13px">
+                  <option value="">UF</option>
+                  <option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option>
+                  <option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option>
+                  <option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option>
+                  <option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+                  <option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option>
+                  <option>SE</option><option>TO</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin:0">
+                <label style="font-size:11px;font-weight:600">Nº (complemento)</label>
+                <input type="text" id="nfCliNumero" placeholder="Nº" style="padding:8px 12px;font-size:13px">
+              </div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="emitirNfDoForm()" style="flex:1;padding:12px;font-size:14px;font-weight:700">🧾 Emitir NF-e de Saída</button>
+              <button class="btn btn-secondary" onclick="fecharFormNf()" style="padding:12px">Cancelar</button>
+            </div>
+            <div id="nfFormResult" style="margin-top:10px;font-size:12px"></div>
+          </div>
+        </div>
+
+        <!-- TAB: Notas emitidas -->
+        <div id="blingSecNotas" class="card" style="padding:20px;margin-top:0;border-top-left-radius:0;border-top-right-radius:0;display:none">
+          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">📄 Notas fiscais emitidas</h4>
           <div id="blingNotasList">
             <div style="text-align:center;padding:2rem;color:var(--txt3)">
               <div style="font-size:1.5rem;margin-bottom:6px">📄</div>
@@ -2172,7 +2397,7 @@ function mostrarPosVenda(v,prod){
     html+='<div style="font-size:12px;font-weight:700;color:var(--pri);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">🧾 Nota Fiscal</div>';
     if(bc.access_token&&bc.token_expires&&Date.now()<bc.token_expires){
       html+='<div style="display:flex;gap:8px">';
-      html+='<button onclick="gerarNfSaidaBling(\''+v.id+'\');document.getElementById(\'modalPosVenda\').remove()" style="flex:1;padding:10px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">Emitir NF-e de Saída</button>';
+      html+='<button onclick="document.getElementById(\'modalPosVenda\').remove();goPage(\'bling\');setTimeout(function(){abrirFormNfSaida(\''+v.id+'\')},300)" style="flex:1;padding:10px;background:var(--pri);color:#fff;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer">🧾 Cadastrar cliente e emitir NF-e →</button>';
       html+='</div>';
     }else if(bc.client_id){
       html+='<div style="padding:10px;background:rgba(243,156,18,.08);border-radius:6px;font-size:12px;color:var(--y)">⚠️ Token Bling expirado. <a href="#" onclick="goPage(\'bling\');document.getElementById(\'modalPosVenda\').remove();return false" style="color:var(--pri);text-decoration:underline">Reconectar →</a></div>';
@@ -3236,11 +3461,12 @@ function goPage(page){
   }else if(page==='bling'){
     document.getElementById('pageBling').classList.add('on');
     document.querySelectorAll('.sb-item:not(.disabled)')[3].classList.add('active');
-    document.getElementById('topTitle').textContent='Bling (NF-e)';
-    document.getElementById('topSub').textContent='Emissão de notas fiscais';
+    document.getElementById('topTitle').textContent='Bling — ERP';
+    document.getElementById('topSub').textContent='Cadastro, NF-e de compra e venda';
     topAction.style.display='none';
     btnSyncTop.style.display='none';
     renderBlingStatus();
+    switchBlingTab('cadastro');
   }else if(page==='correios'){
     document.getElementById('pageCorreios').classList.add('on');
     document.querySelectorAll('.sb-item:not(.disabled)')[4].classList.add('active');
@@ -3425,96 +3651,310 @@ function salvarBlingEmitente(){
   showToast('Dados do emitente salvos!','✅');
 }
 
-function emitirNfEntrada(){
-  var bc=getBlingConfig();
-  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
-  // Get compras sem nota
-  var compras=getCompras().filter(function(c){return !c.nf_entrada});
-  if(!compras.length){showToast('Nenhuma compra pendente de NF de entrada','ℹ️');return}
-  var html='<h4 style="margin:0 0 12px;color:var(--pri)">Compras sem NF de Entrada</h4>';
-  compras.forEach(function(c){
-    var p=getProds().find(function(pr){return pr.id===c.produto_id});
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:6px">';
-    html+='<span style="font-size:13px">'+(p?p.modelo:'Compra #'+c.id)+' — '+formatarValorBR(c.valor)+'</span>';
-    html+='<button onclick="gerarNfEntradaBling(\''+c.id+'\')" style="padding:4px 12px;background:var(--pri);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">Emitir NF-e</button>';
-    html+='</div>';
+/* === BLING TABS === */
+function switchBlingTab(tab){
+  var tabs=['cadastro','nfCompra','nfVenda','notas'];
+  tabs.forEach(function(t){
+    var btn=document.getElementById('blingTab'+t.charAt(0).toUpperCase()+t.slice(1));
+    var sec=document.getElementById('blingSec'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(!btn||!sec) return;
+    if(t===tab){
+      btn.style.color='var(--pri)';btn.style.fontWeight='700';btn.style.borderBottomColor='var(--pri)';btn.classList.add('active');
+      sec.style.display='';
+    }else{
+      btn.style.color='var(--txt3)';btn.style.fontWeight='600';btn.style.borderBottomColor='transparent';btn.classList.remove('active');
+      sec.style.display='none';
+    }
   });
-  document.getElementById('blingNotasList').innerHTML=html;
+  // Carregar conteúdo da aba
+  if(tab==='cadastro') carregarCadastroBling();
+  if(tab==='nfCompra') carregarNfCompraSelect();
+  if(tab==='nfVenda') renderVendasPendentesNf();
+  if(tab==='notas') renderBlingNotas();
 }
 
-function gerarNfEntradaBling(compraId){
+/* === CADASTRO PRODUTO NO BLING === */
+function carregarCadastroBling(){
+  var sel=document.getElementById('blingCadProduto');
+  if(!sel) return;
+  var prods=getProds();
+  var html='<option value="">— Selecione um acordeão —</option>';
+  prods.forEach(function(p){
+    var nome=p.nome||p.modelo||'Acordeão';
+    var status=p.vendido?'(Vendido)':'(Disponível)';
+    html+='<option value="'+p.id+'">'+nome+' '+status+'</option>';
+  });
+  sel.innerHTML=html;
+  document.getElementById('blingCadDetalhes').style.display='none';
+  // Listar já cadastrados
+  listarProdutosBling();
+}
+
+function preencherCadastroBling(){
+  var prodId=document.getElementById('blingCadProduto').value;
+  if(!prodId){document.getElementById('blingCadDetalhes').style.display='none';return}
+  var p=getProds().find(function(pr){return pr.id===prodId});
+  if(!p){return}
+  document.getElementById('blingCadDetalhes').style.display='';
+  document.getElementById('blingCadDescricao').value=(p.marca?p.marca+' ':'')+( p.modelo||p.nome||'Acordeão');
+  document.getElementById('blingCadCodigo').value=p.id||'';
+  document.getElementById('blingCadPreco').value=p.precoVenda?String(p.precoVenda).replace('.',','):'';
+  document.getElementById('blingCadPeso').value=p.peso||'';
+  document.getElementById('blingCadObs').value=p.descricao||'';
+  document.getElementById('blingCadResult').innerHTML='';
+}
+
+function cadastrarProdutoBling(){
   var bc=getBlingConfig();
   if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
+  var descricao=document.getElementById('blingCadDescricao').value.trim();
+  var codigo=document.getElementById('blingCadCodigo').value.trim();
+  var preco=parseFloat((document.getElementById('blingCadPreco').value||'0').replace(/\./g,'').replace(',','.'))||0;
+  var ncm=document.getElementById('blingCadNcm').value.trim().replace(/\D/g,'');
+  var cest=document.getElementById('blingCadCest').value.trim().replace(/\D/g,'');
+  var unidade=document.getElementById('blingCadUnidade').value.trim()||'UN';
+  var peso=parseFloat(document.getElementById('blingCadPeso').value)||0;
+  var origem=parseInt(document.getElementById('blingCadOrigem').value)||0;
+  var obs=document.getElementById('blingCadObs').value.trim();
+  if(!descricao){showToast('Preencha a descrição do produto','⚠️');return}
+  var body={
+    nome:descricao,
+    codigo:codigo||undefined,
+    preco:preco,
+    unidade:unidade,
+    tipo:'P',
+    situacao:'A',
+    formato:'S'
+  };
+  if(ncm) body.tributacao={ncm:ncm,cest:cest||undefined,origem:origem};
+  if(peso) body.pesoBruto=peso;
+  if(obs) body.descricaoCurta=obs;
+  document.getElementById('blingCadResult').innerHTML='<div style="color:var(--y);padding:8px">⏳ Cadastrando produto no Bling...</div>';
+  blingApiCall('/produtos','POST',body,function(ok,data){
+    if(ok&&data.data&&data.data.id){
+      // Salvar bling_produto_id no produto local
+      var prodId=document.getElementById('blingCadProduto').value;
+      if(prodId){
+        var prods=getProds();
+        var idx=prods.findIndex(function(p){return p.id===prodId});
+        if(idx>=0){
+          prods[idx].bling_produto_id=data.data.id;
+          setProds(prods);
+        }
+      }
+      document.getElementById('blingCadResult').innerHTML='<div style="color:var(--g);padding:8px;font-weight:700">✅ Produto cadastrado no Bling! ID: '+data.data.id+'</div>';
+      showToast('✅ Produto cadastrado no Bling!');
+      listarProdutosBling();
+    }else{
+      var errMsg=data.error||(data.data&&data.data.erros?JSON.stringify(data.data.erros):'Erro desconhecido');
+      document.getElementById('blingCadResult').innerHTML='<div style="color:var(--r);padding:8px">❌ Erro: '+errMsg+'</div>';
+      console.error('Bling produto erro:',data);
+    }
+  });
+}
+
+function listarProdutosBling(){
+  var el=document.getElementById('blingCadLista');
+  if(!el) return;
+  var bc=getBlingConfig();
+  if(!bc.access_token){el.innerHTML='<p style="color:var(--txt3)">Conecte ao Bling para ver produtos cadastrados.</p>';return}
+  el.innerHTML='<p style="color:var(--txt3)">⏳ Carregando...</p>';
+  blingApiCall('/produtos?pagina=1&limite=50','GET',null,function(ok,data){
+    if(!ok||!data.data||!data.data.length){
+      el.innerHTML='<p style="color:var(--txt3)">Nenhum produto encontrado no Bling.</p>';
+      return;
+    }
+    var html='';
+    data.data.forEach(function(p){
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:4px">';
+      html+='<div><span style="font-weight:600;font-size:13px">'+p.nome+'</span>';
+      if(p.codigo) html+=' <span style="font-size:11px;color:var(--txt3)">('+p.codigo+')</span>';
+      html+='</div>';
+      html+='<span style="font-size:12px;color:var(--g);font-weight:600">R$ '+(p.preco?Number(p.preco).toFixed(2).replace('.',','):'—')+'</span>';
+      html+='</div>';
+    });
+    el.innerHTML=html;
+  });
+}
+
+/* === NF-e COMPRA (ENTRADA) — FORMULÁRIO COMPLETO === */
+function carregarNfCompraSelect(){
+  var sel=document.getElementById('blingNfCompraSelect');
+  if(!sel) return;
+  var compras=getCompras().filter(function(c){return !c.nf_entrada});
+  var html='<option value="">— Selecione ou preencha manualmente —</option>';
+  compras.forEach(function(c){
+    var p=getProds().find(function(pr){return pr.id===c.produto_id});
+    var nome=p?(p.nome||p.modelo):'Compra';
+    html+='<option value="'+c.id+'">'+nome+' — '+formatarValorBR(c.valor)+' ('+((c.data_compra||c.data||'').substring(0,10)||'s/ data')+')</option>';
+  });
+  sel.innerHTML=html;
+  // Limpar formulário
+  document.getElementById('nfCompCompraId').value='';
+  document.getElementById('nfCompFornNome').value='';
+  document.getElementById('nfCompFornDoc').value='';
+  document.getElementById('nfCompFornTel').value='';
+  document.getElementById('nfCompFornEndereco').value='';
+  document.getElementById('nfCompFornCep').value='';
+  document.getElementById('nfCompFornCidade').value='';
+  document.getElementById('nfCompFornUf').value='';
+  document.getElementById('nfCompFornNumero').value='';
+  document.getElementById('nfCompProdDescricao').value='';
+  document.getElementById('nfCompProdValor').value='';
+  document.getElementById('nfCompProdData').value='';
+  document.getElementById('nfCompResult').innerHTML='';
+}
+
+function preencherNfCompra(){
+  var compraId=document.getElementById('blingNfCompraSelect').value;
+  if(!compraId){document.getElementById('nfCompCompraId').value='';return}
   var compra=getCompras().find(function(c){return c.id===compraId});
-  if(!compra){showToast('Compra não encontrada','⚠️');return}
-  var prod=getProds().find(function(p){return p.id===compra.produto_id});
+  if(!compra) return;
+  var p=getProds().find(function(pr){return pr.id===compra.produto_id});
+  document.getElementById('nfCompCompraId').value=compraId;
+  document.getElementById('nfCompFornNome').value=compra.fornecedor||'';
+  document.getElementById('nfCompFornDoc').value=compra.fornecedor_doc||'';
+  document.getElementById('nfCompFornTel').value=compra.fornecedor_tel||'';
+  document.getElementById('nfCompFornEndereco').value=compra.fornecedor_endereco||'';
+  document.getElementById('nfCompFornCep').value=compra.fornecedor_cep||'';
+  document.getElementById('nfCompFornCidade').value=compra.fornecedor_cidade||'';
+  document.getElementById('nfCompFornUf').value=compra.fornecedor_uf||'';
+  document.getElementById('nfCompFornNumero').value=compra.fornecedor_numero||'';
+  document.getElementById('nfCompProdDescricao').value=p?((p.marca?p.marca+' ':'')+( p.modelo||p.nome||'Acordeão')):'Acordeão';
+  document.getElementById('nfCompProdValor').value=compra.valor?String(compra.valor).replace('.',','):'';
+  document.getElementById('nfCompProdData').value=(compra.data_compra||compra.data||'').substring(0,10);
+}
+
+function emitirNfCompraForm(){
+  var bc=getBlingConfig();
+  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
   var emitente=bc.emitente||{};
   if(!emitente.cnpj){showToast('Configure os dados do emitente primeiro','⚠️');return}
-  showToast('⏳ Buscando natureza de operação...','🔄');
-  // 1. Buscar naturezas de operação
+  var compraId=document.getElementById('nfCompCompraId').value;
+  var fornNome=document.getElementById('nfCompFornNome').value.trim();
+  var fornDoc=document.getElementById('nfCompFornDoc').value.trim().replace(/\D/g,'');
+  var fornTel=document.getElementById('nfCompFornTel').value.trim();
+  var fornEndereco=document.getElementById('nfCompFornEndereco').value.trim();
+  var fornCep=document.getElementById('nfCompFornCep').value.trim().replace(/\D/g,'');
+  var fornCidade=document.getElementById('nfCompFornCidade').value.trim();
+  var fornUf=document.getElementById('nfCompFornUf').value;
+  var fornNumero=document.getElementById('nfCompFornNumero').value.trim();
+  var prodDescricao=document.getElementById('nfCompProdDescricao').value.trim();
+  var prodValor=parseFloat((document.getElementById('nfCompProdValor').value||'0').replace(/\./g,'').replace(',','.'))||0;
+  var prodData=document.getElementById('nfCompProdData').value||new Date().toISOString().split('T')[0];
+  var prodNcm=document.getElementById('nfCompProdNcm').value.trim().replace(/\D/g,'');
+  var prodCfop=document.getElementById('nfCompProdCfop').value.trim();
+  if(!fornNome){showToast('Informe o nome do fornecedor','⚠️');return}
+  if(!prodDescricao){showToast('Informe a descrição do produto','⚠️');return}
+  if(!prodValor){showToast('Informe o valor da compra','⚠️');return}
+  // Salvar dados do fornecedor na compra (se selecionou uma)
+  if(compraId){
+    var compras=getCompras();
+    var idx=compras.findIndex(function(c){return c.id===compraId});
+    if(idx>=0){
+      compras[idx].fornecedor=fornNome;
+      compras[idx].fornecedor_doc=fornDoc;
+      compras[idx].fornecedor_tel=fornTel;
+      compras[idx].fornecedor_endereco=fornEndereco;
+      compras[idx].fornecedor_cep=fornCep;
+      compras[idx].fornecedor_cidade=fornCidade;
+      compras[idx].fornecedor_uf=fornUf;
+      compras[idx].fornecedor_numero=fornNumero;
+      setCompras(compras);
+    }
+  }
+  document.getElementById('nfCompResult').innerHTML='<div style="color:var(--y);padding:8px">⏳ Buscando natureza de operação...</div>';
   blingApiCall('/naturezas-de-operacoes?pagina=1&limite=100','GET',null,function(okN,dataN){
     var natOp=null;
     if(okN&&dataN.data&&dataN.data.length){
-      // Procurar "compra" ou "entrada" na descrição
       natOp=dataN.data.find(function(n){return /compra|entrada/i.test(n.descricao)});
-      if(!natOp) natOp=dataN.data[0]; // fallback: primeira
+      if(!natOp) natOp=dataN.data[0];
     }
-    // 2. Montar NF-e de entrada
+    var contato={nome:fornNome,tipoPessoa:'J'};
+    if(fornDoc){
+      contato.numeroDocumento=fornDoc;
+      contato.tipoPessoa=fornDoc.length>11?'J':'F';
+    }
+    if(fornTel) contato.telefone=fornTel;
+    if(fornEndereco||fornCep){
+      contato.endereco={
+        endereco:fornEndereco+(fornNumero?', '+fornNumero:''),
+        numero:fornNumero||'S/N',
+        cep:fornCep,
+        municipio:fornCidade,
+        uf:fornUf
+      };
+    }
     var nfeBody={
-      tipo:0, // 0=entrada, 1=saída
-      numero:null, // auto
-      dataOperacao:new Date().toISOString().split('T')[0],
-      contato:{
-        nome:compra.fornecedor||'Fornecedor',
-        tipoPessoa:'J'
-      },
+      tipo:0,
+      numero:null,
+      dataOperacao:prodData,
+      contato:contato,
       naturezaOperacao:natOp?{id:natOp.id}:undefined,
       itens:[{
-        codigo:prod?(prod.id||'PROD'):'PROD',
-        descricao:prod?(prod.marca+' '+prod.modelo):'Acordeon',
+        codigo:compraId||'PROD',
+        descricao:prodDescricao,
         unidade:'UN',
         quantidade:1,
-        valor:compra.valor||0
+        valor:prodValor
       }]
     };
-    showToast('⏳ Emitindo NF-e de entrada...','🔄');
+    document.getElementById('nfCompResult').innerHTML='<div style="color:var(--y);padding:8px">⏳ Emitindo NF-e de entrada...</div>';
     blingApiCall('/nfe','POST',nfeBody,function(ok,data){
       if(ok&&data.data&&data.data.id){
-        // Sucesso — salvar número da NF na compra
-        var compras=getCompras();
-        var idx=compras.findIndex(function(c){return c.id===compraId});
-        if(idx>=0){
-          compras[idx].nf_entrada=data.data.numero||data.data.id;
-          compras[idx].nf_entrada_id=data.data.id;
-          localStorage.setItem('jk_compras',JSON.stringify(compras));
-          syncToServer();
+        if(compraId){
+          var compras2=getCompras();
+          var idx2=compras2.findIndex(function(c){return c.id===compraId});
+          if(idx2>=0){
+            compras2[idx2].nf_entrada=data.data.numero||data.data.id;
+            compras2[idx2].nf_entrada_id=data.data.id;
+            setCompras(compras2);
+          }
         }
-        showToast('NF-e de entrada #'+(data.data.numero||data.data.id)+' emitida!','✅');
-        renderBlingNotas();
-        emitirNfEntrada(); // Refresh lista
+        document.getElementById('nfCompResult').innerHTML='<div style="color:var(--g);padding:8px;font-weight:700">✅ NF-e de entrada #'+(data.data.numero||data.data.id)+' emitida com sucesso!</div>';
+        showToast('✅ NF-e de entrada emitida!');
+        carregarNfCompraSelect();
       }else{
         var errMsg=data.error||(data.data&&data.data.erros?JSON.stringify(data.data.erros):'Erro desconhecido');
-        showToast('Erro ao emitir NF-e: '+errMsg,'❌');
+        document.getElementById('nfCompResult').innerHTML='<div style="color:var(--r);padding:8px">❌ Erro: '+errMsg+'</div>';
         console.error('Bling NF-e erro:',data);
       }
     });
   });
 }
 
-function emitirNfSaida(){
-  var bc=getBlingConfig();
-  if(!bc.access_token){showToast('Conecte ao Bling primeiro','⚠️');return}
+/* === NF-e VENDA (SAÍDA) — LISTA + FORMULÁRIO === */
+function renderVendasPendentesNf(){
+  var el=document.getElementById('blingVendasPendentes');
+  if(!el) return;
   var vendas=getVendas().filter(function(v){return !v.sem_nota&&!v.nf_saida});
-  if(!vendas.length){showToast('Nenhuma venda pendente de NF de saída','ℹ️');return}
-  var html='<h4 style="margin:0 0 12px;color:var(--pri)">Vendas sem NF de Saída</h4>';
+  if(!vendas.length){
+    el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--txt3)"><div style="font-size:1.3rem;margin-bottom:4px">✅</div><p style="margin:0;font-size:12px">Todas as vendas já possuem NF-e emitida!</p></div>';
+    return;
+  }
+  var html='<div style="font-size:12px;font-weight:700;color:var(--txt2);margin-bottom:8px">Vendas pendentes de NF-e ('+vendas.length+')</div>';
   vendas.forEach(function(v){
     var p=getProds().find(function(pr){return pr.id===v.produto_id});
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg);border-radius:6px;margin-bottom:6px">';
-    html+='<span style="font-size:13px">'+(p?p.modelo:'Venda #'+v.id)+' — '+formatarValorBR(v.preco_venda)+'</span>';
-    html+='<button onclick="gerarNfSaidaBling(\''+v.id+'\')" style="padding:4px 12px;background:var(--g);color:#fff;border:none;border-radius:4px;font-size:11px;cursor:pointer">Emitir NF-e</button>';
+    var nome=p?(p.nome||p.modelo):'Acordeão';
+    var data=(v.data_venda||v.data||'').substring(0,10);
+    html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--bg);border-radius:8px;margin-bottom:6px">';
+    html+='<div><span style="font-weight:600;font-size:13px">'+nome+'</span>';
+    if(data) html+=' <span style="font-size:11px;color:var(--txt3)">'+data+'</span>';
+    html+='<br><span style="font-size:12px;color:var(--g);font-weight:600">'+formatarValorBR(v.preco_venda)+'</span>';
+    if(v.comprador&&v.comprador.nome) html+=' <span style="font-size:11px;color:var(--txt3)">→ '+v.comprador.nome+'</span>';
+    html+='</div>';
+    html+='<button onclick="abrirFormNfSaida(\''+v.id+'\')" style="padding:8px 16px;background:var(--g);color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🧾 Emitir NF-e</button>';
     html+='</div>';
   });
-  document.getElementById('blingNotasList').innerHTML=html;
+  el.innerHTML=html;
+}
+
+function emitirNfEntrada(){
+  switchBlingTab('nfCompra');
+}
+
+function emitirNfSaida(){
+  switchBlingTab('nfVenda');
 }
 
 function gerarNfSaidaBling(vendaId){
@@ -3592,6 +4032,123 @@ function gerarNfSaidaBling(vendaId){
       }else{
         var errMsg=data.error||(data.data&&data.data.erros?JSON.stringify(data.data.erros):'Erro desconhecido');
         showToast('Erro ao emitir NF-e: '+errMsg,'❌');
+        console.error('Bling NF-e erro:',data);
+      }
+    });
+  });
+}
+
+function abrirFormNfSaida(vendaId){
+  // Garantir que estamos na aba de venda
+  switchBlingTab('nfVenda');
+  var venda=getVendas().find(function(v){return v.id===vendaId});
+  if(!venda){showToast('Venda não encontrada','error');return}
+  var prod=getProds().find(function(p){return p.id===venda.produto_id});
+  document.getElementById('nfVendaId').value=vendaId;
+  document.getElementById('nfProdutoInfo').textContent=prod?(prod.nome||prod.modelo||'Acordeon'):'Acordeon';
+  document.getElementById('nfValorInfo').textContent='Valor: '+formatarValorBR(venda.preco_venda);
+  // Preencher dados do cliente se existem (do envio)
+  var c=venda.comprador||{};
+  document.getElementById('nfCliNome').value=c.nome||'';
+  document.getElementById('nfCliDoc').value=c.cpf||'';
+  document.getElementById('nfCliTel').value=c.tel||'';
+  document.getElementById('nfCliEndereco').value=c.endereco||'';
+  document.getElementById('nfCliCep').value=c.cep||'';
+  document.getElementById('nfCliCidade').value=c.cidade||'';
+  document.getElementById('nfCliUf').value=c.uf||'';
+  document.getElementById('nfCliNumero').value='';
+  document.getElementById('nfFormResult').innerHTML='';
+  document.getElementById('blingNfForm').style.display='block';
+  // Scroll to form
+  document.getElementById('blingNfForm').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function fecharFormNf(){
+  document.getElementById('blingNfForm').style.display='none';
+}
+
+function emitirNfDoForm(){
+  var vendaId=document.getElementById('nfVendaId').value;
+  var bc=getBlingConfig();
+  if(!bc.access_token){showToast('Conecte ao Bling primeiro','error');return}
+  var venda=getVendas().find(function(v){return v.id===vendaId});
+  if(!venda){showToast('Venda não encontrada','error');return}
+  var prod=getProds().find(function(p){return p.id===venda.produto_id});
+  var emitente=bc.emitente||{};
+  if(!emitente.cnpj){showToast('Configure os dados do emitente primeiro','error');return}
+  // Pegar dados do formulário
+  var cliNome=document.getElementById('nfCliNome').value.trim();
+  var cliDoc=document.getElementById('nfCliDoc').value.trim().replace(/\D/g,'');
+  var cliTel=document.getElementById('nfCliTel').value.trim();
+  var cliEndereco=document.getElementById('nfCliEndereco').value.trim();
+  var cliCep=document.getElementById('nfCliCep').value.trim().replace(/\D/g,'');
+  var cliCidade=document.getElementById('nfCliCidade').value.trim();
+  var cliUf=document.getElementById('nfCliUf').value;
+  var cliNumero=document.getElementById('nfCliNumero').value.trim();
+  if(!cliNome){showToast('Informe o nome do cliente','error');return}
+  // Salvar dados do comprador na venda (atualizar)
+  var vendas=getVendas();
+  var idx=vendas.findIndex(function(v){return v.id===vendaId});
+  if(idx>=0){
+    vendas[idx].comprador={nome:cliNome,cpf:cliDoc?cliDoc.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'):undefined,tel:cliTel,endereco:cliEndereco+(cliNumero?', '+cliNumero:''),cep:cliCep,cidade:cliCidade,uf:cliUf};
+    setVendas(vendas);
+    venda=vendas[idx];
+  }
+  document.getElementById('nfFormResult').innerHTML='<div style="color:var(--y);padding:8px">⏳ Buscando natureza de operação...</div>';
+  blingApiCall('/naturezas-de-operacoes?pagina=1&limite=100','GET',null,function(okN,dataN){
+    var natOp=null;
+    if(okN&&dataN.data&&dataN.data.length){
+      natOp=dataN.data.find(function(n){return /venda|sa[ií]da/i.test(n.descricao)});
+      if(!natOp) natOp=dataN.data[0];
+    }
+    var contato={nome:cliNome,tipoPessoa:'F'};
+    if(cliDoc){
+      contato.numeroDocumento=cliDoc;
+      contato.tipoPessoa=cliDoc.length>11?'J':'F';
+    }
+    if(cliTel) contato.telefone=cliTel;
+    if(cliEndereco||cliCep){
+      contato.endereco={
+        endereco:cliEndereco+(cliNumero?', '+cliNumero:''),
+        numero:cliNumero||'S/N',
+        cep:cliCep,
+        municipio:cliCidade,
+        uf:cliUf
+      };
+    }
+    var nfeBody={
+      tipo:1,
+      numero:null,
+      dataOperacao:venda.data||new Date().toISOString().split('T')[0],
+      contato:contato,
+      naturezaOperacao:natOp?{id:natOp.id}:undefined,
+      itens:[{
+        codigo:prod?(prod.id||'PROD'):'PROD',
+        descricao:prod?(prod.nome||'Acordeon'):'Acordeon',
+        unidade:'UN',
+        quantidade:1,
+        valor:venda.preco_venda||0
+      }]
+    };
+    if(venda.envio&&venda.frete_saida){
+      nfeBody.transporte={fretePorConta:0,volumes:[{quantidade:1,especie:'CAIXA',pesoBruto:prod&&prod.peso?parseFloat(prod.peso):15}]};
+    }
+    document.getElementById('nfFormResult').innerHTML='<div style="color:var(--y);padding:8px">⏳ Emitindo NF-e de saída...</div>';
+    blingApiCall('/nfe','POST',nfeBody,function(ok,data){
+      if(ok&&data.data&&data.data.id){
+        var vendas2=getVendas();
+        var idx2=vendas2.findIndex(function(v){return v.id===vendaId});
+        if(idx2>=0){
+          vendas2[idx2].nf_saida=data.data.numero||data.data.id;
+          vendas2[idx2].nf_saida_id=data.data.id;
+          setVendas(vendas2);
+        }
+        document.getElementById('nfFormResult').innerHTML='<div style="color:var(--g);padding:8px;font-weight:700">✅ NF-e #'+(data.data.numero||data.data.id)+' emitida com sucesso!</div>';
+        showToast('✅ NF-e de saída #'+(data.data.numero||data.data.id)+' emitida!');
+        setTimeout(function(){fecharFormNf();renderVendasPendentesNf()},2000);
+      }else{
+        var errMsg=data.error||(data.data&&data.data.erros?JSON.stringify(data.data.erros):'Erro desconhecido');
+        document.getElementById('nfFormResult').innerHTML='<div style="color:var(--r);padding:8px">❌ Erro: '+errMsg+'</div>';
         console.error('Bling NF-e erro:',data);
       }
     });
