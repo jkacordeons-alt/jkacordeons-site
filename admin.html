@@ -4863,7 +4863,7 @@ function publicarNoML(prodId){
       showToast('Publicado! ID: '+data.id,'✅');
       // Enviar descrição separadamente
       if(descText){
-        mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText,text:descText},function(){});
+        mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){});
       }
       renderMLProdutos();
       renderMLStatus();
@@ -4938,7 +4938,7 @@ function publicarTodosML(){
         var allProds=getProds();
         var pp=allProds.find(function(x){return x.id===p.id});
         if(pp){pp.ml_item_id=data.id;pp.ml_permalink=data.permalink||'';setProds(allProds)}
-        if(descText){mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText,text:descText},function(){})}
+        if(descText){mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){})}
         showToast((i)+'/'+prods.length+' — '+p.modelo,'✅');
       }else{
         var msg=data.message||data.error||'Erro';
@@ -4956,16 +4956,32 @@ function atualizarAnuncioML(prodId){
   var prods=getProds();
   var prod=prods.find(function(p){return p.id===prodId});
   if(!prod||!prod.ml_item_id){showToast('Produto sem anúncio no ML','⚠️');return}
-  var item=montarAnuncioML(prod);
-  var descText=item._description;
-  delete item._description;
-  delete item.category_id;delete item.buying_mode;delete item.currency_id;delete item.listing_type_id;
+  var full=montarAnuncioML(prod);
+  var descText=full._description;
+  // PUT aceita apenas campos mutáveis
+  var fotos=[];
+  (prod.fotos||[]).forEach(function(f){
+    if(f&&!f.startsWith('data:')&&fotos.length<10) fotos.push({source:f});
+  });
+  var preco=parsarPrecoBR(prod.preco)||0;
+  var item={
+    price:preco,
+    available_quantity:1,
+    pictures:fotos,
+    shipping:{mode:'me2',local_pick_up:false,free_shipping:false},
+    attributes:full.attributes||[]
+  };
   showToast('Atualizando anúncio...','🔄');
   mlApiCall('/items/'+prod.ml_item_id,'PUT',item,function(ok,data){
     if(ok){
-      if(descText){mlApiCall('/items/'+prod.ml_item_id+'/description','PUT',{plain_text:descText,text:descText},function(){})}
+      if(descText){mlApiCall('/items/'+prod.ml_item_id+'/description','PUT',{plain_text:descText},function(){})}
       showToast('Anúncio atualizado!','✅');
-    }else{showToast('Erro: '+(data.message||data.error||'Erro'),'❌')}
+    }else{
+      var msg=data.message||data.error||'Erro';
+      if(data.cause&&data.cause.length){msg+=' — '+data.cause.map(function(c){return (c.code||'')+': '+(c.message||'')}).join('; ')}
+      showToast('Erro: '+msg,'❌');
+      console.error('ML update error:',JSON.stringify(data,null,2));
+    }
   });
 }
 
