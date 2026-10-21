@@ -4736,7 +4736,6 @@ function montarAnuncioML(prod){
 
   var condicao=c.condition||'used';
   var item={
-    title:titulo,
     category_id:'MLB189344',
     price:preco,
     currency_id:'BRL',
@@ -4748,7 +4747,8 @@ function montarAnuncioML(prod){
     attributes:[
       {id:'ITEM_CONDITION',value_name:condicao==='new'?'Novo':'Usado'},
       {id:'BRAND',value_name:prod.marca||'Outro'},
-      {id:'MODEL',value_name:prod.modelo||'Outro'}
+      {id:'MODEL',value_name:prod.modelo||'Outro'},
+      {id:'TITLE',value_name:titulo}
     ]
   };
 
