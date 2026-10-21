@@ -407,6 +407,10 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <span class="sb-icon">📦</span> Correios
           <span class="sb-badge" id="badgeCorreios" style="display:none;background:var(--b)">●</span>
         </div>
+        <div class="sb-item" onclick="goPage('mercadolivre')">
+          <span class="sb-icon">🛒</span> Mercado Livre
+          <span class="sb-badge" id="badgeML" style="display:none;background:#ffe600">●</span>
+        </div>
       </div>
       <div class="sb-section">
         <div class="sb-section-label">Gestão</div>
@@ -1249,6 +1253,124 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">📦 Histórico de envios</h4>
           <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Vendas com envio já postado.</p>
           <div id="correiosHistorico"></div>
+        </div>
+      </div>
+
+      <!-- PAGE: Mercado Livre -->
+      <div class="page" id="pageMercadoLivre">
+        <div class="dash-welcome" style="border-color:rgba(255,230,0,.25);background:linear-gradient(135deg,rgba(255,230,0,.1),rgba(255,230,0,.02))">
+          <h2>🛒 Mercado Livre</h2>
+          <p>Publique seus acordeões como anúncios no Mercado Livre direto do catálogo.</p>
+        </div>
+
+        <!-- Status da conexão ML -->
+        <div class="card" style="padding:16px;margin-bottom:1.5rem">
+          <div id="mlStatus" style="display:flex;align-items:center;gap:12px">
+            <div id="mlStatusIcon" style="width:40px;height:40px;border-radius:10px;background:rgba(255,230,0,.12);display:flex;align-items:center;justify-content:center;font-size:1.3rem">🛒</div>
+            <div style="flex:1">
+              <div id="mlStatusTitle" style="font-weight:700;font-size:14px">Não conectado</div>
+              <div id="mlStatusSub" style="font-size:12px;color:var(--txt3)">Configure suas credenciais para começar</div>
+            </div>
+            <button class="btn btn-secondary" onclick="toggleMLConfig()" style="font-size:12px" id="btnMLConfig">⚙️ Configurar</button>
+          </div>
+        </div>
+
+        <!-- Configuração OAuth2 ML (toggle) -->
+        <div id="mlConfigPanel" style="display:none;margin-bottom:1.5rem">
+          <div class="card" style="padding:20px">
+            <h4 style="margin:0 0 4px;font-size:14px;font-weight:700">🔐 Credenciais do Mercado Livre</h4>
+            <p style="font-size:11px;color:var(--txt3);margin:0 0 16px">Crie um aplicativo em <a href="https://developers.mercadolivre.com.br/devcenter" target="_blank" style="color:var(--b)">developers.mercadolivre.com.br</a></p>
+
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">App ID (Client ID)</label>
+              <input type="text" id="mlAppId" placeholder="Cole o App ID do seu app ML" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">Client Secret</label>
+              <input type="password" id="mlClientSecret" placeholder="Cole o Client Secret" style="padding:8px 12px">
+            </div>
+            <div class="form-group" style="margin-bottom:10px">
+              <label style="font-size:12px;font-weight:600">URL de Redirect (copie e cole no app ML)</label>
+              <div style="display:flex;gap:6px">
+                <input type="text" id="mlRedirectUrl" readonly style="padding:8px 12px;background:var(--bg);font-size:11px;font-family:monospace" value="">
+                <button class="btn btn-secondary" onclick="copiarMLRedirect()" style="white-space:nowrap;font-size:11px">📋 Copiar</button>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:14px">
+              <button class="btn btn-primary" onclick="salvarMLConfig()" style="font-size:12px">💾 Salvar credenciais</button>
+              <button class="btn btn-secondary" onclick="iniciarAuthML()" id="btnMLAuth" style="font-size:12px;display:none">🔗 Conectar ao ML</button>
+            </div>
+            <div id="mlConfigResult" style="margin-top:8px;font-size:12px"></div>
+
+            <div style="margin-top:16px;padding:12px;background:rgba(255,230,0,.06);border-radius:8px;border:1px solid rgba(255,230,0,.15)">
+              <div style="font-size:12px;font-weight:700;color:#e6a800;margin-bottom:6px">📋 Passo a passo</div>
+              <ol style="margin:0;padding-left:18px;font-size:11px;color:var(--txt2);line-height:1.8">
+                <li>Acesse <a href="https://developers.mercadolivre.com.br/devcenter" target="_blank" style="color:var(--b)">developers.mercadolivre.com.br</a> e crie um aplicativo</li>
+                <li>Copie a URL de redirect acima e cole nas configurações do app</li>
+                <li>Cole aqui o <strong>App ID</strong> e o <strong>Client Secret</strong></li>
+                <li>Clique em <strong>Salvar</strong> e depois em <strong>Conectar ao ML</strong></li>
+                <li>Autorize o acesso na tela do Mercado Livre</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Configurações do anúncio -->
+        <div class="card" style="padding:20px;margin-bottom:1.5rem">
+          <h4 style="margin:0 0 14px;font-size:14px;font-weight:700">📝 Configurações do anúncio</h4>
+          <p style="font-size:11px;color:var(--txt3);margin:0 0 14px">Defina os padrões para os anúncios publicados. Você pode ajustar cada produto antes de publicar.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Tipo de anúncio</label>
+              <select id="mlTipoAnuncio" style="padding:8px 12px;font-size:12px">
+                <option value="gold_special">Clássico (11%)</option>
+                <option value="gold_pro">Premium (16%)</option>
+                <option value="free">Grátis (sem destaque)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Condição</label>
+              <select id="mlCondicao" style="padding:8px 12px;font-size:12px">
+                <option value="used">Usado</option>
+                <option value="new">Novo</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Tipo de frete</label>
+              <select id="mlFrete" style="padding:8px 12px;font-size:12px">
+                <option value="me2">Mercado Envios (ML calcula)</option>
+                <option value="custom">Frete a combinar</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin:0">
+              <label style="font-size:11px;font-weight:600">Garantia</label>
+              <select id="mlGarantia" style="padding:8px 12px;font-size:12px">
+                <option value="30">30 dias</option>
+                <option value="60">60 dias</option>
+                <option value="90">90 dias</option>
+                <option value="0">Sem garantia</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="salvarMLAnuncioConfig()" style="font-size:12px;margin-top:12px">💾 Salvar configurações</button>
+        </div>
+
+        <!-- Produtos para publicar -->
+        <div class="card" style="padding:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h4 style="margin:0;font-size:14px;font-weight:700">🪗 Acordeões para publicar</h4>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-secondary" onclick="renderMLProdutos()" style="font-size:11px;padding:5px 10px">🔄 Atualizar</button>
+              <button class="btn btn-primary" onclick="publicarTodosML()" style="font-size:11px;padding:5px 10px">🚀 Publicar todos</button>
+            </div>
+          </div>
+          <div id="mlProdutosList">
+            <div style="text-align:center;padding:2rem;color:var(--txt3)">
+              <div style="font-size:1.5rem;margin-bottom:6px">🛒</div>
+              <p style="margin:0;font-size:12px">Conecte ao Mercado Livre para começar</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3475,9 +3597,18 @@ function goPage(page){
     topAction.style.display='none';
     btnSyncTop.style.display='none';
     renderCorreiosStatus();
+  }else if(page==='mercadolivre'){
+    document.getElementById('pageMercadoLivre').classList.add('on');
+    document.querySelectorAll('.sb-item:not(.disabled)')[5].classList.add('active');
+    document.getElementById('topTitle').textContent='Mercado Livre';
+    document.getElementById('topSub').textContent='Publique anúncios direto do catálogo';
+    topAction.style.display='none';
+    btnSyncTop.style.display='none';
+    renderMLStatus();
+    renderMLProdutos();
   }else if(page==='vendedores'){
     document.getElementById('pageVendedores').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[5].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[6].classList.add('active');
     document.getElementById('topTitle').textContent='Vendedores';
     document.getElementById('topSub').textContent='Equipe de vendas';
     topAction.style.display='none';
@@ -3485,7 +3616,7 @@ function goPage(page){
     renderVendedores();
   }else if(page==='compras'){
     document.getElementById('pageCompras').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[6].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
     document.getElementById('topTitle').textContent='Compras';
     document.getElementById('topSub').textContent='Registro de aquisições';
     topAction.style.display='none';
@@ -3494,7 +3625,7 @@ function goPage(page){
     renderCompras();
   }else if(page==='ranking'){
     document.getElementById('pageRanking').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[7].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[8].classList.add('active');
     document.getElementById('topTitle').textContent='Ranking de Vendas';
     document.getElementById('topSub').textContent='Desempenho da equipe';
     topAction.style.display='none';
@@ -3502,7 +3633,7 @@ function goPage(page){
     renderRanking();
   }else if(page==='financeiro'){
     document.getElementById('pageFinanceiro').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[8].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[9].classList.add('active');
     document.getElementById('topTitle').textContent='Financeiro';
     document.getElementById('topSub').textContent='Relatório de faturamento e custos';
     topAction.style.display='none';
@@ -3513,14 +3644,14 @@ function goPage(page){
     renderFinanceiro();
   }else if(page==='simulador'){
     document.getElementById('pageSimulador').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[9].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[10].classList.add('active');
     document.getElementById('topTitle').textContent='Simulador de Compra';
     document.getElementById('topSub').textContent='Calcule se vale a pena antes de comprar';
     topAction.style.display='none';
     btnSyncTop.style.display='none';
   }else if(page==='config'){
     document.getElementById('pageConfig').classList.add('on');
-    document.querySelectorAll('.sb-item:not(.disabled)')[10].classList.add('active');
+    document.querySelectorAll('.sb-item:not(.disabled)')[11].classList.add('active');
     document.getElementById('topTitle').textContent='Configurações';
     document.getElementById('topSub').textContent='Segurança e dados do sistema';
     topAction.style.display='none';
@@ -4390,6 +4521,329 @@ function copiarTexto(texto){
     try{document.execCommand('copy')}catch(e){}
     document.body.removeChild(ta);
   }
+}
+
+/* ===== MERCADO LIVRE ===== */
+function getMLConfig(){try{return JSON.parse(localStorage.getItem('jk_ml_config'))||{}}catch(e){return{}}}
+function setMLConfig(c){localStorage.setItem('jk_ml_config',JSON.stringify(c));syncToServer()}
+
+function toggleMLConfig(){
+  var p=document.getElementById('mlConfigPanel');
+  p.style.display=p.style.display==='none'?'block':'none';
+  if(p.style.display==='block'){
+    var c=getMLConfig();
+    document.getElementById('mlAppId').value=c.app_id||'';
+    document.getElementById('mlClientSecret').value=c.client_secret||'';
+    var base=location.origin+'/ml_callback.php';
+    document.getElementById('mlRedirectUrl').value=base;
+    if(c.app_id) document.getElementById('btnMLAuth').style.display='';
+    // Carregar config anúncio
+    document.getElementById('mlTipoAnuncio').value=c.listing_type||'gold_special';
+    document.getElementById('mlCondicao').value=c.condition||'used';
+    document.getElementById('mlFrete').value=c.shipping||'me2';
+    document.getElementById('mlGarantia').value=c.warranty||'30';
+  }
+}
+
+function copiarMLRedirect(){
+  var url=document.getElementById('mlRedirectUrl').value;
+  copiarTexto(url);
+  showToast('URL copiada!','📋');
+}
+
+function salvarMLConfig(){
+  var c=getMLConfig();
+  c.app_id=(document.getElementById('mlAppId').value||'').trim();
+  c.client_secret=(document.getElementById('mlClientSecret').value||'').trim();
+  c.redirect_uri=document.getElementById('mlRedirectUrl').value;
+  if(!c.app_id||!c.client_secret){showToast('Preencha App ID e Client Secret','⚠️');return}
+  setMLConfig(c);
+  // Salvar config no servidor para o proxy/callback usarem
+  fetch('ml_save_config.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({app_id:c.app_id,client_secret:c.client_secret,redirect_uri:c.redirect_uri})}).catch(function(){});
+  document.getElementById('btnMLAuth').style.display='';
+  showToast('Credenciais salvas!','✅');
+}
+
+function salvarMLAnuncioConfig(){
+  var c=getMLConfig();
+  c.listing_type=document.getElementById('mlTipoAnuncio').value;
+  c.condition=document.getElementById('mlCondicao').value;
+  c.shipping=document.getElementById('mlFrete').value;
+  c.warranty=document.getElementById('mlGarantia').value;
+  setMLConfig(c);
+  showToast('Configurações de anúncio salvas!','✅');
+}
+
+function iniciarAuthML(){
+  var c=getMLConfig();
+  if(!c.app_id){showToast('Salve as credenciais primeiro','⚠️');return}
+  var authUrl='https://auth.mercadolivre.com.br/authorization'
+    +'?response_type=code'
+    +'&client_id='+encodeURIComponent(c.app_id)
+    +'&redirect_uri='+encodeURIComponent(c.redirect_uri||location.origin+'/ml_callback.php');
+  window.open(authUrl,'_blank');
+}
+
+function renderMLStatus(){
+  var c=getMLConfig();
+  var icon=document.getElementById('mlStatusIcon');
+  var title=document.getElementById('mlStatusTitle');
+  var sub=document.getElementById('mlStatusSub');
+  if(c.access_token){
+    var expirado=c.token_expires&&Date.now()>c.token_expires;
+    icon.style.background=expirado?'rgba(255,152,0,.12)':'rgba(46,204,113,.12)';
+    icon.textContent=expirado?'⚠️':'✅';
+    title.textContent=expirado?'Token expirado':'Conectado ao Mercado Livre';
+    title.style.color=expirado?'#ff9800':'#2ecc71';
+    sub.textContent=expirado?'Reconecte para renovar o token':'Pronto para publicar anúncios';
+    // Carregar dados do seller
+    if(!expirado&&!c.seller_id) carregarSellerML();
+    if(c.seller_id) sub.textContent='Seller: '+c.seller_nickname+' (ID '+c.seller_id+')';
+  }else{
+    icon.style.background='rgba(255,230,0,.12)';
+    icon.textContent='🛒';
+    title.textContent='Não conectado';
+    title.style.color='';
+    sub.textContent='Configure suas credenciais para começar';
+  }
+  // Badge
+  var prods=getProds().filter(function(p){return p.precoVenda&&p.fotos&&p.fotos.length&&!p.vendido});
+  var publicados=prods.filter(function(p){return p.ml_item_id});
+  var badge=document.getElementById('badgeML');
+  var naoPublicados=prods.length-publicados.length;
+  if(badge){badge.style.display=naoPublicados>0?'':'none';if(naoPublicados>0)badge.textContent=naoPublicados}
+}
+
+function carregarSellerML(){
+  mlApiCall('/users/me','GET',null,function(ok,data){
+    if(ok&&data.id){
+      var c=getMLConfig();
+      c.seller_id=data.id;
+      c.seller_nickname=data.nickname||'';
+      setMLConfig(c);
+      var sub=document.getElementById('mlStatusSub');
+      if(sub) sub.textContent='Seller: '+c.seller_nickname+' (ID '+c.seller_id+')';
+    }
+  });
+}
+
+function mlApiCall(endpoint,method,body,callback){
+  var url='ml_api.php?endpoint='+encodeURIComponent(endpoint)+'&method='+(method||'GET');
+  var opts={method:method||'GET',headers:{'Content-Type':'application/json'}};
+  if(body&&(method==='POST'||method==='PUT')) opts.body=JSON.stringify(body);
+  fetch(url,opts).then(function(r){return r.json()}).then(function(data){
+    if(data._token_info){
+      var c=getMLConfig();
+      c.token_expires=data._token_info.expires_at;
+      setMLConfig(c);
+    }
+    if(data.error){callback(false,data)}
+    else{callback(true,data)}
+  }).catch(function(e){callback(false,{error:e.message})});
+}
+
+function renderMLProdutos(){
+  var el=document.getElementById('mlProdutosList');
+  if(!el) return;
+  var c=getMLConfig();
+  if(!c.access_token){
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><div style="font-size:1.5rem;margin-bottom:6px">🔗</div><p style="margin:0;font-size:12px">Conecte ao Mercado Livre para ver os produtos</p></div>';
+    return;
+  }
+  var prods=getProds().filter(function(p){return p.precoVenda&&p.fotos&&p.fotos.length&&!p.vendido});
+  if(!prods.length){
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><p style="margin:0;font-size:12px">Nenhum produto disponível para publicar. Cadastre produtos com fotos e preço de venda.</p></div>';
+    return;
+  }
+  var html='<div style="display:flex;flex-direction:column;gap:10px">';
+  prods.forEach(function(p){
+    var foto=p.fotos[0]||'';
+    var fotoUrl=foto.startsWith('data:')?'':foto;
+    var publicado=!!p.ml_item_id;
+    var statusTag=publicado
+      ?'<span style="background:rgba(46,204,113,.12);color:#2ecc71;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700">✅ Publicado</span>'
+      :'<span style="background:rgba(255,152,0,.12);color:#ff9800;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700">Não publicado</span>';
+    var btnAcao=publicado
+      ?'<button class="btn btn-secondary" onclick="atualizarAnuncioML(\''+p.id+'\')" style="font-size:10px;padding:4px 8px">🔄 Atualizar</button>'
+       +'<button class="btn btn-secondary" onclick="pausarAnuncioML(\''+p.id+'\')" style="font-size:10px;padding:4px 8px;margin-left:4px">⏸️ Pausar</button>'
+       +'<a href="https://www.mercadolivre.com.br/p/'+p.ml_item_id+'" target="_blank" style="font-size:10px;padding:4px 8px;margin-left:4px;color:var(--b)">🔗 Ver</a>'
+      :'<button class="btn btn-primary" onclick="publicarNoML(\''+p.id+'\')" style="font-size:10px;padding:4px 8px">🚀 Publicar</button>';
+    html+='<div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:10px">';
+    if(fotoUrl) html+='<img src="'+fotoUrl+'" style="width:50px;height:50px;border-radius:8px;object-fit:cover">';
+    else html+='<div style="width:50px;height:50px;border-radius:8px;background:var(--brd);display:flex;align-items:center;justify-content:center;font-size:1.2rem">🪗</div>';
+    html+='<div style="flex:1;min-width:0">';
+    html+='<div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(p.modelo||p.nome||'Sem nome')+'</div>';
+    html+='<div style="font-size:11px;color:var(--txt3)">'+(p.marca||'')+' — '+formatarValorBR(p.precoVenda)+' — '+p.fotos.length+' foto(s)</div>';
+    html+='</div>';
+    html+='<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+statusTag+btnAcao+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function montarAnuncioML(prod){
+  var c=getMLConfig();
+  // Preparar fotos — só URLs (não base64)
+  var fotos=[];
+  (prod.fotos||[]).forEach(function(f){
+    if(f&&!f.startsWith('data:')) fotos.push({source:f});
+  });
+  // Título: máx 60 chars para ML
+  var titulo=(prod.marca?prod.marca+' ':'')+(prod.modelo||prod.nome||'Acordeão');
+  if(titulo.length>60) titulo=titulo.substring(0,57)+'...';
+  // Descrição
+  var desc=prod.descricao||('Acordeão '+(prod.modelo||'')+' '+(prod.marca||'')+'. Em excelente estado. Garantia de '+(c.warranty||'30')+' dias.');
+
+  var item={
+    title:titulo,
+    category_id:'MLB189344',
+    price:parseFloat(prod.precoVenda)||0,
+    currency_id:'BRL',
+    available_quantity:1,
+    buying_mode:'buy_it_now',
+    condition:c.condition||'used',
+    listing_type_id:c.listing_type||'gold_special',
+    description:{plain_text:desc},
+    pictures:fotos,
+    attributes:[
+      {id:'BRAND',value_name:prod.marca||'Outro'},
+      {id:'MODEL',value_name:prod.modelo||'Outro'}
+    ]
+  };
+
+  // Shipping
+  if(c.shipping==='me2'){
+    item.shipping={mode:'me2',local_pick_up:false,free_shipping:false};
+  }else{
+    item.shipping={mode:'not_specified',local_pick_up:true,free_shipping:false};
+  }
+
+  // Garantia
+  if(c.warranty&&c.warranty!=='0'){
+    item.sale_terms=[{id:'WARRANTY_TYPE',value_name:'Garantia do vendedor'},{id:'WARRANTY_TIME',value_name:c.warranty+' dias'}];
+  }
+
+  return item;
+}
+
+function publicarNoML(prodId){
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===prodId});
+  if(!prod){showToast('Produto não encontrado','❌');return}
+
+  // Verificar se tem fotos URL (não base64)
+  var fotosUrl=(prod.fotos||[]).filter(function(f){return f&&!f.startsWith('data:')});
+  if(!fotosUrl.length){
+    // Precisa fazer upload das fotos no imgBB antes
+    showToast('Fazendo upload das fotos...','📸');
+    uploadFotosEPublicar(prod);
+    return;
+  }
+
+  var item=montarAnuncioML(prod);
+  showToast('Publicando no Mercado Livre...','🚀');
+
+  mlApiCall('/items','POST',item,function(ok,data){
+    if(ok&&data.id){
+      prod.ml_item_id=data.id;
+      prod.ml_permalink=data.permalink||'';
+      setProds(prods);
+      showToast('Publicado! ID: '+data.id,'✅');
+      renderMLProdutos();
+      renderMLStatus();
+    }else{
+      var msg=data.message||data.error||(data.cause&&data.cause[0]&&data.cause[0].message)||'Erro desconhecido';
+      showToast('Erro: '+msg,'❌');
+      console.error('ML publish error:',data);
+    }
+  });
+}
+
+function uploadFotosEPublicar(prod){
+  var mc=getMetaConfig();
+  var imgbbKey=mc.imgbbKey;
+  if(!imgbbKey){showToast('Configure a chave imgBB em Config > Meta','⚠️');return}
+  var prods=getProds();
+  var base64Fotos=(prod.fotos||[]).filter(function(f){return f&&f.startsWith('data:')});
+  var urlFotos=(prod.fotos||[]).filter(function(f){return f&&!f.startsWith('data:')});
+  var pendentes=base64Fotos.length;
+  if(!pendentes){publicarNoML(prod.id);return}
+  var feitas=0;
+  base64Fotos.forEach(function(b64){
+    uploadToImgbb(b64,imgbbKey).then(function(url){
+      urlFotos.push(url);
+      feitas++;
+      if(feitas>=pendentes){
+        // Atualizar prod com URLs
+        var p=prods.find(function(pp){return pp.id===prod.id});
+        p.fotos=urlFotos;
+        setProds(prods);
+        showToast('Fotos enviadas! Publicando...','📸');
+        publicarNoML(prod.id);
+      }
+    }).catch(function(e){
+      feitas++;
+      showToast('Erro no upload: '+e.message,'❌');
+    });
+  });
+}
+
+function publicarTodosML(){
+  var c=getMLConfig();
+  if(!c.access_token){showToast('Conecte ao Mercado Livre primeiro','⚠️');return}
+  var prods=getProds().filter(function(p){return p.precoVenda&&p.fotos&&p.fotos.length&&!p.vendido&&!p.ml_item_id});
+  if(!prods.length){showToast('Nenhum produto pendente para publicar','ℹ️');return}
+  showToast('Publicando '+prods.length+' produto(s)...','🚀');
+  var i=0;
+  function proximo(){
+    if(i>=prods.length){showToast('Todos publicados!','✅');renderMLProdutos();renderMLStatus();return}
+    var p=prods[i];i++;
+    var fotosUrl=(p.fotos||[]).filter(function(f){return f&&!f.startsWith('data:')});
+    if(!fotosUrl.length){
+      // Upload fotos primeiro
+      uploadFotosEPublicar(p);
+      setTimeout(proximo,3000);
+      return;
+    }
+    var item=montarAnuncioML(p);
+    mlApiCall('/items','POST',item,function(ok,data){
+      if(ok&&data.id){
+        var allProds=getProds();
+        var pp=allProds.find(function(x){return x.id===p.id});
+        if(pp){pp.ml_item_id=data.id;pp.ml_permalink=data.permalink||'';setProds(allProds)}
+        showToast((i)+'/'+prods.length+' — '+p.modelo,'✅');
+      }else{
+        var msg=data.message||data.error||'Erro';
+        showToast(p.modelo+': '+msg,'❌');
+      }
+      setTimeout(proximo,1500);
+    });
+  }
+  proximo();
+}
+
+function atualizarAnuncioML(prodId){
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===prodId});
+  if(!prod||!prod.ml_item_id){showToast('Produto sem anúncio no ML','⚠️');return}
+  var item=montarAnuncioML(prod);
+  delete item.category_id;delete item.buying_mode;delete item.currency_id;delete item.listing_type_id;
+  showToast('Atualizando anúncio...','🔄');
+  mlApiCall('/items/'+prod.ml_item_id,'PUT',item,function(ok,data){
+    if(ok){showToast('Anúncio atualizado!','✅')}
+    else{showToast('Erro: '+(data.message||data.error||'Erro'),'❌')}
+  });
+}
+
+function pausarAnuncioML(prodId){
+  var prods=getProds();
+  var prod=prods.find(function(p){return p.id===prodId});
+  if(!prod||!prod.ml_item_id){return}
+  mlApiCall('/items/'+prod.ml_item_id,'PUT',{status:'paused'},function(ok,data){
+    if(ok){showToast('Anúncio pausado','⏸️')}
+    else{showToast('Erro: '+(data.message||data.error),'❌')}
+  });
 }
 
 /* ===== DATA ===== */
