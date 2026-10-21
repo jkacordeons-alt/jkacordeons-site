@@ -4849,22 +4849,34 @@ function publicarComFallback(item,descText,prod,prods,tipoIdx,precoOriginal,call
   });
 }
 
-// Remove linhas com valores/preços da descrição, mantém só especificações
+// Remove valores, frete, contatos — mantém só especificações do acordeão
 function limparValoresDescricaoML(txt){
   if(!txt) return txt;
   var linhas=txt.split('\n');
   var filtradas=linhas.filter(function(linha){
     var l=linha.trim().toLowerCase();
-    if(!l) return true; // manter linhas em branco
-    // Remover linhas que contenham valores monetários ou palavras-chave de preço
+    if(!l) return true;
+    // --- VALORES E PREÇOS ---
     if(/r\$\s*[\d.,]+/.test(l)) return false;
-    if(/^\s*(valor|preço|preco|price|custo|investimento)\s*[:=]/i.test(linha)) return false;
-    if(/^\s*(parcel|parcelas|pagamento|pix|cartão|cartao|transferência|transferencia|à vista|a vista|entrada|sinal)\s*[:=\-–]/i.test(linha)) return false;
+    if(/^\s*(valor|preço|preco|price|custo|investimento)\s*[:=\-–]/i.test(linha)) return false;
+    if(/\b(parcel|parcelas|pagamento|pix|cartão|cartao|transferência|transferencia|à vista|a vista|entrada|sinal)\b/i.test(l)) return false;
     if(/\b(por apenas|somente|só|de\s+r\$|por\s+r\$|apenas\s+r\$)\b/.test(l)) return false;
-    if(/\b\d+\s*x\s*(de\s+)?r\$/.test(l)) return false; // 12x de R$...
+    if(/\b\d+\s*x\s*(de\s+)?r\$/.test(l)) return false;
     if(/\b(desconto|promoção|promocao|oferta|liquidação|liquidacao)\b/.test(l)&&/\d/.test(l)) return false;
     if(/^\s*(aceito|aceitamos|formas? de pagamento|condições|condicoes)\s*[:=\-–]/i.test(linha)) return false;
-    if(/^\s*(frete|envio|entrega)\s*[:=]/i.test(linha)&&/r\$|grátis|gratis|inclus/.test(l)) return false;
+    // --- FRETE ---
+    if(/\b(frete\s*(pago|gr[aá]tis|inclus|por conta)|envio\s*(pago|gr[aá]tis|inclus)|entrega\s*(pago|gr[aá]tis|inclus))\b/i.test(l)) return false;
+    if(/^\s*(frete|envio|entrega)\b/i.test(l)&&/(pago|gr[aá]tis|inclus|todo|brasil|sedex|pac|correios)/i.test(l)) return false;
+    // --- CONTATOS (ML penaliza) ---
+    if(/\b(whatsapp|whats|zap|wpp|watts)\b/i.test(l)) return false;
+    if(/\b(instagram|insta|face|facebook|telegram|tiktok|youtube)\b/i.test(l)) return false;
+    if(/\b(chama|chamar|chame|liga|ligar|ligue|manda|mandar|mande)\s*(no|na|pra|para|msg|mensagem|inbox|dm|direct)/i.test(l)) return false;
+    if(/\(\d{2}\)\s*\d{4,5}[\s-]?\d{4}/.test(l)) return false; // (42) 99958-0017
+    if(/\b\d{2}\s*\d{4,5}[\s-]?\d{4}\b/.test(l)) return false; // 42 999580017
+    if(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(l)) return false; // email
+    if(/\b(entre\s*em\s*contato|fale\s*conosco|nos\s*contate|contato\s*:)/i.test(l)) return false;
+    if(/\b(link\s*na\s*bio|acesse|visite\s*(nosso|nossa|o|a)\s*(site|loja|perfil))/i.test(l)) return false;
+    if(/(www\.|\.com|\.br|http)/i.test(l)) return false; // URLs
     return true;
   });
   return filtradas.join('\n').replace(/\n{3,}/g,'\n\n').trim();
@@ -5098,7 +5110,11 @@ function atualizarAnuncioML(prodId){
   (prod.fotos||[]).forEach(function(f){
     if(f&&!f.startsWith('data:')&&fotos.length<10) fotos.push({source:f});
   });
-  var preco=parsarPrecoBR(prod.preco)||0;
+  var precoBase=parsarPrecoBR(prod.preco)||0;
+  // Aplicar comissão do tipo de anúncio atual
+  var tipoAtual=prod.ml_listing_type||'gold_special';
+  var comissao=ML_COMISSOES[tipoAtual]||0.13;
+  var preco=comissao>0?Math.ceil(precoBase/(1-comissao)):precoBase;
   var item={
     price:preco,
     available_quantity:1,
@@ -5204,28 +5220,21 @@ function renderMLMetricas(){
 function carregarVisitasML(){
   var prods=getProds().filter(function(p){return p.ml_item_id});
   if(!prods.length){document.getElementById('mlMetVisitas').textContent='0';return}
-  // ML usa /items/visits?ids=ID1,ID2
-  var ids=prods.map(function(p){return p.ml_item_id}).join(',');
-  var agora=new Date();
-  var atras=new Date(agora.getTime()-90*24*60*60*1000);
-  var df=atras.toISOString().split('T')[0]+'T00:00:00.000-03:00';
-  var dt=agora.toISOString().split('T')[0]+'T23:59:59.000-03:00';
-  mlApiCall('/items/visits?ids='+ids+'&date_from='+df+'&date_to='+dt,'GET',null,function(ok,data){
-    if(!ok){document.getElementById('mlMetVisitas').textContent='—';return}
-    var totalVisitas=0;
-    // Resposta pode ser array de {item_id, total_visits} ou objeto
-    if(Array.isArray(data)){
-      data.forEach(function(v){totalVisitas+=(v.total_visits||v.total||0)});
-    }else if(typeof data==='object'){
-      Object.keys(data).forEach(function(k){
-        if(k.startsWith('MLB')){
-          var val=data[k];
-          if(typeof val==='number') totalVisitas+=val;
-          else if(Array.isArray(val)) val.forEach(function(v){totalVisitas+=(v.total||0)});
-        }
-      });
-    }
-    document.getElementById('mlMetVisitas').textContent=totalVisitas;
+  // Usar endpoint por item: /items/{id}/visits/time_window?last=90&unit=day
+  var totalVisitas=0;
+  var count=0;
+  prods.forEach(function(p){
+    mlApiCall('/items/'+p.ml_item_id+'/visits/time_window?last=90&unit=day','GET',null,function(ok,data){
+      count++;
+      if(ok&&data.results){
+        data.results.forEach(function(d){totalVisitas+=(d.total||0)});
+      }else if(ok&&data.total_visits!==undefined){
+        totalVisitas+=data.total_visits;
+      }
+      if(count>=prods.length){
+        document.getElementById('mlMetVisitas').textContent=totalVisitas;
+      }
+    });
   });
 }
 
