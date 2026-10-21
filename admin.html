@@ -4781,34 +4781,65 @@ function montarAnuncioML(prod){
 
 // Diagnóstico: descobre categoria e atributos corretos para acordeões
 function diagnosticarCategoriaML(){
-  showToast('Consultando categoria correta...','🔍');
-  // 1. Category predictor
-  mlApiCall('/sites/MLB/category_predictor/predict?q=acordeão','GET',null,function(ok,data){
-    if(ok&&data.length){
-      var pred=data[0];
-      var catId=pred.category_id;
-      var domainId=pred.domain_id||'';
-      console.log('ML Category Predictor resultado:',JSON.stringify(pred,null,2));
-      showToast('Categoria: '+catId+' ('+pred.category_name+')','✅');
-      // 2. Buscar atributos obrigatórios
-      mlApiCall('/categories/'+catId+'/attributes','GET',null,function(ok2,attrs){
-        if(ok2&&attrs.length){
-          var obrigatorios=attrs.filter(function(a){return a.tags&&a.tags.required});
-          console.log('ML Atributos obrigatórios para '+catId+':');
-          obrigatorios.forEach(function(a){
+  showToast('Consultando categorias e atributos...','🔍');
+  var resultados=[];
+
+  // 1. Domain discovery (endpoint atual do predictor)
+  mlApiCall('/sites/MLB/domain_discovery/search?q=acordeão','GET',null,function(ok1,d1){
+    console.log('=== ML DIAGNÓSTICO ===');
+    console.log('1. Domain discovery:',JSON.stringify(d1,null,2));
+    resultados.push('Domain discovery: '+(ok1?'OK':'ERRO'));
+
+    // 2. Info da categoria MLB188064
+    mlApiCall('/categories/MLB188064','GET',null,function(ok2,d2){
+      console.log('2. Categoria MLB188064:',JSON.stringify(d2,null,2));
+      resultados.push('MLB188064: '+(d2.name||'?'));
+
+      // 3. Atributos obrigatórios da MLB188064
+      mlApiCall('/categories/MLB188064/attributes','GET',null,function(ok3,attrs188){
+        console.log('3. Atributos MLB188064:');
+        if(ok3&&attrs188.length){
+          attrs188.forEach(function(a){
+            var req=a.tags&&(a.tags.required||a.tags.catalog_required)?'OBRIGATÓRIO':'opcional';
             var vals=(a.values||[]).slice(0,5).map(function(v){return v.name}).join(', ');
-            console.log('  - '+a.id+' ('+a.name+')'+(vals?' [valores: '+vals+']':''));
+            console.log('  '+req+' — '+a.id+' ('+a.name+') tipo:'+a.value_type+(vals?' ['+vals+']':''));
           });
-          console.log('ML Todos os atributos:',JSON.stringify(attrs.map(function(a){return{id:a.id,name:a.name,required:!!(a.tags&&a.tags.required),type:a.value_type}}),null,2));
-          alert('Categoria: '+catId+' — '+pred.category_name+'\nDomínio: '+domainId+'\nAtributos obrigatórios: '+obrigatorios.map(function(a){return a.id}).join(', ')+'\n\nVeja o console (F12) para detalhes completos.');
-        }else{
-          console.error('Erro ao buscar atributos:',data);
         }
+
+        // 4. Buscar acordeões reais e ver suas categorias
+        mlApiCall('/sites/MLB/search?q=acordeão&limit=3','GET',null,function(ok4,search){
+          console.log('4. Busca "acordeão" — categorias encontradas:');
+          if(ok4&&search.results){
+            search.results.forEach(function(r){
+              console.log('  - "'+r.title+'" → cat:'+r.category_id+' dom:'+(r.domain_id||'?'));
+            });
+            // Pegar a categoria do primeiro resultado real
+            var catReal=search.results[0].category_id;
+            resultados.push('Categoria real de acordeões: '+catReal);
+
+            // 5. Atributos dessa categoria real
+            mlApiCall('/categories/'+catReal+'/attributes','GET',null,function(ok5,attrsReal){
+              console.log('5. Atributos da categoria REAL ('+catReal+'):');
+              if(ok5&&attrsReal.length){
+                var obrig=[];
+                attrsReal.forEach(function(a){
+                  var req=a.tags&&(a.tags.required||a.tags.catalog_required)?'OBRIGATÓRIO':'opcional';
+                  if(req==='OBRIGATÓRIO') obrig.push(a.id);
+                  var vals=(a.values||[]).slice(0,5).map(function(v){return v.name}).join(', ');
+                  console.log('  '+req+' — '+a.id+' ('+a.name+') tipo:'+a.value_type+(vals?' ['+vals+']':''));
+                });
+                alert('DIAGNÓSTICO ML:\n\nCategoria real de acordeões: '+catReal+'\nMLB188064 é: '+(d2.name||'?')+'\n\nAtributos obrigatórios:\n'+obrig.join('\n')+'\n\nVeja o console (F12) para detalhes completos.');
+              }else{
+                alert('Erro ao buscar atributos de '+catReal);
+              }
+            });
+          }else{
+            console.log('  Busca falhou:',search);
+            alert('Diagnóstico parcial — veja console (F12)');
+          }
+        });
       });
-    }else{
-      console.error('Category predictor falhou:',data);
-      showToast('Erro no predictor — veja console','❌');
-    }
+    });
   });
 }
 
