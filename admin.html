@@ -4725,9 +4725,9 @@ function montarAnuncioML(prod){
   (prod.fotos||[]).forEach(function(f){
     if(f&&!f.startsWith('data:')&&fotos.length<10) fotos.push({source:f});
   });
-  // Título: máx 60 chars para ML
+  // Título: máx 60 chars, sem caracteres especiais proibidos pelo ML
   var titulo='Acordeão '+(prod.marca?prod.marca+' ':'')+(prod.modelo||prod.nome||'');
-  titulo=titulo.trim();
+  titulo=titulo.replace(/[*#$%&{}|\\<>~`^]/g,'').replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();
   if(titulo.length>60) titulo=titulo.substring(0,57)+'...';
   // Preço — ML exige número > 0
   var preco=parsarPrecoBR(prod.preco)||0;
