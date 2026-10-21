@@ -4863,7 +4863,7 @@ function publicarNoML(prodId){
       showToast('Publicado! ID: '+data.id,'✅');
       // Enviar descrição separadamente
       if(descText){
-        mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){});
+        mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText,text:descText},function(){});
       }
       renderMLProdutos();
       renderMLStatus();
@@ -4938,7 +4938,7 @@ function publicarTodosML(){
         var allProds=getProds();
         var pp=allProds.find(function(x){return x.id===p.id});
         if(pp){pp.ml_item_id=data.id;pp.ml_permalink=data.permalink||'';setProds(allProds)}
-        if(descText){mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){})}
+        if(descText){mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText,text:descText},function(){})}
         showToast((i)+'/'+prods.length+' — '+p.modelo,'✅');
       }else{
         var msg=data.message||data.error||'Erro';
@@ -4963,7 +4963,7 @@ function atualizarAnuncioML(prodId){
   showToast('Atualizando anúncio...','🔄');
   mlApiCall('/items/'+prod.ml_item_id,'PUT',item,function(ok,data){
     if(ok){
-      if(descText){mlApiCall('/items/'+prod.ml_item_id+'/description','PUT',{plain_text:descText},function(){})}
+      if(descText){mlApiCall('/items/'+prod.ml_item_id+'/description','PUT',{plain_text:descText,text:descText},function(){})}
       showToast('Anúncio atualizado!','✅');
     }else{showToast('Erro: '+(data.message||data.error||'Erro'),'❌')}
   });
