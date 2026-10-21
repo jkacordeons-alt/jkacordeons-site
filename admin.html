@@ -4720,29 +4720,32 @@ function renderMLProdutos(){
 
 function montarAnuncioML(prod){
   var c=getMLConfig();
-  // Preparar fotos — só URLs (não base64)
+  // Preparar fotos — só URLs (não base64), max 10
   var fotos=[];
   (prod.fotos||[]).forEach(function(f){
-    if(f&&!f.startsWith('data:')) fotos.push({source:f});
+    if(f&&!f.startsWith('data:')&&fotos.length<10) fotos.push({source:f});
   });
   // Título: máx 60 chars para ML
-  var titulo=(prod.marca?prod.marca+' ':'')+(prod.modelo||prod.nome||'Acordeão');
+  var titulo='Acordeão '+(prod.marca?prod.marca+' ':'')+(prod.modelo||prod.nome||'');
+  titulo=titulo.trim();
   if(titulo.length>60) titulo=titulo.substring(0,57)+'...';
-  // Descrição
+  // Preço — ML exige número > 0
+  var preco=parsarPrecoBR(prod.preco)||0;
+  // Descrição para enviar separado depois
   var desc=prod.descricao||('Acordeão '+(prod.modelo||'')+' '+(prod.marca||'')+'. Em excelente estado. Garantia de '+(c.warranty||'30')+' dias.');
 
+  var condicao=c.condition||'used';
   var item={
     title:titulo,
     category_id:'MLB189344',
-    price:parsarPrecoBR(prod.preco)||0,
+    price:preco,
     currency_id:'BRL',
     available_quantity:1,
     buying_mode:'buy_it_now',
-    condition:c.condition||'used',
     listing_type_id:c.listing_type||'gold_special',
-    description:{plain_text:desc},
     pictures:fotos,
     attributes:[
+      {id:'ITEM_CONDITION',value_name:condicao==='new'?'Novo':'Usado'},
       {id:'BRAND',value_name:prod.marca||'Outro'},
       {id:'MODEL',value_name:prod.modelo||'Outro'}
     ]
@@ -4755,10 +4758,13 @@ function montarAnuncioML(prod){
     item.shipping={mode:'not_specified',local_pick_up:true,free_shipping:false};
   }
 
-  // Garantia
+  // Garantia via sale_terms
   if(c.warranty&&c.warranty!=='0'){
     item.sale_terms=[{id:'WARRANTY_TYPE',value_name:'Garantia do vendedor'},{id:'WARRANTY_TIME',value_name:c.warranty+' dias'}];
   }
+
+  // Descrição guardada pra enviar separado
+  item._description=desc;
 
   return item;
 }
@@ -4778,7 +4784,10 @@ function publicarNoML(prodId){
   }
 
   var item=montarAnuncioML(prod);
+  var descText=item._description;
+  delete item._description;
   showToast('Publicando no Mercado Livre...','🚀');
+  console.log('ML payload:',JSON.stringify(item,null,2));
 
   mlApiCall('/items','POST',item,function(ok,data){
     if(ok&&data.id){
@@ -4786,12 +4795,17 @@ function publicarNoML(prodId){
       prod.ml_permalink=data.permalink||'';
       setProds(prods);
       showToast('Publicado! ID: '+data.id,'✅');
+      // Enviar descrição separadamente
+      if(descText){
+        mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){});
+      }
       renderMLProdutos();
       renderMLStatus();
     }else{
-      var msg=data.message||data.error||(data.cause&&data.cause[0]&&data.cause[0].message)||'Erro desconhecido';
+      var msg=data.message||data.error||'Erro desconhecido';
+      if(data.cause&&data.cause.length){msg+=' — '+data.cause.map(function(c){return (c.code||'')+': '+(c.message||'')}).join('; ')}
       showToast('Erro: '+msg,'❌');
-      console.error('ML publish error:',data);
+      console.error('ML publish error:',JSON.stringify(data,null,2));
     }
   });
 }
@@ -4844,6 +4858,9 @@ function publicarTodosML(){
       return;
     }
     var item=montarAnuncioML(p);
+    var descText=item._description;
+    delete item._description;
+    console.log('ML payload (batch):',JSON.stringify(item,null,2));
     mlApiCall('/items','POST',item,function(ok,data){
       if(!ok&&(data.error==='Token não encontrado. Autorize o app primeiro.'||data.error==='Token expirado. Re-autorize o app.'||data.error==='Refresh token falhou. Re-autorize o app.')){
         parou=true;
@@ -4855,10 +4872,13 @@ function publicarTodosML(){
         var allProds=getProds();
         var pp=allProds.find(function(x){return x.id===p.id});
         if(pp){pp.ml_item_id=data.id;pp.ml_permalink=data.permalink||'';setProds(allProds)}
+        if(descText){mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){})}
         showToast((i)+'/'+prods.length+' — '+p.modelo,'✅');
       }else{
         var msg=data.message||data.error||'Erro';
+        if(data.cause&&data.cause.length){msg+=' — '+data.cause.map(function(c){return (c.code||'')+': '+(c.message||'')}).join('; ')}
         showToast(p.modelo+': '+msg,'❌');
+        console.error('ML batch publish error:',JSON.stringify(data,null,2));
       }
       setTimeout(proximo,2000);
     });
@@ -4871,11 +4891,15 @@ function atualizarAnuncioML(prodId){
   var prod=prods.find(function(p){return p.id===prodId});
   if(!prod||!prod.ml_item_id){showToast('Produto sem anúncio no ML','⚠️');return}
   var item=montarAnuncioML(prod);
+  var descText=item._description;
+  delete item._description;
   delete item.category_id;delete item.buying_mode;delete item.currency_id;delete item.listing_type_id;
   showToast('Atualizando anúncio...','🔄');
   mlApiCall('/items/'+prod.ml_item_id,'PUT',item,function(ok,data){
-    if(ok){showToast('Anúncio atualizado!','✅')}
-    else{showToast('Erro: '+(data.message||data.error||'Erro'),'❌')}
+    if(ok){
+      if(descText){mlApiCall('/items/'+prod.ml_item_id+'/description','PUT',{plain_text:descText},function(){})}
+      showToast('Anúncio atualizado!','✅');
+    }else{showToast('Erro: '+(data.message||data.error||'Erro'),'❌')}
   });
 }
 
