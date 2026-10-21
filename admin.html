@@ -4606,6 +4606,18 @@ function iniciarAuthML(){
   });
 }
 
+function syncMLTokenToServer(){
+  var c=getMLConfig();
+  if(!c.access_token) return;
+  fetch('ml_api.php?endpoint=%2Fsave_token&method=POST',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({access_token:c.access_token,refresh_token:c.refresh_token,token_expires:c.token_expires,seller_id:c.seller_id})
+  }).then(function(r){return r.json()}).then(function(d){
+    if(d.ok) console.log('ML token synced to server');
+    else console.warn('ML token sync failed:',d);
+  }).catch(function(e){console.error('ML token sync error:',e)});
+}
+
 function renderMLStatus(){
   var c=getMLConfig();
   var icon=document.getElementById('mlStatusIcon');
@@ -4618,6 +4630,8 @@ function renderMLStatus(){
     title.textContent=expirado?'Token expirado':'Conectado ao Mercado Livre';
     title.style.color=expirado?'#ff9800':'#2ecc71';
     sub.textContent=expirado?'Reconecte para renovar o token':'Pronto para publicar anúncios';
+    // Sync token para o servidor (fallback caso callback não tenha gravado)
+    syncMLTokenToServer();
     // Carregar dados do seller
     if(!expirado&&!c.seller_id) carregarSellerML();
     if(c.seller_id) sub.textContent='Seller: '+c.seller_nickname+' (ID '+c.seller_id+')';
@@ -4818,18 +4832,25 @@ function publicarTodosML(){
   if(!prods.length){showToast('Nenhum produto pendente para publicar','ℹ️');return}
   showToast('Publicando '+prods.length+' produto(s)...','🚀');
   var i=0;
+  var parou=false;
   function proximo(){
-    if(i>=prods.length){showToast('Todos publicados!','✅');renderMLProdutos();renderMLStatus();return}
+    if(parou) return;
+    if(i>=prods.length){showToast('Publicação finalizada!','✅');renderMLProdutos();renderMLStatus();return}
     var p=prods[i];i++;
     var fotosUrl=(p.fotos||[]).filter(function(f){return f&&!f.startsWith('data:')});
     if(!fotosUrl.length){
-      // Upload fotos primeiro
       uploadFotosEPublicar(p);
-      setTimeout(proximo,3000);
+      setTimeout(proximo,4000);
       return;
     }
     var item=montarAnuncioML(p);
     mlApiCall('/items','POST',item,function(ok,data){
+      if(!ok&&(data.error==='Token não encontrado. Autorize o app primeiro.'||data.error==='Token expirado. Re-autorize o app.'||data.error==='Refresh token falhou. Re-autorize o app.')){
+        parou=true;
+        showToast('Erro de autenticação. Reconecte ao ML.','❌');
+        renderMLStatus();
+        return;
+      }
       if(ok&&data.id){
         var allProds=getProds();
         var pp=allProds.find(function(x){return x.id===p.id});
@@ -4839,7 +4860,7 @@ function publicarTodosML(){
         var msg=data.message||data.error||'Erro';
         showToast(p.modelo+': '+msg,'❌');
       }
-      setTimeout(proximo,1500);
+      setTimeout(proximo,2000);
     });
   }
   proximo();

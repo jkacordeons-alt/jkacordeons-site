@@ -17,11 +17,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
+// Endpoint de debug
+if (isset($_GET['endpoint']) && $_GET['endpoint'] === '/debug') {
+    $tokenFile = __DIR__ . '/ml_token.json';
+    $configFile = __DIR__ . '/ml_config.json';
+    echo json_encode([
+        'dir' => __DIR__,
+        'token_file' => $tokenFile,
+        'token_exists' => file_exists($tokenFile),
+        'config_exists' => file_exists($configFile),
+        'dir_writable' => is_writable(__DIR__),
+        'files_in_dir' => array_values(array_filter(scandir(__DIR__), function($f){ return strpos($f,'ml_')===0; }))
+    ]);
+    exit;
+}
+
+// Se receber token via POST header (fallback para salvar token do JS)
+if (isset($_GET['endpoint']) && $_GET['endpoint'] === '/save_token') {
+    $body = json_decode(file_get_contents('php://input'), true);
+    if ($body && isset($body['access_token'])) {
+        $tokenFile = __DIR__ . '/ml_token.json';
+        $tokenData = [
+            'access_token' => $body['access_token'],
+            'refresh_token' => isset($body['refresh_token']) ? $body['refresh_token'] : null,
+            'token_type' => 'Bearer',
+            'expires_at' => isset($body['token_expires']) ? intval($body['token_expires']/1000) : time()+21600,
+            'user_id' => isset($body['seller_id']) ? $body['seller_id'] : null,
+            'created_at' => time()
+        ];
+        $ok = file_put_contents($tokenFile, json_encode($tokenData, JSON_PRETTY_PRINT));
+        echo json_encode(['ok' => $ok !== false, 'path' => $tokenFile]);
+        exit;
+    }
+    echo json_encode(['error' => 'Dados inválidos']);
+    exit;
+}
+
 // Carregar token
 $tokenFile = __DIR__ . '/ml_token.json';
 if (!file_exists($tokenFile)) {
     http_response_code(401);
-    echo json_encode(['error' => 'Token não encontrado. Autorize o app primeiro.']);
+    echo json_encode(['error' => 'Token não encontrado. Autorize o app primeiro.', 'path' => $tokenFile, 'dir_writable' => is_writable(__DIR__)]);
     exit;
 }
 
