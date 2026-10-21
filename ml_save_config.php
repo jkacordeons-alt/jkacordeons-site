@@ -31,6 +31,7 @@ $config = [
     'app_id' => $input['app_id'],
     'client_secret' => $input['client_secret'],
     'redirect_uri' => isset($input['redirect_uri']) ? $input['redirect_uri'] : 'https://jkacordeons.com.br/ml_callback.php',
+    'code_verifier' => isset($input['code_verifier']) ? $input['code_verifier'] : null,
     'saved_at' => date('Y-m-d H:i:s')
 ];
 

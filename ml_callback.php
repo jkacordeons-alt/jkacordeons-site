@@ -46,7 +46,8 @@ curl_setopt_array($ch, [
         'client_id' => $app_id,
         'client_secret' => $client_secret,
         'code' => $code,
-        'redirect_uri' => $redirect_uri
+        'redirect_uri' => $redirect_uri,
+        'code_verifier' => isset($config['code_verifier']) ? $config['code_verifier'] : ''
     ]),
     CURLOPT_TIMEOUT => 15
 ]);
