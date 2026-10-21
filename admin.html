@@ -4744,18 +4744,19 @@ function montarAnuncioML(prod){
   // Descrição para enviar separado depois
   var desc=prod.descricao||('Acordeão '+(prod.modelo||'')+' '+(prod.marca||'')+'. Em excelente estado. Garantia de '+(c.warranty||'30')+' dias.');
 
-  var condicao=c.condition||'used';
+  var condicao='used';
   var item={
-    title:titulo,
+    family_name:titulo,
     category_id:'MLB72749',
     price:preco,
     currency_id:'BRL',
     available_quantity:1,
     buying_mode:'buy_it_now',
-    listing_type_id:c.listing_type||'gold_special',
+    listing_type_id:'free',
     pictures:fotos,
+    shipping:{mode:'me2',local_pick_up:false,free_shipping:false},
     attributes:[
-      {id:'ITEM_CONDITION',value_name:condicao==='new'?'Novo':'Usado'},
+      {id:'ITEM_CONDITION',value_name:'Usado'},
       {id:'BRAND',value_name:prod.marca||'Outro'},
       {id:'MODEL',value_name:prod.modelo||'Outro'},
       {id:'PRODUCT_TYPE',value_name:'Acordeão'},
@@ -4763,18 +4764,6 @@ function montarAnuncioML(prod){
       {id:'EMPTY_GTIN_REASON',value_name:'O produto não tem código cadastrado'}
     ]
   };
-
-  // Shipping
-  if(c.shipping==='me2'){
-    item.shipping={mode:'me2',local_pick_up:false,free_shipping:false};
-  }else{
-    item.shipping={mode:'not_specified',local_pick_up:true,free_shipping:false};
-  }
-
-  // Garantia via sale_terms
-  if(c.warranty&&c.warranty!=='0'){
-    item.sale_terms=[{id:'WARRANTY_TYPE',value_name:'Garantia do vendedor'},{id:'WARRANTY_TIME',value_name:c.warranty+' dias'}];
-  }
 
   // Descrição guardada pra enviar separado
   item._description=desc;
