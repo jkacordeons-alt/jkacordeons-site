@@ -1363,6 +1363,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             <div style="display:flex;gap:6px">
               <button class="btn btn-secondary" onclick="renderMLProdutos()" style="font-size:11px;padding:5px 10px">🔄 Atualizar</button>
               <button class="btn btn-primary" onclick="publicarTodosML()" style="font-size:11px;padding:5px 10px">🚀 Publicar todos</button>
+              <button class="btn btn-secondary" onclick="diagnosticarCategoriaML()" style="font-size:11px;padding:5px 10px">🔍 Diagnosticar categoria</button>
             </div>
           </div>
           <div id="mlProdutosList">
@@ -4776,6 +4777,39 @@ function montarAnuncioML(prod){
   item._description=desc;
 
   return item;
+}
+
+// Diagnóstico: descobre categoria e atributos corretos para acordeões
+function diagnosticarCategoriaML(){
+  showToast('Consultando categoria correta...','🔍');
+  // 1. Category predictor
+  mlApiCall('/sites/MLB/category_predictor/predict?q=acordeão','GET',null,function(ok,data){
+    if(ok&&data.length){
+      var pred=data[0];
+      var catId=pred.category_id;
+      var domainId=pred.domain_id||'';
+      console.log('ML Category Predictor resultado:',JSON.stringify(pred,null,2));
+      showToast('Categoria: '+catId+' ('+pred.category_name+')','✅');
+      // 2. Buscar atributos obrigatórios
+      mlApiCall('/categories/'+catId+'/attributes','GET',null,function(ok2,attrs){
+        if(ok2&&attrs.length){
+          var obrigatorios=attrs.filter(function(a){return a.tags&&a.tags.required});
+          console.log('ML Atributos obrigatórios para '+catId+':');
+          obrigatorios.forEach(function(a){
+            var vals=(a.values||[]).slice(0,5).map(function(v){return v.name}).join(', ');
+            console.log('  - '+a.id+' ('+a.name+')'+(vals?' [valores: '+vals+']':''));
+          });
+          console.log('ML Todos os atributos:',JSON.stringify(attrs.map(function(a){return{id:a.id,name:a.name,required:!!(a.tags&&a.tags.required),type:a.value_type}}),null,2));
+          alert('Categoria: '+catId+' — '+pred.category_name+'\nDomínio: '+domainId+'\nAtributos obrigatórios: '+obrigatorios.map(function(a){return a.id}).join(', ')+'\n\nVeja o console (F12) para detalhes completos.');
+        }else{
+          console.error('Erro ao buscar atributos:',data);
+        }
+      });
+    }else{
+      console.error('Category predictor falhou:',data);
+      showToast('Erro no predictor — veja console','❌');
+    }
+  });
 }
 
 function publicarNoML(prodId){
