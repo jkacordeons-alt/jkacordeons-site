@@ -4629,7 +4629,7 @@ function renderMLStatus(){
     sub.textContent='Configure suas credenciais para começar';
   }
   // Badge
-  var prods=getProds().filter(function(p){return p.precoVenda&&p.fotos&&p.fotos.length&&!p.vendido});
+  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&!p.vendido});
   var publicados=prods.filter(function(p){return p.ml_item_id});
   var badge=document.getElementById('badgeML');
   var naoPublicados=prods.length-publicados.length;
@@ -4672,9 +4672,9 @@ function renderMLProdutos(){
     el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><div style="font-size:1.5rem;margin-bottom:6px">🔗</div><p style="margin:0;font-size:12px">Conecte ao Mercado Livre para ver os produtos</p></div>';
     return;
   }
-  var prods=getProds().filter(function(p){return p.precoVenda&&p.fotos&&p.fotos.length&&!p.vendido});
+  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&!p.vendido});
   if(!prods.length){
-    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><p style="margin:0;font-size:12px">Nenhum produto disponível para publicar. Cadastre produtos com fotos e preço de venda.</p></div>';
+    el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><p style="margin:0;font-size:12px">Nenhum produto disponível para publicar. Cadastre produtos com fotos e preço.</p></div>';
     return;
   }
   var html='<div style="display:flex;flex-direction:column;gap:10px">';
@@ -4695,7 +4695,7 @@ function renderMLProdutos(){
     else html+='<div style="width:50px;height:50px;border-radius:8px;background:var(--brd);display:flex;align-items:center;justify-content:center;font-size:1.2rem">🪗</div>';
     html+='<div style="flex:1;min-width:0">';
     html+='<div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+(p.modelo||p.nome||'Sem nome')+'</div>';
-    html+='<div style="font-size:11px;color:var(--txt3)">'+(p.marca||'')+' — '+formatarValorBR(p.precoVenda)+' — '+p.fotos.length+' foto(s)</div>';
+    html+='<div style="font-size:11px;color:var(--txt3)">'+(p.marca||'')+' — '+(p.preco||'Sem preço')+' — '+p.fotos.length+' foto(s)</div>';
     html+='</div>';
     html+='<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">'+statusTag+btnAcao+'</div>';
     html+='</div>';
@@ -4720,7 +4720,7 @@ function montarAnuncioML(prod){
   var item={
     title:titulo,
     category_id:'MLB189344',
-    price:parseFloat(prod.precoVenda)||0,
+    price:parsarPrecoBR(prod.preco)||0,
     currency_id:'BRL',
     available_quantity:1,
     buying_mode:'buy_it_now',
@@ -4814,7 +4814,7 @@ function uploadFotosEPublicar(prod){
 function publicarTodosML(){
   var c=getMLConfig();
   if(!c.access_token){showToast('Conecte ao Mercado Livre primeiro','⚠️');return}
-  var prods=getProds().filter(function(p){return p.precoVenda&&p.fotos&&p.fotos.length&&!p.vendido&&!p.ml_item_id});
+  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&!p.vendido&&!p.ml_item_id});
   if(!prods.length){showToast('Nenhum produto pendente para publicar','ℹ️');return}
   showToast('Publicando '+prods.length+' produto(s)...','🚀');
   var i=0;
