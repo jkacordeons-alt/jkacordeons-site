@@ -4736,19 +4736,18 @@ function montarAnuncioML(prod){
 
   var condicao=c.condition||'used';
   var item={
-    category_id:'MLB189344',
+    title:titulo,
+    category_id:'MLB188064',
     price:preco,
     currency_id:'BRL',
     available_quantity:1,
     buying_mode:'buy_it_now',
     listing_type_id:c.listing_type||'gold_special',
     pictures:fotos,
-    family_name:'Acordeões',
     attributes:[
       {id:'ITEM_CONDITION',value_name:condicao==='new'?'Novo':'Usado'},
       {id:'BRAND',value_name:prod.marca||'Outro'},
-      {id:'MODEL',value_name:prod.modelo||'Outro'},
-      {id:'TITLE',value_name:titulo}
+      {id:'MODEL',value_name:prod.modelo||'Outro'}
     ]
   };
 
