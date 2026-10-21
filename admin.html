@@ -1907,6 +1907,7 @@ function forcarLogout(){
 function loadFromServer(){
   return fetch(API_URL+'?action=load',{headers:authHeaders()})
   .then(function(r){
+    if(r.status===401){forcarLogout();throw new Error('session_expired')}
     var ct=r.headers.get('content-type')||'';
     if(ct.indexOf('json')===-1){throw new Error('not json')}
     return r.json();
@@ -3482,6 +3483,14 @@ function iniciarSessao(){
     // Auto-importar do Meta em background ao logar
     _autoImportDone=false;
     autoImportarDoMeta();
+  }).catch(function(e){
+    if(e.message!=='session_expired'){
+      console.warn('☁️ Erro ao carregar do servidor:',e.message);
+      atualizarStats();
+      goPage('dashboard');
+      var prods=getProds();
+      if(prods.length>0) showToast('📱 '+prods.length+' produto(s) carregado(s) localmente');
+    }
   });
 }
 
@@ -4736,7 +4745,6 @@ function montarAnuncioML(prod){
 
   var condicao=c.condition||'used';
   var item={
-    title:titulo,
     category_id:'MLB188064',
     price:preco,
     currency_id:'BRL',
@@ -4744,6 +4752,7 @@ function montarAnuncioML(prod){
     buying_mode:'buy_it_now',
     listing_type_id:c.listing_type||'gold_special',
     pictures:fotos,
+    family_name:titulo,
     attributes:[
       {id:'ITEM_CONDITION',value_name:condicao==='new'?'Novo':'Usado'},
       {id:'BRAND',value_name:prod.marca||'Outro'},
