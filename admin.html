@@ -4849,8 +4849,30 @@ function publicarComFallback(item,descText,prod,prods,tipoIdx,precoOriginal,call
   });
 }
 
+// Remove linhas com valores/preços da descrição, mantém só especificações
+function limparValoresDescricaoML(txt){
+  if(!txt) return txt;
+  var linhas=txt.split('\n');
+  var filtradas=linhas.filter(function(linha){
+    var l=linha.trim().toLowerCase();
+    if(!l) return true; // manter linhas em branco
+    // Remover linhas que contenham valores monetários ou palavras-chave de preço
+    if(/r\$\s*[\d.,]+/.test(l)) return false;
+    if(/^\s*(valor|preço|preco|price|custo|investimento)\s*[:=]/i.test(linha)) return false;
+    if(/^\s*(parcel|parcelas|pagamento|pix|cartão|cartao|transferência|transferencia|à vista|a vista|entrada|sinal)\s*[:=\-–]/i.test(linha)) return false;
+    if(/\b(por apenas|somente|só|de\s+r\$|por\s+r\$|apenas\s+r\$)\b/.test(l)) return false;
+    if(/\b\d+\s*x\s*(de\s+)?r\$/.test(l)) return false; // 12x de R$...
+    if(/\b(desconto|promoção|promocao|oferta|liquidação|liquidacao)\b/.test(l)&&/\d/.test(l)) return false;
+    if(/^\s*(aceito|aceitamos|formas? de pagamento|condições|condicoes)\s*[:=\-–]/i.test(linha)) return false;
+    if(/^\s*(frete|envio|entrega)\s*[:=]/i.test(linha)&&/r\$|grátis|gratis|inclus/.test(l)) return false;
+    return true;
+  });
+  return filtradas.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+
 // Helper: tenta POST descrição, se falhar tenta PUT (escopo global)
 function enviarDescricaoML(itemId,txt){
+  txt=limparValoresDescricaoML(txt);
   txt=limparTextoML(txt);
   console.log('📝 Enviando descrição para',itemId,'texto:',txt.substring(0,100));
   mlApiCall('/items/'+itemId+'/description','POST',{plain_text:txt},function(ok,data){
@@ -5182,16 +5204,24 @@ function renderMLMetricas(){
 function carregarVisitasML(){
   var prods=getProds().filter(function(p){return p.ml_item_id});
   if(!prods.length){document.getElementById('mlMetVisitas').textContent='0';return}
-  // ML usa /visits/items?ids=MLB1,MLB2,...
+  // ML usa /items/visits?ids=ID1,ID2
   var ids=prods.map(function(p){return p.ml_item_id}).join(',');
-  mlApiCall('/visits/items?ids='+ids,'GET',null,function(ok,data){
+  var agora=new Date();
+  var atras=new Date(agora.getTime()-90*24*60*60*1000);
+  var df=atras.toISOString().split('T')[0]+'T00:00:00.000-03:00';
+  var dt=agora.toISOString().split('T')[0]+'T23:59:59.000-03:00';
+  mlApiCall('/items/visits?ids='+ids+'&date_from='+df+'&date_to='+dt,'GET',null,function(ok,data){
     if(!ok){document.getElementById('mlMetVisitas').textContent='—';return}
     var totalVisitas=0;
-    // data é um objeto {MLB123: [{date,total},...], ...} ou array
-    if(typeof data==='object'){
+    // Resposta pode ser array de {item_id, total_visits} ou objeto
+    if(Array.isArray(data)){
+      data.forEach(function(v){totalVisitas+=(v.total_visits||v.total||0)});
+    }else if(typeof data==='object'){
       Object.keys(data).forEach(function(k){
-        if(k.startsWith('MLB')&&Array.isArray(data[k])){
-          data[k].forEach(function(v){totalVisitas+=(v.total||0)});
+        if(k.startsWith('MLB')){
+          var val=data[k];
+          if(typeof val==='number') totalVisitas+=val;
+          else if(Array.isArray(val)) val.forEach(function(v){totalVisitas+=(v.total||0)});
         }
       });
     }
