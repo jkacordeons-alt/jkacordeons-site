@@ -1373,6 +1373,52 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             </div>
           </div>
         </div>
+
+        <!-- Painel de Métricas ML -->
+        <div class="card" style="padding:20px;margin-top:1.5rem" id="mlMetricasPanel">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <h4 style="margin:0;font-size:14px;font-weight:700">📊 Métricas e Perguntas</h4>
+            <button class="btn btn-secondary" onclick="renderMLMetricas()" style="font-size:11px;padding:5px 10px">🔄 Atualizar</button>
+          </div>
+
+          <!-- Resumo rápido -->
+          <div id="mlMetricasResumo" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+            <div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:1.5rem" id="mlMetAtivos">—</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:2px">Ativos</div>
+            </div>
+            <div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:1.5rem" id="mlMetPausados">—</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:2px">Pausados</div>
+            </div>
+            <div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:1.5rem" id="mlMetVisitas">—</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:2px">Visitas</div>
+            </div>
+            <div style="background:var(--bg);border-radius:10px;padding:14px;text-align:center">
+              <div style="font-size:1.5rem" id="mlMetVendas">—</div>
+              <div style="font-size:10px;color:var(--txt3);margin-top:2px">Vendas</div>
+            </div>
+          </div>
+
+          <!-- Tabs: Anúncios | Perguntas | Vendas -->
+          <div style="display:flex;gap:0;border-bottom:2px solid var(--brd);margin-bottom:14px" id="mlMetTabs">
+            <button class="mlMetTab mlMetTabActive" onclick="switchMLMetTab('anuncios')" style="padding:8px 16px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--b);margin-bottom:-2px;color:var(--b)">Anúncios</button>
+            <button class="mlMetTab" onclick="switchMLMetTab('perguntas')" style="padding:8px 16px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--txt3)">Perguntas</button>
+            <button class="mlMetTab" onclick="switchMLMetTab('vendas')" style="padding:8px 16px;font-size:12px;font-weight:600;border:none;background:none;cursor:pointer;color:var(--txt3)">Vendas</button>
+          </div>
+
+          <!-- Conteúdo das tabs -->
+          <div id="mlMetContentAnuncios">
+            <div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px">Carregando anúncios...</div>
+          </div>
+          <div id="mlMetContentPerguntas" style="display:none">
+            <div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px">Carregando perguntas...</div>
+          </div>
+          <div id="mlMetContentVendas" style="display:none">
+            <div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px">Carregando vendas...</div>
+          </div>
+        </div>
       </div>
 
       <!-- PAGE: Configurações -->
@@ -3616,6 +3662,7 @@ function goPage(page){
     btnSyncTop.style.display='none';
     renderMLStatus();
     renderMLProdutos();
+    renderMLMetricas();
   }else if(page==='vendedores'){
     document.getElementById('pageVendedores').classList.add('on');
     document.querySelectorAll('.sb-item:not(.disabled)')[6].classList.add('active');
@@ -4674,7 +4721,9 @@ function carregarSellerML(){
 }
 
 function mlApiCall(endpoint,method,body,callback){
-  var url='ml_api.php?endpoint='+encodeURIComponent(endpoint)+'&method='+(method||'GET');
+  var parts=endpoint.split('?');
+  var url='ml_api.php?endpoint='+encodeURIComponent(parts[0])+'&method='+(method||'GET');
+  if(parts[1]) url+='&params='+encodeURIComponent(parts[1]);
   var opts={method:method||'GET',headers:{'Content-Type':'application/json'}};
   if(body&&(method==='POST'||method==='PUT')) opts.body=JSON.stringify(body);
   fetch(url,opts).then(function(r){return r.json()}).then(function(data){
@@ -4741,6 +4790,63 @@ function limparTextoML(txt){
     .replace(/  +/g,' ')
     .replace(/\n{3,}/g,'\n\n')
     .trim();
+}
+
+// Comissões do ML por tipo de anúncio (aproximado, sobre preço do produto)
+var ML_COMISSOES={free:0, gold_special:0.13, gold_pro:0.18};
+var ML_TIPOS_FALLBACK=['free','gold_special','gold_pro'];
+
+// Publica item com fallback de tipo de anúncio
+// Se 'free' falhar com listing_type.temporarily_unavailable, tenta gold_special com +13%, depois gold_pro com +18%
+function publicarComFallback(item,descText,prod,prods,tipoIdx,precoOriginal,callback){
+  tipoIdx=tipoIdx||0;
+  precoOriginal=precoOriginal||item.price;
+  if(tipoIdx>=ML_TIPOS_FALLBACK.length){
+    if(callback) callback(false,{message:'Nenhum tipo de anúncio disponível (todos esgotados)'});
+    return;
+  }
+  var tipo=ML_TIPOS_FALLBACK[tipoIdx];
+  var comissao=ML_COMISSOES[tipo]||0;
+  // Preço ajustado: precoOriginal / (1 - comissao) → vendedor recebe ~precoOriginal líquido
+  var precoAjustado=comissao>0?Math.ceil(precoOriginal/(1-comissao)):precoOriginal;
+  item.listing_type_id=tipo;
+  item.price=precoAjustado;
+  var tipoNome=tipo==='free'?'Grátis':tipo==='gold_special'?'Clássico':'Premium';
+  console.log('📦 Tentando publicar como',tipoNome,'preço:',precoAjustado);
+
+  mlApiCall('/items','POST',item,function(ok,data){
+    if(!ok){
+      // Verificar se é erro de tipo indisponível
+      var causas=data.cause||[];
+      var tipoEsgotado=causas.some(function(c){return c.code==='listing_type.temporarily_unavailable'||c.code==='item.listing_type.invalid'});
+      if(tipoEsgotado&&tipoIdx<ML_TIPOS_FALLBACK.length-1){
+        var proxTipo=ML_TIPOS_FALLBACK[tipoIdx+1];
+        var proxNome=proxTipo==='gold_special'?'Clássico':'Premium';
+        showToast('Tipo '+tipoNome+' esgotado, tentando '+proxNome+'...','🔄');
+        publicarComFallback(item,descText,prod,prods,tipoIdx+1,precoOriginal,callback);
+        return;
+      }
+    }
+    if(ok&&data.id){
+      var tipoUsado=item.listing_type_id;
+      var tipoUsadoNome=tipoUsado==='free'?'Grátis':tipoUsado==='gold_special'?'Clássico':'Premium';
+      prod.ml_item_id=data.id;
+      prod.ml_permalink=data.permalink||'';
+      prod.ml_listing_type=tipoUsado;
+      prod.ml_preco_ml=precoAjustado;
+      setProds(prods);
+      var extraMsg=comissao>0?' ('+tipoUsadoNome+', R$'+precoAjustado.toFixed(2)+')':'';
+      showToast('Publicado! '+data.id+extraMsg,'✅');
+      if(descText){enviarDescricaoML(data.id,descText)}
+      if(callback) callback(true,data);
+    }else{
+      var msg=data.message||data.error||'Erro desconhecido';
+      if(data.cause&&data.cause.length){msg+=' — '+data.cause.map(function(c){return (c.code||'')+': '+(c.message||'')}).join('; ')}
+      showToast('Erro: '+msg,'❌');
+      console.error('ML publish error:',JSON.stringify(data,null,2));
+      if(callback) callback(false,data);
+    }
+  });
 }
 
 // Helper: tenta POST descrição, se falhar tenta PUT (escopo global)
@@ -4883,22 +4989,10 @@ function publicarNoML(prodId){
   showToast('Publicando no Mercado Livre...','🚀');
   console.log('ML payload:',JSON.stringify(item,null,2));
 
-  mlApiCall('/items','POST',item,function(ok,data){
-    if(ok&&data.id){
-      prod.ml_item_id=data.id;
-      prod.ml_permalink=data.permalink||'';
-      setProds(prods);
-      showToast('Publicado! ID: '+data.id,'✅');
-      // Enviar descrição separadamente
-      if(descText){enviarDescricaoML(data.id,descText)}
-      renderMLProdutos();
-      renderMLStatus();
-    }else{
-      var msg=data.message||data.error||'Erro desconhecido';
-      if(data.cause&&data.cause.length){msg+=' — '+data.cause.map(function(c){return (c.code||'')+': '+(c.message||'')}).join('; ')}
-      showToast('Erro: '+msg,'❌');
-      console.error('ML publish error:',JSON.stringify(data,null,2));
-    }
+  publicarComFallback(item,descText,prod,prods,0,item.price,function(){
+    renderMLProdutos();
+    renderMLStatus();
+    if(typeof renderMLMetricas==='function') renderMLMetricas();
   });
 }
 
@@ -4953,24 +5047,17 @@ function publicarTodosML(){
     var descText=item._description;
     delete item._description;
     console.log('ML payload (batch):',JSON.stringify(item,null,2));
-    mlApiCall('/items','POST',item,function(ok,data){
-      if(!ok&&(data.error==='Token não encontrado. Autorize o app primeiro.'||data.error==='Token expirado. Re-autorize o app.'||data.error==='Refresh token falhou. Re-autorize o app.')){
+    var allProds=getProds();
+    var pp=allProds.find(function(x){return x.id===p.id});
+    publicarComFallback(item,descText,pp||p,allProds,0,item.price,function(ok,data){
+      if(!ok&&data&&(data.error==='Token não encontrado. Autorize o app primeiro.'||data.error==='Token expirado. Re-autorize o app.'||data.error==='Refresh token falhou. Re-autorize o app.')){
         parou=true;
         showToast('Erro de autenticação. Reconecte ao ML.','❌');
         renderMLStatus();
         return;
       }
-      if(ok&&data.id){
-        var allProds=getProds();
-        var pp=allProds.find(function(x){return x.id===p.id});
-        if(pp){pp.ml_item_id=data.id;pp.ml_permalink=data.permalink||'';setProds(allProds)}
-        if(descText){enviarDescricaoML(data.id,descText)}
+      if(ok){
         showToast((i)+'/'+prods.length+' — '+p.modelo,'✅');
-      }else{
-        var msg=data.message||data.error||'Erro';
-        if(data.cause&&data.cause.length){msg+=' — '+data.cause.map(function(c){return (c.code||'')+': '+(c.message||'')}).join('; ')}
-        showToast(p.modelo+': '+msg,'❌');
-        console.error('ML batch publish error:',JSON.stringify(data,null,2));
       }
       setTimeout(proximo,2000);
     });
@@ -5018,6 +5105,196 @@ function pausarAnuncioML(prodId){
   mlApiCall('/items/'+prod.ml_item_id,'PUT',{status:'paused'},function(ok,data){
     if(ok){showToast('Anúncio pausado','⏸️')}
     else{showToast('Erro: '+(data.message||data.error),'❌')}
+  });
+}
+
+/* ===== MÉTRICAS ML ===== */
+function switchMLMetTab(tab){
+  ['anuncios','perguntas','vendas'].forEach(function(t){
+    var el=document.getElementById('mlMetContent'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el) el.style.display=t===tab?'':'none';
+  });
+  document.querySelectorAll('.mlMetTab').forEach(function(btn,idx){
+    var tabs=['anuncios','perguntas','vendas'];
+    var isActive=tabs[idx]===tab;
+    btn.style.borderBottom=isActive?'2px solid var(--b)':'none';
+    btn.style.color=isActive?'var(--b)':'var(--txt3)';
+    btn.style.marginBottom=isActive?'-2px':'0';
+  });
+}
+
+function renderMLMetricas(){
+  var c=getMLConfig();
+  if(!c.access_token){return}
+  var prods=getProds().filter(function(p){return p.ml_item_id});
+  if(!prods.length){
+    document.getElementById('mlMetContentAnuncios').innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px">Nenhum anúncio publicado ainda</div>';
+    return;
+  }
+  // Carregar dados de cada anúncio
+  var ativos=0,pausados=0,totalVisitas=0,totalVendas=0;
+  var anunciosHTML='<div style="display:flex;flex-direction:column;gap:8px">';
+  var carregados=0;
+  prods.forEach(function(p,idx){
+    mlApiCall('/items/'+p.ml_item_id,'GET',null,function(ok,data){
+      carregados++;
+      if(ok){
+        var status=data.status||'unknown';
+        if(status==='active') ativos++;
+        else if(status==='paused') pausados++;
+        var visitas=data.initial_quantity-data.available_quantity||0;
+        var vendas=data.sold_quantity||0;
+        totalVendas+=vendas;
+        var statusColor=status==='active'?'#2ecc71':status==='paused'?'#ff9800':'#e74c3c';
+        var statusText=status==='active'?'Ativo':status==='paused'?'Pausado':status==='closed'?'Fechado':status;
+        var tipoAnuncio=data.listing_type_id||'free';
+        var tipoNome=tipoAnuncio==='free'?'Grátis':tipoAnuncio==='gold_special'?'Clássico':tipoAnuncio==='gold_pro'?'Premium':tipoAnuncio;
+        var thumb=data.thumbnail||'';
+
+        anunciosHTML+='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px">';
+        if(thumb) anunciosHTML+='<img src="'+thumb+'" style="width:44px;height:44px;border-radius:6px;object-fit:cover">';
+        anunciosHTML+='<div style="flex:1;min-width:0">';
+        anunciosHTML+='<div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+data.title+'</div>';
+        anunciosHTML+='<div style="font-size:10px;color:var(--txt3)">R$ '+(data.price||0).toFixed(2)+' · '+tipoNome+' · '+vendas+' venda(s) · '+data.available_quantity+' disponível</div>';
+        anunciosHTML+='</div>';
+        anunciosHTML+='<span style="background:rgba('+
+          (status==='active'?'46,204,113':status==='paused'?'255,152,0':'231,76,60')
+          +',.12);color:'+statusColor+';padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">'+statusText+'</span>';
+        anunciosHTML+='</div>';
+      }
+      if(carregados>=prods.length){
+        anunciosHTML+='</div>';
+        document.getElementById('mlMetContentAnuncios').innerHTML=anunciosHTML;
+        document.getElementById('mlMetAtivos').textContent=ativos;
+        document.getElementById('mlMetPausados').textContent=pausados;
+        document.getElementById('mlMetVendas').textContent=totalVendas;
+        // Buscar visitas via /users/me (visits)
+        carregarVisitasML();
+        // Buscar perguntas
+        carregarPerguntasML();
+        // Buscar vendas/orders
+        carregarVendasML();
+      }
+    });
+  });
+}
+
+function carregarVisitasML(){
+  var prods=getProds().filter(function(p){return p.ml_item_id});
+  if(!prods.length){document.getElementById('mlMetVisitas').textContent='0';return}
+  // ML usa /visits/items?ids=MLB1,MLB2,...
+  var ids=prods.map(function(p){return p.ml_item_id}).join(',');
+  mlApiCall('/visits/items?ids='+ids,'GET',null,function(ok,data){
+    if(!ok){document.getElementById('mlMetVisitas').textContent='—';return}
+    var totalVisitas=0;
+    // data é um objeto {MLB123: [{date,total},...], ...} ou array
+    if(typeof data==='object'){
+      Object.keys(data).forEach(function(k){
+        if(k.startsWith('MLB')&&Array.isArray(data[k])){
+          data[k].forEach(function(v){totalVisitas+=(v.total||0)});
+        }
+      });
+    }
+    document.getElementById('mlMetVisitas').textContent=totalVisitas;
+  });
+}
+
+function carregarPerguntasML(){
+  var c=getMLConfig();
+  if(!c.seller_id){
+    // Tentar pegar seller_id
+    mlApiCall('/users/me','GET',null,function(ok,data){
+      if(ok&&data.id){
+        c.seller_id=data.id;
+        setMLConfig(c);
+        buscarPerguntasML(data.id);
+      }
+    });
+  }else{
+    buscarPerguntasML(c.seller_id);
+  }
+}
+
+function buscarPerguntasML(sellerId){
+  mlApiCall('/my/received_questions/search','GET',null,function(ok,data){
+    var el=document.getElementById('mlMetContentPerguntas');
+    if(!ok||!data.questions||!data.questions.length){
+      el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px">Nenhuma pergunta recebida</div>';
+      return;
+    }
+    var html='<div style="display:flex;flex-direction:column;gap:10px">';
+    data.questions.forEach(function(q){
+      var respondida=q.status==='ANSWERED';
+      var dt=new Date(q.date_created);
+      var dtStr=dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      html+='<div style="padding:12px;background:var(--bg);border-radius:10px;border-left:3px solid '+(respondida?'var(--g)':'var(--b)')+'">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      html+='<span style="font-size:10px;color:var(--txt3)">'+dtStr+'</span>';
+      html+='<span style="font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;'+(respondida?'background:rgba(46,204,113,.12);color:#2ecc71':'background:rgba(52,152,219,.12);color:#3498db')+'">'+(respondida?'Respondida':'Pendente')+'</span>';
+      html+='</div>';
+      html+='<div style="font-size:13px;font-weight:500;margin-bottom:4px">'+q.text+'</div>';
+      if(q.answer){
+        html+='<div style="font-size:12px;color:var(--txt2);padding:8px;background:rgba(46,204,113,.05);border-radius:6px;margin-top:6px"><strong>Sua resposta:</strong> '+q.answer.text+'</div>';
+      }else{
+        html+='<div style="margin-top:8px;display:flex;gap:6px" id="mlPergResp_'+q.id+'">';
+        html+='<input type="text" placeholder="Escreva sua resposta..." style="flex:1;padding:8px 10px;font-size:12px;border-radius:6px;border:1px solid var(--brd)" id="mlPergInput_'+q.id+'">';
+        html+='<button class="btn btn-primary" onclick="responderPerguntaML(\''+q.id+'\')" style="font-size:11px;padding:6px 12px;white-space:nowrap">Responder</button>';
+        html+='</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
+  });
+}
+
+function responderPerguntaML(questionId){
+  var input=document.getElementById('mlPergInput_'+questionId);
+  if(!input||!input.value.trim()){showToast('Digite uma resposta','⚠️');return}
+  var texto=input.value.trim();
+  showToast('Enviando resposta...','📤');
+  mlApiCall('/answers','POST',{question_id:parseInt(questionId),text:texto},function(ok,data){
+    if(ok){
+      showToast('Resposta enviada!','✅');
+      var wrap=document.getElementById('mlPergResp_'+questionId);
+      if(wrap) wrap.innerHTML='<div style="font-size:12px;color:var(--g);font-weight:600">✅ Respondido: '+texto+'</div>';
+    }else{
+      var msg=data.message||data.error||'Erro ao responder';
+      showToast('Erro: '+msg,'❌');
+      console.error('ML answer error:',JSON.stringify(data));
+    }
+  });
+}
+
+function carregarVendasML(){
+  var c=getMLConfig();
+  var sellerId=c.seller_id;
+  if(!sellerId){return}
+  mlApiCall('/orders/search?seller='+sellerId,'GET',null,function(ok,data){
+    var el=document.getElementById('mlMetContentVendas');
+    if(!ok||!data.results||!data.results.length){
+      el.innerHTML='<div style="text-align:center;padding:1.5rem;color:var(--txt3);font-size:12px">Nenhuma venda registrada</div>';
+      return;
+    }
+    var html='<div style="display:flex;flex-direction:column;gap:8px">';
+    data.results.slice(0,20).forEach(function(order){
+      var dt=new Date(order.date_created);
+      var dtStr=dt.toLocaleDateString('pt-BR');
+      var status=order.status||'unknown';
+      var statusText=status==='paid'?'Pago':status==='confirmed'?'Confirmado':status==='cancelled'?'Cancelado':status==='delivered'?'Entregue':status;
+      var statusColor=status==='paid'||status==='confirmed'||status==='delivered'?'#2ecc71':status==='cancelled'?'#e74c3c':'#ff9800';
+      var total=order.total_amount||0;
+      var items=(order.order_items||[]).map(function(oi){return oi.item?oi.item.title:'Produto'}).join(', ');
+      html+='<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--bg);border-radius:8px">';
+      html+='<div style="flex:1;min-width:0">';
+      html+='<div style="font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+items+'</div>';
+      html+='<div style="font-size:10px;color:var(--txt3)">'+dtStr+' · R$ '+total.toFixed(2)+'</div>';
+      html+='</div>';
+      html+='<span style="font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;background:rgba('+(status==='paid'||status==='confirmed'||status==='delivered'?'46,204,113':'231,76,60')+',.12);color:'+statusColor+'">'+statusText+'</span>';
+      html+='</div>';
+    });
+    html+='</div>';
+    el.innerHTML=html;
   });
 }
 
