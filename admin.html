@@ -4728,6 +4728,15 @@ function renderMLProdutos(){
   el.innerHTML=html;
 }
 
+// Helper: tenta POST descrição, se falhar tenta PUT (escopo global)
+function enviarDescricaoML(itemId,txt){
+  mlApiCall('/items/'+itemId+'/description','POST',{plain_text:txt},function(ok){
+    if(!ok){mlApiCall('/items/'+itemId+'/description','PUT',{plain_text:txt},function(ok2){
+      if(ok2){console.log('Descrição atualizada via PUT')}else{console.warn('Descrição falhou POST e PUT')}
+    })}else{console.log('Descrição criada via POST')}
+  });
+}
+
 function montarAnuncioML(prod){
   var c=getMLConfig();
   // Preparar fotos — só URLs (não base64), max 10
@@ -4862,9 +4871,7 @@ function publicarNoML(prodId){
       setProds(prods);
       showToast('Publicado! ID: '+data.id,'✅');
       // Enviar descrição separadamente
-      if(descText){
-        mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){});
-      }
+      if(descText){enviarDescricaoML(data.id,descText)}
       renderMLProdutos();
       renderMLStatus();
     }else{
@@ -4938,7 +4945,7 @@ function publicarTodosML(){
         var allProds=getProds();
         var pp=allProds.find(function(x){return x.id===p.id});
         if(pp){pp.ml_item_id=data.id;pp.ml_permalink=data.permalink||'';setProds(allProds)}
-        if(descText){mlApiCall('/items/'+data.id+'/description','POST',{plain_text:descText},function(){})}
+        if(descText){enviarDescricaoML(data.id,descText)}
         showToast((i)+'/'+prods.length+' — '+p.modelo,'✅');
       }else{
         var msg=data.message||data.error||'Erro';
@@ -4974,7 +4981,7 @@ function atualizarAnuncioML(prodId){
   showToast('Atualizando anúncio...','🔄');
   mlApiCall('/items/'+prod.ml_item_id,'PUT',item,function(ok,data){
     if(ok){
-      if(descText){mlApiCall('/items/'+prod.ml_item_id+'/description','PUT',{plain_text:descText},function(){})}
+      if(descText){enviarDescricaoML(prod.ml_item_id,descText)}
       showToast('Anúncio atualizado!','✅');
     }else{
       var msg=data.message||data.error||'Erro';
