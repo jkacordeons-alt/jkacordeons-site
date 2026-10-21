@@ -4728,8 +4728,24 @@ function renderMLProdutos(){
   el.innerHTML=html;
 }
 
+// Limpar texto para plain_text do ML (sem markdown, emojis, formatação)
+function limparTextoML(txt){
+  return txt
+    .replace(/\*\*([^*]+)\*\*/g,'$1')  // **negrito** → negrito
+    .replace(/\*([^*]+)\*/g,'$1')       // *itálico* → itálico
+    .replace(/__([^_]+)__/g,'$1')       // __sublinhado__
+    .replace(/_([^_]+)_/g,'$1')         // _itálico_
+    .replace(/[#>~`]/g,'')              // headers, blockquotes, code
+    .replace(/\[([^\]]+)\]\([^)]+\)/g,'$1') // [link](url) → link
+    .replace(/[\u{1F000}-\u{1FFFF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FEFF}]|[\u{1F900}-\u{1F9FF}]|[\u{2700}-\u{27BF}]|[\u{2300}-\u{23FF}]|[\u{200D}]|[\u{FE0F}]|[✔✅❌⚠️🔗🔄🚀📝📥☁️🪗🎵🎶🎹🎼]/gu,'') // emojis
+    .replace(/  +/g,' ')
+    .replace(/\n{3,}/g,'\n\n')
+    .trim();
+}
+
 // Helper: tenta POST descrição, se falhar tenta PUT (escopo global)
 function enviarDescricaoML(itemId,txt){
+  txt=limparTextoML(txt);
   console.log('📝 Enviando descrição para',itemId,'texto:',txt.substring(0,100));
   mlApiCall('/items/'+itemId+'/description','POST',{plain_text:txt},function(ok,data){
     console.log('📝 POST description response:',JSON.stringify(data));
