@@ -1324,8 +1324,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             <div class="form-group" style="margin:0">
               <label style="font-size:11px;font-weight:600">Tipo de anúncio</label>
               <select id="mlTipoAnuncio" style="padding:8px 12px;font-size:12px">
-                <option value="free" selected>Grátis (sem destaque)</option>
-                <option value="gold_special">Clássico (11%)</option>
+                <option value="free">Grátis (sem destaque)</option>
+                <option value="gold_special" selected>Clássico (11%)</option>
                 <option value="gold_pro">Premium (16%)</option>
               </select>
             </div>
@@ -4794,7 +4794,7 @@ function limparTextoML(txt){
 
 // Comissões do ML por tipo de anúncio (aproximado, sobre preço do produto)
 var ML_COMISSOES={free:0, gold_special:0.13, gold_pro:0.18};
-var ML_TIPOS_FALLBACK=['free','gold_special','gold_pro'];
+var ML_TIPOS_FALLBACK=['gold_special','gold_pro'];
 
 // Publica item com fallback de tipo de anúncio
 // Se 'free' falhar com listing_type.temporarily_unavailable, tenta gold_special com +13%, depois gold_pro com +18%
@@ -4886,7 +4886,7 @@ function montarAnuncioML(prod){
     currency_id:'BRL',
     available_quantity:1,
     buying_mode:'buy_it_now',
-    listing_type_id:'free',
+    listing_type_id:'gold_special',
     pictures:fotos,
     shipping:{mode:'me2',local_pick_up:false,free_shipping:false},
     attributes:[
