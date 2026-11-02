@@ -632,9 +632,9 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <div class="page" id="pageVendedores">
         <div class="dash-welcome" style="border-color:rgba(52,152,219,.15);background:linear-gradient(135deg,rgba(52,152,219,.08),rgba(52,152,219,.02))">
           <h2>👥 Equipe de Vendas</h2>
-          <p>Cadastre seus vendedores, defina comissões e acompanhe as horas trabalhadas.</p>
+          <p>Cadastre seus vendedores, defina comissões e acompanhe o desempenho mensal detalhado.</p>
         </div>
-        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
           <button class="btn btn-primary" onclick="abrirModalVendedor()">➕ Novo vendedor</button>
           <button class="btn btn-secondary" onclick="toggleInativos()">👁️ <span id="btnInativos">Mostrar inativos</span></button>
         </div>
@@ -643,6 +643,44 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
           <div class="cat-empty-icon">👥</div>
           <p>Nenhum vendedor cadastrado</p>
           <span>Clique em "Novo vendedor" para começar</span>
+        </div>
+        <!-- Vendas detalhadas por vendedor -->
+        <div id="vendDetalheSection" style="margin-top:2rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:1rem">
+            <h3 style="margin:0;font-size:1.1rem">📊 Vendas Detalhadas</h3>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <select id="vendFiltroVendedor" onchange="renderVendedoresDetalhe()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--bord);background:var(--card);color:var(--txt);font-size:12px">
+                <option value="todos">Todos os vendedores</option>
+              </select>
+              <select id="vendFiltroMes" onchange="renderVendedoresDetalhe()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--bord);background:var(--card);color:var(--txt);font-size:12px">
+                <option value="todos">Todos os meses</option>
+              </select>
+              <select id="vendFiltroAno" onchange="renderVendedoresDetalhe()" style="padding:6px 12px;border-radius:8px;border:1px solid var(--bord);background:var(--card);color:var(--txt);font-size:12px">
+                <option value="todos">Todos os anos</option>
+              </select>
+            </div>
+          </div>
+          <!-- Resumo cards do vendedor selecionado -->
+          <div id="vendResumoCards" class="fin-cards" style="margin-bottom:1rem"></div>
+          <!-- Tabela detalhada -->
+          <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--bord)">
+            <table style="width:100%;border-collapse:collapse;font-size:12px">
+              <thead><tr style="background:var(--card2)">
+                <th style="padding:10px 14px;text-align:left;font-size:11px;color:var(--txt3);font-weight:700">Produto</th>
+                <th style="padding:10px 8px;text-align:left;font-size:11px;color:var(--txt3);font-weight:700">Vendedor</th>
+                <th style="padding:10px 8px;text-align:left;font-size:11px;color:var(--txt3);font-weight:700">Data</th>
+                <th style="padding:10px 8px;text-align:right;font-size:11px;color:var(--txt3);font-weight:700">Valor</th>
+                <th style="padding:10px 8px;text-align:right;font-size:11px;color:var(--txt3);font-weight:700">Comissão</th>
+                <th style="padding:10px 8px;text-align:center;font-size:11px;color:var(--txt3);font-weight:700">Info</th>
+              </tr></thead>
+              <tbody id="vendDetalheBody"></tbody>
+              <tfoot id="vendDetalheFoot" style="font-weight:700;background:var(--card2)"></tfoot>
+            </table>
+          </div>
+          <div id="vendDetalheEmpty" class="cat-empty" style="display:none;margin-top:1rem">
+            <div class="cat-empty-icon">📋</div>
+            <p>Nenhuma venda encontrada para este filtro</p>
+          </div>
         </div>
       </div>
 
@@ -713,8 +751,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       <!-- PAGE: Financeiro -->
       <div class="page" id="pageFinanceiro">
         <div class="dash-welcome" style="border-color:rgba(37,211,102,.15);background:linear-gradient(135deg,rgba(37,211,102,.08),rgba(37,211,102,.02))">
-          <h2>💹 Relatório Financeiro</h2>
-          <p>Visão completa de faturamento, custos e lucro líquido.</p>
+          <h2>💹 Painel Financeiro</h2>
+          <p>Faturamento, lucro bruto e líquido, projeção de faturamento, ROI e custos detalhados.</p>
         </div>
 
         <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:center">
@@ -823,8 +861,8 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
               <input type="text" id="simFreteOut" placeholder="Frete para o cliente" oninput="calcularSimulacao()" style="padding:8px 12px">
             </div>
             <div class="form-group" style="margin-bottom:10px">
-              <label style="font-size:12px;font-weight:600">Comissão do vendedor (%)</label>
-              <input type="text" id="simComPct" placeholder="Ex: 10" oninput="calcularSimulacao()" style="padding:8px 12px">
+              <label style="font-size:12px;font-weight:600">Comissão estimada (%) <span style="font-size:10px;color:var(--txt3);font-weight:400">progressiva: 1-3%</span></label>
+              <input type="text" id="simComPct" placeholder="Ex: 1, 2, ou 3" oninput="calcularSimulacao()" style="padding:8px 12px">
             </div>
 
             <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:12px">
@@ -1781,13 +1819,17 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         <input type="text" id="fVendNome" placeholder="Ex: João Silva">
       </div>
       <div class="form-group">
-        <label>Comissão (%)</label>
-        <input type="number" id="fVendComissao" placeholder="Ex: 10" min="0" max="100" step="0.5">
-        <div class="form-hint">Porcentagem do valor de venda que o vendedor recebe</div>
-      </div>
-      <div class="form-group">
         <label>Telefone (opcional)</label>
         <input type="text" id="fVendTel" placeholder="(42) 99999-9999">
+      </div>
+      <div style="background:rgba(52,152,219,.06);border:1px solid rgba(52,152,219,.15);border-radius:8px;padding:12px 16px;margin-top:8px">
+        <div style="font-size:11px;font-weight:700;color:var(--b);margin-bottom:6px">📋 Política de Comissão</div>
+        <div style="font-size:12px;color:var(--txt2);line-height:1.6">
+          Salário fixo: <strong>R$ 1.700</strong><br>
+          Até R$ 100 mil vendidos: <strong>1%</strong><br>
+          De R$ 100 mil a R$ 300 mil: <strong>2%</strong><br>
+          Acima de R$ 300 mil: <strong>3%</strong>
+        </div>
       </div>
     </div>
     <div class="modal-footer">
@@ -2057,6 +2099,62 @@ function getVendas(){try{return JSON.parse(localStorage.getItem('jk_vendas')||'[
 function setVendas(v){try{localStorage.setItem('jk_vendas',JSON.stringify(v))}catch(e){};syncToServer()}
 
 var _mostrarInativos=false;
+
+/* ===== COMISSÃO PROGRESSIVA VENDEDORES ===== */
+var VENDEDOR_SALARIO=1700;
+var VENDEDOR_FAIXAS=[
+  {ate:100000,pct:1},
+  {ate:300000,pct:2},
+  {ate:Infinity,pct:3}
+];
+// Calcula comissão progressiva sobre totalVendido (faixas acumulativas)
+function calcularComissaoProgressiva(totalVendido){
+  if(!totalVendido||totalVendido<=0)return 0;
+  var comissao=0;
+  var anterior=0;
+  for(var i=0;i<VENDEDOR_FAIXAS.length;i++){
+    var faixa=VENDEDOR_FAIXAS[i];
+    var limite=Math.min(totalVendido,faixa.ate);
+    var valor=limite-anterior;
+    if(valor>0) comissao+=valor*(faixa.pct/100);
+    anterior=limite;
+    if(totalVendido<=faixa.ate) break;
+  }
+  return comissao;
+}
+// Calcula comissões de todos os vendedores para um array de vendas (agrupa por vendedor)
+function calcularComissoesTodasVendas(vendas){
+  var porVendedor={};
+  vendas.forEach(function(v){
+    var vid=v.vendedor_id||'sem_vendedor';
+    if(!porVendedor[vid])porVendedor[vid]={total:0,vendas:[]};
+    // Na troca, base da comissão é o dinheiro recebido
+    var base=v.troca?(v.troca_dinheiro!=null?v.troca_dinheiro:(v.base_comissao||Math.max(0,(v.preco_venda||0)-(v.troca_valor||0)))):(v.preco_venda||0);
+    porVendedor[vid].total+=base;
+    porVendedor[vid].vendas.push({id:v.id,base:base});
+  });
+  var resultado={total:0,porVendedor:{}};
+  Object.keys(porVendedor).forEach(function(vid){
+    var info=porVendedor[vid];
+    var comTotal=calcularComissaoProgressiva(info.total);
+    // Distribuir proporcionalmente por venda
+    var porVenda={};
+    info.vendas.forEach(function(vd){
+      var proporcao=info.total>0?vd.base/info.total:0;
+      porVenda[vd.id]=comTotal*proporcao;
+    });
+    resultado.porVendedor[vid]={totalVendido:info.total,comissao:comTotal,porVenda:porVenda};
+    resultado.total+=comTotal;
+  });
+  return resultado;
+}
+// Conta vendedores ativos no período (para calcular custo salarial)
+function calcularSalarios(vendas){
+  var vendedoresAtivos={};
+  vendas.forEach(function(v){if(v.vendedor_id)vendedoresAtivos[v.vendedor_id]=true});
+  var qtd=Object.keys(vendedoresAtivos).length;
+  return{qtd:qtd,total:qtd*VENDEDOR_SALARIO};
+}
 function toggleInativos(){
   _mostrarInativos=!_mostrarInativos;
   document.getElementById('btnInativos').textContent=_mostrarInativos?'Ocultar inativos':'Mostrar inativos';
@@ -2067,7 +2165,6 @@ function abrirModalVendedor(id){
   var modal=document.getElementById('modalVendedor');
   document.getElementById('vendedorEditId').value='';
   document.getElementById('fVendNome').value='';
-  document.getElementById('fVendComissao').value='';
   document.getElementById('fVendTel').value='';
   document.getElementById('modalVendedorTitle').textContent='➕ Novo vendedor';
   if(id){
@@ -2075,7 +2172,6 @@ function abrirModalVendedor(id){
     if(v){
       document.getElementById('vendedorEditId').value=v.id;
       document.getElementById('fVendNome').value=v.nome||'';
-      document.getElementById('fVendComissao').value=v.comissao_pct||'';
       document.getElementById('fVendTel').value=v.telefone||'';
       document.getElementById('modalVendedorTitle').textContent='✏️ Editar vendedor';
     }
@@ -2087,18 +2183,16 @@ function fecharModalVendedor(){document.getElementById('modalVendedor').classLis
 function salvarVendedor(){
   var nome=document.getElementById('fVendNome').value.trim();
   if(!nome){showToast('⚠️ Informe o nome do vendedor','error');return}
-  var comissao=parseFloat(document.getElementById('fVendComissao').value)||0;
   var tel=document.getElementById('fVendTel').value.trim();
   var editId=document.getElementById('vendedorEditId').value;
   var vendedores=getVendedores();
   if(editId){
     var v=vendedores.find(function(x){return x.id===editId});
-    if(v){v.nome=nome;v.comissao_pct=comissao;v.telefone=tel;v.atualizado=new Date().toISOString()}
+    if(v){v.nome=nome;v.telefone=tel;v.atualizado=new Date().toISOString()}
   }else{
     vendedores.push({
       id:'vend_'+Date.now(),
       nome:nome,
-      comissao_pct:comissao,
       telefone:tel,
       ativo:true,
       criado:new Date().toISOString(),
@@ -2131,34 +2225,137 @@ function renderVendedores(){
   if(!filtrados.length){
     grid.innerHTML='';
     empty.style.display='block';
+  }else{
+    empty.style.display='none';
+    grid.innerHTML=filtrados.map(function(v){
+      var vendasV=vendas.filter(function(vd){return vd.vendedor_id===v.id});
+      var totalVendas=vendasV.length;
+      var totalFat=vendasV.reduce(function(s,vd){return s+(vd.preco_venda||0)},0);
+      var totalCom=vendasV.reduce(function(s,vd){return s+(vd.comissao_valor||0)},0);
+      var iniciais=v.nome.split(' ').map(function(n){return n[0]}).join('').substring(0,2).toUpperCase();
+      var inativo=v.ativo===false;
+      return '<div class="vend-card" style="'+(inativo?'opacity:.5':'')+'">'+
+        '<div class="vend-card-top">'+
+          '<div class="vend-avatar"'+(inativo?' style="background:var(--r-soft);color:var(--r)"':'')+'>'+iniciais+'</div>'+
+          '<div><div class="vend-nome">'+v.nome+(inativo?' <span style="font-size:10px;color:var(--r);font-weight:400">(inativo)</span>':'')+'</div>'+
+            '<div class="vend-sub">Salário R$ '+formatarValorBR(VENDEDOR_SALARIO)+' + comissão progressiva'+(v.telefone?' · '+v.telefone:'')+'</div></div>'+
+        '</div>'+
+        '<div class="vend-stats">'+
+          '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--g)">'+totalVendas+'</div><div class="vend-stat-label">Vendas</div></div>'+
+          '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--y)">'+formatarValorBR(totalFat)+'</div><div class="vend-stat-label">Faturamento</div></div>'+
+          '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--b)">'+formatarValorBR(totalCom)+'</div><div class="vend-stat-label">Comissão</div></div>'+
+        '</div>'+
+        '<div class="vend-actions">'+
+          '<button onclick="abrirModalVendedor(\''+v.id+'\')" style="background:var(--b-soft);color:var(--b)">✏️ Editar</button>'+
+          '<button onclick="toggleAtivoVendedor(\''+v.id+'\')" style="background:'+(inativo?'var(--g-soft);color:var(--g)':'var(--y-soft);color:var(--y)')+'">'+
+            (inativo?'▶️ Ativar':'⏸️ Desativar')+'</button>'+
+        '</div>'+
+      '</div>';
+    }).join('');
+  }
+  // Preencher filtros e renderizar detalhe
+  _preencherFiltrosVendedores(vendedores,vendas);
+  renderVendedoresDetalhe();
+}
+
+function _preencherFiltrosVendedores(vendedores,vendas){
+  var selVend=document.getElementById('vendFiltroVendedor');
+  var selMes=document.getElementById('vendFiltroMes');
+  var selAno=document.getElementById('vendFiltroAno');
+  if(!selVend)return;
+  var curVend=selVend.value;
+  var curMes=selMes.value;
+  var curAno=selAno.value;
+  // Vendedores
+  selVend.innerHTML='<option value="todos">Todos os vendedores</option>';
+  vendedores.forEach(function(v){
+    selVend.innerHTML+='<option value="'+v.id+'"'+(curVend===v.id?' selected':'')+'>'+v.nome+'</option>';
+  });
+  if(curVend!=='todos'&&!vendedores.find(function(v){return v.id===curVend}))selVend.value='todos';
+  // Meses
+  selMes.innerHTML='<option value="todos">Todos os meses</option>';
+  var meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  meses.forEach(function(m,i){
+    var val=String(i);
+    selMes.innerHTML+='<option value="'+val+'"'+(curMes===val?' selected':'')+'>'+m+'</option>';
+  });
+  // Anos (extrair das vendas)
+  var anos={};
+  vendas.forEach(function(v){if(v.data){var y=new Date(v.data).getFullYear();if(!isNaN(y))anos[y]=true}});
+  var anosArr=Object.keys(anos).sort().reverse();
+  selAno.innerHTML='<option value="todos">Todos os anos</option>';
+  anosArr.forEach(function(a){
+    selAno.innerHTML+='<option value="'+a+'"'+(curAno===a?' selected':'')+'>'+a+'</option>';
+  });
+}
+
+function renderVendedoresDetalhe(){
+  var vendas=getVendas();
+  var vendedores=getVendedores();
+  var filtroVend=document.getElementById('vendFiltroVendedor')?document.getElementById('vendFiltroVendedor').value:'todos';
+  var filtroMes=document.getElementById('vendFiltroMes')?document.getElementById('vendFiltroMes').value:'todos';
+  var filtroAno=document.getElementById('vendFiltroAno')?document.getElementById('vendFiltroAno').value:'todos';
+  // Aplicar filtros
+  var filtradas=vendas.filter(function(v){
+    if(filtroVend!=='todos'&&v.vendedor_id!==filtroVend)return false;
+    if(v.data){
+      var d=new Date(v.data);
+      if(filtroMes!=='todos'&&d.getMonth()!==parseInt(filtroMes))return false;
+      if(filtroAno!=='todos'&&d.getFullYear()!==parseInt(filtroAno))return false;
+    }
+    return true;
+  });
+  filtradas.sort(function(a,b){return(b.data||'').localeCompare(a.data||'')});
+  var bodyEl=document.getElementById('vendDetalheBody');
+  var footEl=document.getElementById('vendDetalheFoot');
+  var emptyEl=document.getElementById('vendDetalheEmpty');
+  var cardsEl=document.getElementById('vendResumoCards');
+  if(!filtradas.length){
+    bodyEl.innerHTML='';footEl.innerHTML='';
+    emptyEl.style.display='block';
+    cardsEl.innerHTML='';
     return;
   }
-  empty.style.display='none';
-  grid.innerHTML=filtrados.map(function(v){
-    var vendasV=vendas.filter(function(vd){return vd.vendedor_id===v.id});
-    var totalVendas=vendasV.length;
-    var totalFat=vendasV.reduce(function(s,vd){return s+(vd.preco_venda||0)},0);
-    var totalCom=vendasV.reduce(function(s,vd){return s+(vd.comissao_valor||0)},0);
-    var iniciais=v.nome.split(' ').map(function(n){return n[0]}).join('').substring(0,2).toUpperCase();
-    var inativo=v.ativo===false;
-    return '<div class="vend-card" style="'+(inativo?'opacity:.5':'')+'">'+
-      '<div class="vend-card-top">'+
-        '<div class="vend-avatar"'+(inativo?' style="background:var(--r-soft);color:var(--r)"':'')+'>'+iniciais+'</div>'+
-        '<div><div class="vend-nome">'+v.nome+(inativo?' <span style="font-size:10px;color:var(--r);font-weight:400">(inativo)</span>':'')+'</div>'+
-          '<div class="vend-sub">Comissão: '+v.comissao_pct+'%'+(v.telefone?' · '+v.telefone:'')+'</div></div>'+
-      '</div>'+
-      '<div class="vend-stats">'+
-        '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--g)">'+totalVendas+'</div><div class="vend-stat-label">Vendas</div></div>'+
-        '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--y)">'+formatarValorBR(totalFat)+'</div><div class="vend-stat-label">Faturamento</div></div>'+
-        '<div class="vend-stat"><div class="vend-stat-val" style="color:var(--b)">'+formatarValorBR(totalCom)+'</div><div class="vend-stat-label">Comissão</div></div>'+
-      '</div>'+
-      '<div class="vend-actions">'+
-        '<button onclick="abrirModalVendedor(\''+v.id+'\')" style="background:var(--b-soft);color:var(--b)">✏️ Editar</button>'+
-        '<button onclick="toggleAtivoVendedor(\''+v.id+'\')" style="background:'+(inativo?'var(--g-soft);color:var(--g)':'var(--y-soft);color:var(--y)')+'">'+
-          (inativo?'▶️ Ativar':'⏸️ Desativar')+'</button>'+
-      '</div>'+
-    '</div>';
-  }).join('');
+  emptyEl.style.display='none';
+  // Calcular comissões progressivas para vendas filtradas
+  var vendComissoes=calcularComissoesTodasVendas(filtradas);
+  var totFat=0,totCom=0;
+  var rows=filtradas.map(function(v){
+    totFat+=v.preco_venda||0;
+    var comVenda=vendComissoes.porVendedor[v.vendedor_id]?(vendComissoes.porVendedor[v.vendedor_id].porVenda[v.id]||0):0;
+    totCom+=comVenda;
+    var dataFmt=v.data?new Date(v.data).toLocaleDateString('pt-BR'):'—';
+    var badges='';
+    if(v.troca)badges+='<span style="background:rgba(243,156,18,.15);color:var(--y);font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700">🔄</span> ';
+    if(v.eletrificacao)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700">⚡</span> ';
+    if(v.envio)badges+='<span style="background:rgba(52,152,219,.15);color:var(--b);font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700">📦</span> ';
+    if(v.sem_nota)badges+='<span style="background:rgba(149,165,166,.15);color:var(--txt3);font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700">S/NF</span> ';
+    return '<tr style="border-bottom:1px solid var(--bord)">'+
+      '<td style="padding:10px 14px;font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+v.produto_nome+'</td>'+
+      '<td style="padding:10px 8px;color:var(--txt2)">'+(v.vendedor_nome||'—')+'</td>'+
+      '<td style="padding:10px 8px;color:var(--txt3);font-size:11px;white-space:nowrap">'+dataFmt+'</td>'+
+      '<td style="padding:10px 8px;text-align:right;font-weight:700;color:var(--g)">'+formatarValorBR(v.preco_venda||0)+'</td>'+
+      '<td style="padding:10px 8px;text-align:right;color:var(--y)">'+formatarValorBR(comVenda)+'</td>'+
+      '<td style="padding:10px 8px;text-align:center;font-size:11px">'+badges+'</td>'+
+    '</tr>';
+  });
+  bodyEl.innerHTML=rows.join('');
+  var ticketMedio=filtradas.length>0?totFat/filtradas.length:0;
+  footEl.innerHTML='<tr>'+
+    '<td style="padding:10px 14px" colspan="3">TOTAL ('+filtradas.length+' vendas)</td>'+
+    '<td style="padding:10px 8px;text-align:right;color:var(--g)">'+formatarValorBR(totFat)+'</td>'+
+    '<td style="padding:10px 8px;text-align:right;color:var(--y)">'+formatarValorBR(totCom)+'</td>'+
+    '<td></td>'+
+  '</tr>';
+  // Cards resumo
+  var vendedorNome=filtroVend!=='todos'?(vendedores.find(function(v){return v.id===filtroVend})||{}).nome||'Vendedor':'Equipe';
+  var mesLabel=filtroMes!=='todos'?['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][parseInt(filtroMes)]:'';
+  var periodoLabel=(mesLabel?(mesLabel+' '):'')+(filtroAno!=='todos'?filtroAno:'Todos os períodos');
+  cardsEl.innerHTML=
+    '<div class="fin-card"><div class="fin-card-label">'+vendedorNome+'</div><div class="fin-card-val" style="color:var(--g)">'+filtradas.length+'</div><div class="fin-card-sub">vendas · '+periodoLabel+'</div></div>'+
+    '<div class="fin-card"><div class="fin-card-label">Faturamento</div><div class="fin-card-val" style="color:var(--g)">'+formatarValorBR(totFat)+'</div></div>'+
+    '<div class="fin-card"><div class="fin-card-label">Comissões</div><div class="fin-card-val" style="color:var(--y)">'+formatarValorBR(totCom)+'</div></div>'+
+    '<div class="fin-card"><div class="fin-card-label">Ticket Médio</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(ticketMedio)+'</div></div>';
 }
 
 function formatarValorBR(num){
@@ -2175,9 +2372,19 @@ function parsarPrecoBR(str){
   str=String(str).replace(/[^\d,.]/g,'');
   if(!str)return 0;
   if(str.indexOf(',')>-1&&str.indexOf('.')>-1){
+    // "3.500,00" → 3500.00 (BR: ponto=milhar, vírgula=decimal)
     return parseFloat(str.replace(/\./g,'').replace(',','.'));
   }else if(str.indexOf(',')>-1){
+    // "3500,50" → 3500.50 (vírgula=decimal)
     return parseFloat(str.replace(',','.'));
+  }else if(str.indexOf('.')>-1){
+    // Só ponto: "3.500" vs "3.5"
+    // Se parte após último ponto tem exatamente 3 dígitos → separador de milhar BR
+    var parts=str.split('.');
+    if(parts[parts.length-1].length===3){
+      return parseFloat(str.replace(/\./g,''))||0;
+    }
+    return parseFloat(str)||0;
   }
   return parseFloat(str)||0;
 }
@@ -2231,7 +2438,7 @@ function abrirModalVenda(prodId){
   var sel=document.getElementById('vendaVendedorSelect');
   sel.innerHTML='<option value="">— Selecione o vendedor —</option>';
   vendedores.forEach(function(v){
-    sel.innerHTML+='<option value="'+v.id+'" data-com="'+v.comissao_pct+'">'+v.nome+' ('+v.comissao_pct+'%)</option>';
+    sel.innerHTML+='<option value="'+v.id+'">'+v.nome+'</option>';
   });
   document.getElementById('vendaResumo').style.display='none';
   document.getElementById('modalVenda').classList.add('on');
@@ -2323,7 +2530,7 @@ function atualizarResumoVenda(){
   var sel=document.getElementById('vendaVendedorSelect');
   var opt=sel.options[sel.selectedIndex];
   if(!opt||!opt.value){document.getElementById('vendaResumo').style.display='none';return}
-  var comPct=parseFloat(opt.getAttribute('data-com'))||0;
+  var vendedorId=opt.value;
   var prod=getProds().find(function(p){return p.id===document.getElementById('vendaProdId').value});
   var precoStr=document.getElementById('vendaPrecoFinal').value.trim();
   var preco=precoStr?parsarPrecoBR(precoStr):parsarPrecoBR(prod?prod.preco:'0');
@@ -2341,8 +2548,19 @@ function atualizarResumoVenda(){
     recebidoDinheiro=trocaDinheiro;
     preco=trocaDinheiro+trocaAvaliacao; // preço real = dinheiro + avaliação do acordeão recebido
   }
-  // Comissão sobre o dinheiro que realmente entra (na troca, só sobre o cash)
-  var comValor=recebidoDinheiro*(comPct/100);
+  // Comissão progressiva: calcular com base no acumulado do vendedor no mês
+  var baseComVenda=temTroca?recebidoDinheiro:preco;
+  var vendasExistentes=getVendas().filter(function(vv){
+    if(vv.vendedor_id!==vendedorId)return false;
+    var d=new Date(vv.data),now=new Date();
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  });
+  var acumuladoVendedor=vendasExistentes.reduce(function(s,vv){
+    return s+(vv.troca?(vv.troca_dinheiro!=null?vv.troca_dinheiro:(vv.base_comissao||Math.max(0,(vv.preco_venda||0)-(vv.troca_valor||0)))):(vv.preco_venda||0));
+  },0);
+  var comSemEsta=calcularComissaoProgressiva(acumuladoVendedor);
+  var comComEsta=calcularComissaoProgressiva(acumuladoVendedor+baseComVenda);
+  var comValor=comComEsta-comSemEsta;
   // Imposto sobre o preço da NF (preço cheio = dinheiro + avaliação)
   var imposto=semNota?0:preco*(impPct/100);
   // Custo de compra se existir
@@ -2362,8 +2580,9 @@ function atualizarResumoVenda(){
   var lucro=preco+eletriCobrado-comValor-freteSaida-imposto-custoTotal-eletriCusto;
   document.getElementById('vrPrecoLabel').textContent=temTroca?'Preço de venda (dinheiro + troca)':'Preço de venda';
   document.getElementById('vrPreco').textContent=formatarValorBR(preco);
-  document.getElementById('vrPct').textContent=comPct;
-  document.getElementById('vrComissao').textContent=formatarValorBR(comValor)+(temTroca?' (sobre '+formatarValorBR(recebidoDinheiro)+' em dinheiro)':'');
+  var comPctEfetivo=baseComVenda>0?((comValor/baseComVenda)*100).toFixed(1):'0';
+  document.getElementById('vrPct').textContent=comPctEfetivo;
+  document.getElementById('vrComissao').textContent=formatarValorBR(comValor)+(temTroca?' (sobre '+formatarValorBR(recebidoDinheiro)+' em dinheiro)':'')+' (progressiva)';
   document.getElementById('vrFrete').textContent=formatarValorBR(freteSaida);
   document.getElementById('vrImpPct').textContent=semNota?'0':impPct;
   document.getElementById('vrImposto').textContent=semNota?'Isento (sem NF)':formatarValorBR(imposto);
@@ -2410,8 +2629,7 @@ function confirmarVenda(){
   var vendedorId=sel.value;
   if(!vendedorId){showToast('⚠️ Selecione o vendedor','error');return}
   var opt=sel.options[sel.selectedIndex];
-  var comPct=parseFloat(opt.getAttribute('data-com'))||0;
-  var vendedorNome=opt.textContent.split(' (')[0];
+  var vendedorNome=opt.textContent;
   var prods=getProds();
   var prod=prods.find(function(p){return p.id===prodId});
   if(!prod){showToast('⚠️ Produto não encontrado','error');return}
@@ -2440,9 +2658,19 @@ function confirmarVenda(){
     // Na troca, o preço de venda real = dinheiro + avaliação da troca
     precoVenda=trocaDinheiro+trocaAvaliacao;
   }
-  // Comissão: na troca, calcula sobre o dinheiro que o cliente pagou (só o cash)
+  // Comissão progressiva: calcular com base no acumulado do vendedor no mês
   var baseComissao=temTroca?trocaDinheiro:precoVenda;
-  var comValor=baseComissao*(comPct/100);
+  var vendasMes=getVendas().filter(function(vv){
+    if(vv.vendedor_id!==vendedorId)return false;
+    var d=new Date(vv.data),now=new Date();
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  });
+  var acumVend=vendasMes.reduce(function(s,vv){
+    return s+(vv.troca?(vv.troca_dinheiro!=null?vv.troca_dinheiro:(vv.base_comissao||Math.max(0,(vv.preco_venda||0)-(vv.troca_valor||0)))):(vv.preco_venda||0));
+  },0);
+  var comAntes=calcularComissaoProgressiva(acumVend);
+  var comDepois=calcularComissaoProgressiva(acumVend+baseComissao);
+  var comValor=comDepois-comAntes;
   // Sem nota fiscal
   var semNota=document.getElementById('vendaSemNota').checked;
   // Envio
@@ -2474,7 +2702,6 @@ function confirmarVenda(){
     preco_venda:precoVenda,
     vendedor_id:vendedorId,
     vendedor_nome:vendedorNome,
-    comissao_pct:comPct,
     comissao_valor:comValor,
     frete_saida:freteSaida,
     sem_nota:semNota,
@@ -2505,7 +2732,6 @@ function confirmarVenda(){
   prod.status='vendido';
   prod.vendedor_id=vendedorId;
   prod.vendedor_nome=vendedorNome;
-  prod.comissao_pct=comPct;
   prod.comissao_valor=comValor;
   prod.frete_saida=freteSaida;
   prod.data_venda=new Date().toISOString();
@@ -2637,6 +2863,8 @@ function renderRanking(){
     var weekAgo=new Date(now.getTime()-7*24*60*60*1000);
     vendas=vendas.filter(function(v){return new Date(v.data)>=weekAgo});
   }
+  // Calcular comissões progressivas
+  var rankComissoes=calcularComissoesTodasVendas(vendas);
   // Agrupar por vendedor
   var ranking={};
   vendas.forEach(function(v){
@@ -2645,7 +2873,10 @@ function renderRanking(){
     }
     ranking[v.vendedor_id].vendas++;
     ranking[v.vendedor_id].faturamento+=v.preco_venda||0;
-    ranking[v.vendedor_id].comissao+=v.comissao_valor||0;
+  });
+  // Atribuir comissões progressivas
+  Object.keys(ranking).forEach(function(vid){
+    ranking[vid].comissao=rankComissoes.porVendedor[vid]?rankComissoes.porVendedor[vid].comissao:0;
   });
   // Adicionar horas dos vendedores
   var lista=Object.keys(ranking).map(function(k){
@@ -2699,7 +2930,7 @@ function renderRanking(){
   // Cards resumo
   var totalVendas=vendas.length;
   var totalFat=vendas.reduce(function(s,v){return s+(v.preco_venda||0)},0);
-  var totalCom=vendas.reduce(function(s,v){return s+(v.comissao_valor||0)},0);
+  var totalCom=rankComissoes.total;
   var ticketMedio=totalVendas>0?totalFat/totalVendas:0;
   cardsEl.innerHTML=
     '<div style="background:var(--card2);border:1px solid var(--bord);border-radius:var(--radius);padding:1.25rem;text-align:center">'+
@@ -3021,26 +3252,19 @@ function salvarFinEdit(vendaId){
   var manutencao=parsarPrecoBR(document.getElementById('fe_manut_'+vendaId).value)||0;
   var freteIn=parsarPrecoBR(document.getElementById('fe_fretein_'+vendaId).value)||0;
   var freteOut=parsarPrecoBR(document.getElementById('fe_freteout_'+vendaId).value)||0;
-  var comPct=parseFloat(document.getElementById('fe_compct_'+vendaId).value)||0;
   var eletriCob=parsarPrecoBR(document.getElementById('fe_eletricob_'+vendaId).value)||0;
   var eletriCusto=parsarPrecoBR(document.getElementById('fe_eletricusto_'+vendaId).value)||0;
   var semNota=document.getElementById('fe_semnota_'+vendaId).checked;
   // Update venda
   v.preco_venda=preco;
-  v.comissao_pct=comPct;
-  // Comissão: se tem troca, calcular sobre o dinheiro recebido (cash direto do cliente)
+  // Comissão: recalculada automaticamente via sistema progressivo no renderFinanceiro
   if(v.troca&&v.troca_dinheiro!=null){
-    v.comissao_valor=v.troca_dinheiro*(comPct/100);
     v.base_comissao=v.troca_dinheiro;
     v.recebido_dinheiro=v.troca_dinheiro;
   }else if(v.troca&&v.troca_valor){
-    // compatibilidade com vendas antigas: recebido = preco - troca_valor
     var baseComissao=Math.max(0,preco-(v.troca_valor||0));
-    v.comissao_valor=baseComissao*(comPct/100);
     v.base_comissao=baseComissao;
     v.recebido_dinheiro=baseComissao;
-  }else{
-    v.comissao_valor=preco*(comPct/100);
   }
   v.frete_saida=freteOut;
   v.sem_nota=semNota;
@@ -3144,9 +3368,13 @@ function renderFinanceiro(){
 
   // Mesmo sem vendas, continuar para renderizar gastos e cards parciais
 
+  // Calcular comissões progressivas para todas as vendas do período
+  var _comissoesProgressivas=calcularComissoesTodasVendas(vendas);
+  var _salarios=calcularSalarios(vendas);
+
   // Montar detalhamento
   var rows=[];
-  var totais={venda:0,compra:0,frete_in:0,bag:0,frete_out:0,comissao:0,imposto:0,manutencao:0,eletri_receita:0,eletri_custo:0,lucro:0};
+  var totais={venda:0,compra:0,frete_in:0,bag:0,frete_out:0,comissao:0,imposto:0,manutencao:0,eletri_receita:0,eletri_custo:0,lucro:0,salarios:0};
 
   vendas.forEach(function(v){
     // Buscar custo de compra: primeiro no produto, depois nas compras
@@ -3159,12 +3387,8 @@ function renderFinanceiro(){
     var freteSaida=v.frete_saida||0;
     var eletriReceita=v.eletri_cobrado||0;
     var eletriCusto=v.eletri_custo||0;
-    // Comissão: se tem troca, recalcular sobre o dinheiro recebido (cash do cliente)
-    var comissao=v.comissao_valor||0;
-    if(v.troca&&v.comissao_pct){
-      var baseComissao=v.troca_dinheiro!=null?v.troca_dinheiro:(v.base_comissao||Math.max(0,(v.preco_venda||0)-(v.troca_valor||0)));
-      comissao=baseComissao*(v.comissao_pct/100);
-    }
+    // Comissão progressiva: usar cálculo global por vendedor
+    var comissao=_comissoesProgressivas&&_comissoesProgressivas.porVendedor[v.vendedor_id]?(_comissoesProgressivas.porVendedor[v.vendedor_id].porVenda[v.id]||0):(v.comissao_valor||0);
     var imposto=v.sem_nota?0:(v.preco_venda||0)*(cf.imposto_pct/100);
     var receitaTotal=(v.preco_venda||0)+eletriReceita;
     var lucro=receitaTotal-custoCompra-freteEntrada-bagAlcas-manutencao-freteSaida-comissao-imposto-eletriCusto;
@@ -3220,7 +3444,7 @@ function renderFinanceiro(){
           '<div class="form-group" style="margin:0"><label style="font-size:11px">Manutenção (R$)</label><input type="text" id="fe_manut_'+v.id+'" value="'+formatarValorBR(manutencao)+'" style="padding:6px 10px;font-size:12px"></div>'+
           '<div class="form-group" style="margin:0"><label style="font-size:11px">Frete entrada (R$)</label><input type="text" id="fe_fretein_'+v.id+'" value="'+formatarValorBR(freteEntrada)+'" style="padding:6px 10px;font-size:12px"></div>'+
           '<div class="form-group" style="margin:0"><label style="font-size:11px">Frete envio (R$)</label><input type="text" id="fe_freteout_'+v.id+'" value="'+formatarValorBR(freteSaida)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Comissão %</label><input type="text" id="fe_compct_'+v.id+'" value="'+(v.comissao_pct||0)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '<div class="form-group" style="margin:0"><label style="font-size:11px">Comissão</label><div style="padding:6px 10px;font-size:12px;color:var(--b);background:rgba(52,152,219,.06);border-radius:6px">'+formatarValorBR(comissao)+' <span style="font-size:10px;color:var(--txt3)">(progressiva)</span></div></div>'+
           '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri cobrado (R$)</label><input type="text" id="fe_eletricob_'+v.id+'" value="'+formatarValorBR(eletriReceita)+'" style="padding:6px 10px;font-size:12px"></div>'+
           '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri custo (R$)</label><input type="text" id="fe_eletricusto_'+v.id+'" value="'+formatarValorBR(eletriCusto)+'" style="padding:6px 10px;font-size:12px"></div>'+
         '</div>'+
@@ -3296,26 +3520,66 @@ function renderFinanceiro(){
   // Cards resumo (incluindo outros gastos) — renderizar primeiro sem ads, depois atualizar
   function renderFinCards(adsSpend){
     var totalAds=adsSpend?adsSpend.spend:0;
-    var custoTotalGeral=totais.compra+totais.frete_in+totais.bag+totais.manutencao+totais.frete_out+totais.comissao+totais.imposto+totais.eletri_custo+totalOutrosGastos+totalAds;
+    var custoSalarios=_salarios.total;
+    var custoTotalGeral=totais.compra+totais.frete_in+totais.bag+totais.manutencao+totais.frete_out+totais.comissao+totais.imposto+totais.eletri_custo+totalOutrosGastos+totalAds+custoSalarios;
     var receitaGeral=totais.venda+totais.eletri_receita;
     var lucroFinal=receitaGeral-custoTotalGeral;
     var margemFinal=receitaGeral>0?((lucroFinal/receitaGeral)*100).toFixed(1):'0';
     var corFinal=lucroFinal>=0?'var(--g)':'var(--r)';
+    // Lucro Bruto = Receita - Custo de aquisição (compra + frete entrada)
+    var lucroBruto=receitaGeral-totais.compra-totais.frete_in;
+    var margemBruta=receitaGeral>0?((lucroBruto/receitaGeral)*100).toFixed(1):'0';
+    var corBruto=lucroBruto>=0?'var(--g)':'var(--r)';
+    // Ticket médio
+    var ticketMedio=vendas.length>0?receitaGeral/vendas.length:0;
+    // ROI = lucro / investimento * 100
+    var investTotal=totais.compra+totais.frete_in+totais.manutencao;
+    var roi=investTotal>0?((lucroBruto/investTotal)*100).toFixed(1):'0';
+    // Projeção de faturamento mensal
+    var projecaoCard='';
+    if(vendas.length>=2&&periodo!=='todos'){
+      var rangeInfo=getFinDateRange(periodo);
+      if(rangeInfo.desde){
+        var diasPeriodo=Math.max(1,Math.ceil((new Date()-rangeInfo.desde)/(1000*60*60*24)));
+        var fatDiario=receitaGeral/diasPeriodo;
+        var projecaoMes=fatDiario*30;
+        var projecaoAno=fatDiario*365;
+        var vendasDia=(vendas.length/diasPeriodo).toFixed(1);
+        projecaoCard='<div class="fin-card" style="border:1px solid rgba(52,152,219,.2);background:rgba(52,152,219,.03)"><div class="fin-card-label">📈 Projeção Mensal</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(projecaoMes)+'</div><div class="fin-card-sub">~'+vendasDia+' vendas/dia · anual ~'+formatarValorBR(projecaoAno)+'</div></div>';
+      }
+    }else if(vendas.length>=2){
+      // Para "todos", calcular com base no range real das vendas
+      var datas=vendas.map(function(v){return new Date(v.data).getTime()}).filter(function(t){return!isNaN(t)}).sort();
+      if(datas.length>=2){
+        var diasRange=Math.max(1,Math.ceil((datas[datas.length-1]-datas[0])/(1000*60*60*24)));
+        var fatDiarioT=receitaGeral/diasRange;
+        var projecaoMesT=fatDiarioT*30;
+        var projecaoAnoT=fatDiarioT*365;
+        var vendasDiaT=(vendas.length/diasRange).toFixed(1);
+        projecaoCard='<div class="fin-card" style="border:1px solid rgba(52,152,219,.2);background:rgba(52,152,219,.03)"><div class="fin-card-label">📈 Projeção Mensal</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(projecaoMesT)+'</div><div class="fin-card-sub">~'+vendasDiaT+' vendas/dia · anual ~'+formatarValorBR(projecaoAnoT)+'</div></div>';
+      }
+    }
     var adsCard='';
     if(adsSpend!==null){
       var adsSub=adsSpend?(adsSpend.impressions>0?adsSpend.impressions.toLocaleString('pt-BR')+' impressões · '+adsSpend.clicks+' cliques':'sem anúncios no período'):'';
       adsCard='<div class="fin-card"><div class="fin-card-label">📢 Facebook Ads</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totalAds)+'</div><div class="fin-card-sub">'+adsSub+'</div></div>';
-    }else{
-      // Conta não configurada ou erro — não mostrar card
-      adsCard='';
     }
     var eletriLucro=totais.eletri_receita-totais.eletri_custo;
     cardsEl.innerHTML=
-      '<div class="fin-card"><div class="fin-card-label">Faturamento</div><div class="fin-card-val" style="color:var(--g)">'+formatarValorBR(receitaGeral)+'</div><div class="fin-card-sub">'+vendas.length+' venda(s)'+(totais.eletri_receita?' · ⚡+'+formatarValorBR(totais.eletri_receita):'')+'</div></div>'+
-      '<div class="fin-card"><div class="fin-card-label">Custo Total</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(custoTotalGeral)+'</div><div class="fin-card-sub">produtos+manutenção+ads+outros</div></div>'+
-      '<div class="fin-card"><div class="fin-card-label">Lucro Líquido</div><div class="fin-card-val" style="color:'+corFinal+'">'+formatarValorBR(lucroFinal)+'</div><div class="fin-card-sub">margem '+margemFinal+'%</div></div>'+
+      // Linha 1: Faturamento, Lucro Bruto, Lucro Líquido, Projeção
+      '<div class="fin-card" style="border:1px solid rgba(37,211,102,.2);background:rgba(37,211,102,.03)"><div class="fin-card-label">💰 Faturamento</div><div class="fin-card-val" style="color:var(--g)">'+formatarValorBR(receitaGeral)+'</div><div class="fin-card-sub">'+vendas.length+' venda(s)'+(totais.eletri_receita?' · ⚡+'+formatarValorBR(totais.eletri_receita):'')+'</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">📊 Lucro Bruto</div><div class="fin-card-val" style="color:'+corBruto+'">'+formatarValorBR(lucroBruto)+'</div><div class="fin-card-sub">margem bruta '+margemBruta+'% · receita − compra − frete</div></div>'+
+      '<div class="fin-card" style="border:1px solid '+(lucroFinal>=0?'rgba(37,211,102,.2)':'rgba(231,76,60,.2)')+';background:'+(lucroFinal>=0?'rgba(37,211,102,.03)':'rgba(231,76,60,.03)')+'"><div class="fin-card-label">💹 Lucro Líquido</div><div class="fin-card-val" style="color:'+corFinal+'">'+formatarValorBR(lucroFinal)+'</div><div class="fin-card-sub">margem líq. '+margemFinal+'% · todos os custos deduzidos</div></div>'+
+      projecaoCard+
+      // Linha 2: Ticket Médio, ROI, Custo Total
+      '<div class="fin-card"><div class="fin-card-label">🎯 Ticket Médio</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(ticketMedio)+'</div><div class="fin-card-sub">por venda</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">📈 ROI</div><div class="fin-card-val" style="color:'+(parseFloat(roi)>=0?'var(--g)':'var(--r)')+'">'+roi+'%</div><div class="fin-card-sub">retorno sobre investimento em estoque</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">📉 Custo Total</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(custoTotalGeral)+'</div><div class="fin-card-sub">produtos+frete+manut.+comissão+salários+imposto+ads+outros</div></div>'+
+      // Linha 3: Detalhamento de custos
+      '<div class="fin-card"><div class="fin-card-label">🏷️ Custo Aquisição</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totais.compra)+'</div><div class="fin-card-sub">compra dos acordeons</div></div>'+
       '<div class="fin-card"><div class="fin-card-label">Imposto ('+cf.imposto_pct+'%)</div><div class="fin-card-val" style="color:var(--y)">'+formatarValorBR(totais.imposto)+'</div></div>'+
-      '<div class="fin-card"><div class="fin-card-label">Comissões</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(totais.comissao)+'</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">Comissões (progressiva)</div><div class="fin-card-val" style="color:var(--b)">'+formatarValorBR(totais.comissao)+'</div><div class="fin-card-sub">'+_salarios.qtd+' vendedor(es) ativo(s)</div></div>'+
+      '<div class="fin-card"><div class="fin-card-label">💼 Salários</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(custoSalarios)+'</div><div class="fin-card-sub">'+_salarios.qtd+'× R$ '+formatarValorBR(VENDEDOR_SALARIO)+'</div></div>'+
       (totais.manutencao?'<div class="fin-card"><div class="fin-card-label">🔧 Manutenção</div><div class="fin-card-val" style="color:var(--r)">'+formatarValorBR(totais.manutencao)+'</div><div class="fin-card-sub">custo de reparo dos acordeons vendidos</div></div>':'')+
       (totais.eletri_receita?'<div class="fin-card"><div class="fin-card-label">⚡ Eletrificação</div><div class="fin-card-val" style="color:'+(eletriLucro>=0?'var(--g)':'var(--r)')+'">'+formatarValorBR(eletriLucro)+'</div><div class="fin-card-sub">cobrado '+formatarValorBR(totais.eletri_receita)+' · custo '+formatarValorBR(totais.eletri_custo)+'</div></div>':'')+
       adsCard+
@@ -6128,7 +6392,7 @@ function salvarProd(){
     // Preservar campos existentes (custo, venda, etc)
     var existing=prods.find(function(p){return p.id===editandoId});
     if(existing){
-      ['status','custo_compra','frete_entrada','vendedor_id','vendedor_nome','comissao_pct','comissao_valor','data_venda','frete_saida','origem_troca','venda_origem_id'].forEach(function(k){
+      ['status','custo_compra','frete_entrada','vendedor_id','vendedor_nome','comissao_valor','data_venda','frete_saida','origem_troca','venda_origem_id'].forEach(function(k){
         if(existing[k]!==undefined&&prod[k]===undefined) prod[k]=existing[k];
       });
       prod.status=existing.status||'disponivel';
