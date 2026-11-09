@@ -545,12 +545,11 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
             <input type="text" id="catBusca" placeholder="Buscar acordeon..." oninput="renderCatalogo()">
           </div>
           <div class="cat-filters">
-            <button class="cat-filter" onclick="setFilter('todos',this)">Todos</button>
             <button class="cat-filter active" onclick="setFilter('disponivel',this)">Disponíveis</button>
             <button class="cat-filter" onclick="setFilter('em_estoque',this)">📦 Em estoque</button>
             <button class="cat-filter" onclick="setFilter('a_caminho',this)">🚚 A caminho</button>
             <button class="cat-filter" onclick="setFilter('reservado',this)">Reservados</button>
-            <button class="cat-filter" onclick="setFilter('vendido',this)">Vendidos</button>
+            <button class="cat-filter" onclick="setFilter('todos',this)">Todos</button>
           </div>
         </div>
         <!-- Ferramentas de dados -->
@@ -2707,7 +2706,10 @@ function confirmarVenda(){
     sem_nota:semNota,
     envio:temEnvio,
     envio_servico:temEnvio?(document.getElementById('vendaEnvioServico').value||'pac'):'',
-    data:new Date().toISOString()
+    data:new Date().toISOString(),
+    custo_compra:prod.custo_compra||0,
+    frete_entrada:prod.frete_entrada||0,
+    manutencao:prod.manutencao||0
   };
   if(comprador) vendaObj.comprador=comprador;
   if(temEletri){
@@ -2728,15 +2730,11 @@ function confirmarVenda(){
   var vendas=getVendas();
   vendas.push(vendaObj);
   setVendas(vendas);
-  // Marcar produto como vendido
-  prod.status='vendido';
-  prod.vendedor_id=vendedorId;
-  prod.vendedor_nome=vendedorNome;
-  prod.comissao_valor=comValor;
-  prod.frete_saida=freteSaida;
-  prod.data_venda=new Date().toISOString();
-  prod.atualizado=new Date().toISOString();
+  // Remover produto do catálogo (já está registrado na venda, não precisa mais aparecer)
+  prods=prods.filter(function(pp){return pp.id!==prod.id});
   setProds(prods);
+  // Remover do catálogo Meta/WhatsApp
+  removeFromMetaCatalog(prodId,prod.nome);
 
   // Se teve troca: auto-criar apenas a compra (produto é cadastrado manualmente depois quando chegar)
   if(temTroca){
@@ -3266,6 +3264,10 @@ function salvarFinEdit(vendaId){
     v.base_comissao=baseComissao;
     v.recebido_dinheiro=baseComissao;
   }
+  // Salvar custos na própria venda (independente do produto)
+  v.custo_compra=custoCompra;
+  v.frete_entrada=freteIn;
+  v.manutencao=manutencao;
   v.frete_saida=freteOut;
   v.sem_nota=semNota;
   if(eletriCob>0){
@@ -3279,7 +3281,7 @@ function salvarFinEdit(vendaId){
   }
   vendas[idx]=v;
   setVendas(vendas);
-  // Update product costs too
+  // Sincronizar custos com o produto também (pra manter coerência no catálogo)
   var prods=getProds();
   var prod=prods.find(function(p){return p.id===v.produto_id});
   if(prod){
@@ -3298,20 +3300,33 @@ function excluirVendaFinanceiro(vendaId){
   var vendas=getVendas();
   var venda=vendas.find(function(v){return v.id===vendaId});
   if(!venda){showToast('⚠️ Venda não encontrada','error');return}
-  // Restaurar produto
+  // Restaurar produto ao catálogo (foi removido na venda, re-criar se necessário)
   var prods=getProds();
-  var prod=prods.find(function(p){return p.id===venda.produto_id});
-  if(prod){
-    prod.status='disponivel';
-    delete prod.vendedor_id;
-    delete prod.vendedor_nome;
-    delete prod.comissao_pct;
-    delete prod.comissao_valor;
-    delete prod.frete_saida;
-    delete prod.data_venda;
-    prod.atualizado=new Date().toISOString();
-    setProds(prods);
+  var prodExiste=prods.find(function(p){return p.id===venda.produto_id});
+  if(prodExiste){
+    prodExiste.status='disponivel';
+    delete prodExiste.vendedor_id;
+    delete prodExiste.vendedor_nome;
+    delete prodExiste.comissao_valor;
+    delete prodExiste.frete_saida;
+    delete prodExiste.data_venda;
+    prodExiste.atualizado=new Date().toISOString();
+  }else{
+    prods.push({
+      id:venda.produto_id,
+      nome:venda.produto_nome,
+      preco:formatarValorBR(venda.preco_venda||0),
+      custo_compra:venda.custo_compra||0,
+      frete_entrada:venda.frete_entrada||0,
+      manutencao:venda.manutencao||0,
+      status:'disponivel',
+      fotos:[],
+      descricao:'',
+      criado:new Date().toISOString(),
+      atualizado:new Date().toISOString()
+    });
   }
+  setProds(prods);
   // Remover compra de troca se existir
   if(venda.troca){
     var compras=getCompras();
@@ -3377,12 +3392,12 @@ function renderFinanceiro(){
   var totais={venda:0,compra:0,frete_in:0,bag:0,frete_out:0,comissao:0,imposto:0,manutencao:0,eletri_receita:0,eletri_custo:0,lucro:0,salarios:0};
 
   vendas.forEach(function(v){
-    // Buscar custo de compra: primeiro no produto, depois nas compras
+    // Buscar custos: primeiro na venda, depois no produto, depois nas compras
     var prod=prods.find(function(p){return p.id===v.produto_id});
     var compra=compras.find(function(c){return c.produto_id===v.produto_id});
-    var custoCompra=(prod&&prod.custo_compra)?prod.custo_compra:(compra?compra.custo_compra:0);
-    var freteEntrada=(prod&&prod.frete_entrada)?prod.frete_entrada:(compra?compra.frete_entrada:0);
-    var manutencao=(prod&&prod.manutencao)?prod.manutencao:0;
+    var custoCompra=v.custo_compra!=null?v.custo_compra:((prod&&prod.custo_compra)?prod.custo_compra:(compra?compra.custo_compra:0));
+    var freteEntrada=v.frete_entrada!=null?v.frete_entrada:((prod&&prod.frete_entrada)?prod.frete_entrada:(compra?compra.frete_entrada:0));
+    var manutencao=v.manutencao!=null?v.manutencao:((prod&&prod.manutencao)?prod.manutencao:0);
     var bagAlcas=cf.bag_alcas;
     var freteSaida=v.frete_saida||0;
     var eletriReceita=v.eletri_cobrado||0;
@@ -3438,15 +3453,33 @@ function renderFinanceiro(){
     rows.push('<tr id="finEdit_'+v.id+'" style="display:none"><td colspan="10" style="padding:0;border:none">'+
       '<div style="background:rgba(52,152,219,.04);border:1px solid rgba(52,152,219,.15);border-radius:0 0 8px 8px;padding:16px 20px;margin:0 -1px">'+
         '<div style="font-size:12px;font-weight:700;margin-bottom:12px;color:var(--b)">✏️ Editar — '+v.produto_nome+'</div>'+
-        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px">'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Preço de venda (R$)</label><input type="text" id="fe_preco_'+v.id+'" value="'+formatarValorBR(v.preco_venda||0)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Custo compra (R$)</label><input type="text" id="fe_compra_'+v.id+'" value="'+formatarValorBR(custoCompra)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Manutenção (R$)</label><input type="text" id="fe_manut_'+v.id+'" value="'+formatarValorBR(manutencao)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Frete entrada (R$)</label><input type="text" id="fe_fretein_'+v.id+'" value="'+formatarValorBR(freteEntrada)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Frete envio (R$)</label><input type="text" id="fe_freteout_'+v.id+'" value="'+formatarValorBR(freteSaida)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">Comissão</label><div style="padding:6px 10px;font-size:12px;color:var(--b);background:rgba(52,152,219,.06);border-radius:6px">'+formatarValorBR(comissao)+' <span style="font-size:10px;color:var(--txt3)">(progressiva)</span></div></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri cobrado (R$)</label><input type="text" id="fe_eletricob_'+v.id+'" value="'+formatarValorBR(eletriReceita)+'" style="padding:6px 10px;font-size:12px"></div>'+
-          '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri custo (R$)</label><input type="text" id="fe_eletricusto_'+v.id+'" value="'+formatarValorBR(eletriCusto)+'" style="padding:6px 10px;font-size:12px"></div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">'+
+          '<div style="background:rgba(37,211,102,.04);border:1px solid rgba(37,211,102,.12);border-radius:8px;padding:12px">'+
+            '<div style="font-size:11px;font-weight:700;color:var(--g);margin-bottom:8px">💰 Receita</div>'+
+            '<div class="form-group" style="margin:0 0 8px"><label style="font-size:11px">Preço de venda (R$)</label><input type="text" id="fe_preco_'+v.id+'" value="'+formatarValorBR(v.preco_venda||0)+'" style="padding:6px 10px;font-size:12px"></div>'+
+            '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Eletri cobrado (R$)</label><input type="text" id="fe_eletricob_'+v.id+'" value="'+formatarValorBR(eletriReceita)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '</div>'+
+          '<div style="background:rgba(231,76,60,.04);border:1px solid rgba(231,76,60,.12);border-radius:8px;padding:12px">'+
+            '<div style="font-size:11px;font-weight:700;color:var(--r);margin-bottom:8px">📦 Custos de Aquisição</div>'+
+            '<div class="form-group" style="margin:0 0 8px"><label style="font-size:11px">Custo compra (R$)</label><input type="text" id="fe_compra_'+v.id+'" value="'+formatarValorBR(custoCompra)+'" style="padding:6px 10px;font-size:12px"></div>'+
+            '<div class="form-group" style="margin:0 0 8px"><label style="font-size:11px">Frete entrada (R$)</label><input type="text" id="fe_fretein_'+v.id+'" value="'+formatarValorBR(freteEntrada)+'" style="padding:6px 10px;font-size:12px"></div>'+
+            '<div class="form-group" style="margin:0"><label style="font-size:11px">Manutenção (R$)</label><input type="text" id="fe_manut_'+v.id+'" value="'+formatarValorBR(manutencao)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '</div>'+
+        '</div>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">'+
+          '<div style="background:rgba(243,156,18,.04);border:1px solid rgba(243,156,18,.12);border-radius:8px;padding:12px">'+
+            '<div style="font-size:11px;font-weight:700;color:var(--y);margin-bottom:8px">🚚 Custos de Venda</div>'+
+            '<div class="form-group" style="margin:0 0 8px"><label style="font-size:11px">Frete envio (R$)</label><input type="text" id="fe_freteout_'+v.id+'" value="'+formatarValorBR(freteSaida)+'" style="padding:6px 10px;font-size:12px"></div>'+
+            '<div class="form-group" style="margin:0"><label style="font-size:11px">⚡ Custo eletrificação (R$)</label><input type="text" id="fe_eletricusto_'+v.id+'" value="'+formatarValorBR(eletriCusto)+'" style="padding:6px 10px;font-size:12px"></div>'+
+          '</div>'+
+          '<div style="background:rgba(52,152,219,.04);border:1px solid rgba(52,152,219,.12);border-radius:8px;padding:12px">'+
+            '<div style="font-size:11px;font-weight:700;color:var(--b);margin-bottom:8px">📋 Calculado automaticamente</div>'+
+            '<div style="font-size:12px;color:var(--txt2);line-height:1.8">'+
+              'Comissão: <strong style="color:var(--b)">'+formatarValorBR(comissao)+'</strong> <span style="font-size:10px;color:var(--txt3)">(progressiva)</span><br>'+
+              'Bag + alças: <strong>'+formatarValorBR(bagAlcas)+'</strong> <span style="font-size:10px;color:var(--txt3)">(fixo)</span><br>'+
+              'Imposto: <strong>'+(v.sem_nota?'Isento':formatarValorBR(imposto))+'</strong>'+
+            '</div>'+
+          '</div>'+
         '</div>'+
         '<div style="margin-top:12px"><label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:12px;color:var(--txt2)"><input type="checkbox" id="fe_semnota_'+v.id+'" '+(v.sem_nota?'checked':'')+' style="accent-color:var(--txt3);width:15px;height:15px"> 🧾 Sem nota fiscal (não calcula imposto)</label></div>'+
         (v.comprador?'<div style="margin-top:12px;padding:10px;background:rgba(52,152,219,.06);border:1px solid rgba(52,152,219,.12);border-radius:6px"><div style="font-size:11px;font-weight:700;color:var(--b);margin-bottom:6px">📦 Dados do cliente</div><div style="font-size:12px;line-height:1.7;color:var(--txt2)">'+v.comprador.nome+(v.comprador.cpf?'<br>CPF: '+v.comprador.cpf:'')+(v.comprador.tel?'<br>Tel: '+v.comprador.tel:'')+'<br>'+v.comprador.endereco+(v.comprador.cidade?'<br>'+v.comprador.cidade+(v.comprador.uf?' — '+v.comprador.uf:''):'')+'<br>CEP: '+v.comprador.cep+'</div></div>':'')+
@@ -4964,7 +4997,7 @@ function renderMLStatus(){
     sub.textContent='Configure suas credenciais para começar';
   }
   // Badge
-  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&!p.vendido});
+  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&(p.status||'disponivel')!=='vendido'});
   var publicados=prods.filter(function(p){return p.ml_item_id});
   var badge=document.getElementById('badgeML');
   var naoPublicados=prods.length-publicados.length;
@@ -5009,7 +5042,7 @@ function renderMLProdutos(){
     el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><div style="font-size:1.5rem;margin-bottom:6px">🔗</div><p style="margin:0;font-size:12px">Conecte ao Mercado Livre para ver os produtos</p></div>';
     return;
   }
-  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&!p.vendido});
+  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&(p.status||'disponivel')!=='vendido'});
   if(!prods.length){
     el.innerHTML='<div style="text-align:center;padding:2rem;color:var(--txt3)"><p style="margin:0;font-size:12px">Nenhum produto disponível para publicar. Cadastre produtos com fotos e preço.</p></div>';
     return;
@@ -5326,7 +5359,7 @@ function uploadFotosEPublicar(prod){
 function publicarTodosML(){
   var c=getMLConfig();
   if(!c.access_token){showToast('Conecte ao Mercado Livre primeiro','⚠️');return}
-  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&!p.vendido&&!p.ml_item_id});
+  var prods=getProds().filter(function(p){return p.preco&&p.fotos&&p.fotos.length&&(p.status||'disponivel')!=='vendido'&&!p.ml_item_id});
   if(!prods.length){showToast('Nenhum produto pendente para publicar','ℹ️');return}
   showToast('Publicando '+prods.length+' produto(s)...','🚀');
   var i=0;
@@ -5705,7 +5738,7 @@ function atualizarStats(){
   var total=prods.length;
   var disp=prods.filter(function(p){return(p.status||'disponivel')==='disponivel'}).length;
   var res=prods.filter(function(p){return p.status==='reservado'}).length;
-  var vend=prods.filter(function(p){return p.status==='vendido'}).length;
+  var vend=getVendas().length;
   document.getElementById('statTotal').textContent=total;
   document.getElementById('statDisp').textContent=disp;
   document.getElementById('statRes').textContent=res;
@@ -5791,7 +5824,9 @@ function renderCatalogo(){
     prods=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'&&(p.localizacao||'em_estoque')==='em_estoque'});
   }else if(filtroAtual==='a_caminho'){
     prods=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'&&(p.localizacao||'em_estoque')==='a_caminho'});
-  }else if(filtroAtual!=='todos'){
+  }else if(filtroAtual==='todos'){
+    prods=prods.filter(function(p){return(p.status||'disponivel')!=='vendido'});
+  }else{
     prods=prods.filter(function(p){return(p.status||'disponivel')===filtroAtual});
   }
   var el=document.getElementById('catGrid');
@@ -5816,9 +5851,7 @@ function renderCatalogo(){
         '<div class="cat-item-price">'+p.preco+' '+locBadge+'</div>'+
         '<div class="cat-item-actions">'+
           '<button class="cat-act edit" data-edit="'+p.id+'">✏️ Editar</button>'+
-          (st!=='vendido'?'<button class="cat-act vend" data-vend="'+p.id+'" style="background:var(--r-soft);color:var(--r)">💰 Vendido</button>':
-          '<button class="cat-act" data-removemeta="'+p.id+'" style="background:rgba(52,152,219,.12);color:var(--b);font-size:10px">📱 Remover do WhatsApp</button>'+
-          '<button class="cat-act vend" data-revend="'+p.id+'" style="background:var(--g-soft);color:var(--g)">↩️ Reativar</button>')+
+          '<button class="cat-act vend" data-vend="'+p.id+'" style="background:var(--r-soft);color:var(--r)">💰 Vender</button>'+
           '<button class="cat-act" data-delete="'+p.id+'" style="background:rgba(231,76,60,.1);color:var(--r);font-size:10px">🗑️ Excluir</button>'+
         '</div>'+
       '</div></div>';
@@ -5828,9 +5861,6 @@ function renderCatalogo(){
   });
   el.querySelectorAll('[data-vend]').forEach(function(btn){
     btn.addEventListener('click',function(e){e.stopPropagation();abrirModalVenda(this.getAttribute('data-vend'))});
-  });
-  el.querySelectorAll('[data-revend]').forEach(function(btn){
-    btn.addEventListener('click',function(e){e.stopPropagation();reativarProd(this.getAttribute('data-revend'))});
   });
   el.querySelectorAll('[data-delete]').forEach(function(btn){
     btn.addEventListener('click',function(e){
@@ -5844,21 +5874,6 @@ function renderCatalogo(){
       setProds(prods);
       showToast('🗑️ "'+prod.nome+'" excluído do sistema');
       renderCatalogo();
-    });
-  });
-  el.querySelectorAll('[data-removemeta]').forEach(function(btn){
-    btn.addEventListener('click',function(e){
-      e.stopPropagation();
-      var pid=this.getAttribute('data-removemeta');
-      var prods=getProds();
-      var prod=prods.find(function(p){return p.id===pid});
-      if(!prod)return;
-      var b=this;b.disabled=true;b.textContent='⏳ Removendo...';
-      removeFromMetaCatalogRetry(prod.id,prod.nome,function(ok){
-        b.disabled=false;
-        b.textContent=ok?'✅ Removido':'❌ Falhou';
-        setTimeout(function(){b.textContent='📱 Remover do WhatsApp'},3000);
-      });
     });
   });
   atualizarStats();
@@ -6477,18 +6492,8 @@ function removeFromMetaCatalogRetry(prodId,prodNome,callback){
 }
 
 function marcarVendido(id){
-  var prods=getProds();
-  var prod=prods.find(function(p){return p.id===id});
-  if(!prod)return;
-  prod.status='vendido';
-  prod.atualizado=new Date().toISOString();
-  setProds(prods);
-  renderCatalogo();
-  atualizarStats();
-  showToast('💰 '+prod.nome+' marcado como vendido!');
-  // Remove from Meta catalog
-  removeFromMetaCatalog(prod.id,prod.nome);
-  showToast('📱 Removendo do catálogo WhatsApp...');
+  // Sempre abrir modal de venda completo (registra no financeiro e remove do sistema)
+  abrirModalVenda(id);
 }
 
 function reativarProd(id){
