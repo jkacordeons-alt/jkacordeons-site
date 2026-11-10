@@ -1867,6 +1867,21 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
         <input type="text" id="fCompraFrete" placeholder="Frete para receber o acordeon">
       </div>
       <div class="form-group">
+        <label>Quantidade</label>
+        <select id="fCompraQtd" style="padding:10px 12px;font-size:14px;border-radius:8px;border:1px solid var(--bord);background:var(--card);color:var(--txt)">
+          <option value="1" selected>1 unidade</option>
+          <option value="2">2 unidades</option>
+          <option value="3">3 unidades</option>
+          <option value="4">4 unidades</option>
+          <option value="5">5 unidades</option>
+          <option value="6">6 unidades</option>
+          <option value="7">7 unidades</option>
+          <option value="8">8 unidades</option>
+          <option value="9">9 unidades</option>
+          <option value="10">10 unidades</option>
+        </select>
+      </div>
+      <div class="form-group">
         <label>Fornecedor / Origem (opcional)</label>
         <input type="text" id="fCompraOrigem" placeholder="Ex: João - Curitiba">
       </div>
@@ -2981,6 +2996,7 @@ function abrirModalCompra(id){
   document.getElementById('fCompraPreco').value='';
   document.getElementById('fCompraFrete').value='';
   document.getElementById('fCompraOrigem').value='';
+  document.getElementById('fCompraQtd').value='1';
   document.getElementById('fCompraData').value=new Date().toISOString().slice(0,10);
   document.getElementById('modalCompraTitle').textContent='🛒 Registrar Compra';
   // Popular select de produtos — só os que NÃO estão vinculados a outra compra
@@ -3003,6 +3019,7 @@ function abrirModalCompra(id){
       document.getElementById('fCompraPreco').value=c.custo_compra||'';
       document.getElementById('fCompraFrete').value=c.frete_entrada||'';
       document.getElementById('fCompraOrigem').value=c.origem||'';
+      document.getElementById('fCompraQtd').value=c.quantidade||'1';
       document.getElementById('fCompraData').value=(c.data||'').slice(0,10);
       if(c.produto_id)sel.value=c.produto_id;
       document.getElementById('modalCompraTitle').textContent='✏️ Editar Compra';
@@ -3028,6 +3045,7 @@ function salvarCompra(){
   var custo=parsarPrecoBR(document.getElementById('fCompraPreco').value);
   if(!custo){showToast('⚠️ Informe o preço de compra','error');return}
   var frete=parsarPrecoBR(document.getElementById('fCompraFrete').value)||0;
+  var quantidade=parseInt(document.getElementById('fCompraQtd').value)||1;
   var origem=document.getElementById('fCompraOrigem').value.trim();
   var data=document.getElementById('fCompraData').value||new Date().toISOString().slice(0,10);
   var prodId=document.getElementById('compraProdSelect').value||null;
@@ -3038,7 +3056,7 @@ function salvarCompra(){
     var c=compras.find(function(x){return x.id===editId});
     if(c){
       c.nome=nome;c.custo_compra=custo;c.frete_entrada=frete;
-      c.origem=origem;c.data=data;c.produto_id=prodId;
+      c.quantidade=quantidade;c.origem=origem;c.data=data;c.produto_id=prodId;
       c.atualizado=new Date().toISOString();
     }
   }else{
@@ -3047,6 +3065,7 @@ function salvarCompra(){
       nome:nome,
       custo_compra:custo,
       frete_entrada:frete,
+      quantidade:quantidade,
       origem:origem,
       data:data,
       produto_id:prodId,
@@ -3070,7 +3089,7 @@ function salvarCompra(){
   fecharModalCompra();
   renderCompras();
   atualizarBadgeCompras();
-  showToast(editId?'✅ Compra atualizada!':'✅ Compra registrada! '+formatarValorBR(custo));
+  showToast(editId?'✅ Compra atualizada!':'✅ Compra registrada! '+formatarValorBR(custo)+(quantidade>1?' (×'+quantidade+')':''));
 }
 
 function excluirCompra(id){
@@ -3116,7 +3135,7 @@ function renderCompras(){
     return '<div class="compra-card"'+borderStyle+'>'+
       '<div class="compra-icon">'+(c.tipo==='troca'?'🔄':'🪗')+'</div>'+
       '<div class="compra-info">'+
-        '<div class="compra-nome">'+c.nome+trocaBadge+'</div>'+
+        '<div class="compra-nome">'+c.nome+trocaBadge+((c.quantidade&&c.quantidade>1)?' <span style="background:var(--b-soft);color:var(--b);font-size:10px;padding:1px 6px;border-radius:4px;margin-left:4px;font-weight:700">×'+c.quantidade+'</span>':'')+'</div>'+
         '<div class="compra-detail">'+dataFmt+(c.origem?' · '+c.origem:'')+' · '+statusBadge+'</div>'+
       '</div>'+
       '<div class="compra-valores">'+
