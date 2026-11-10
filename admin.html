@@ -1868,18 +1868,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--txt);min-he
       </div>
       <div class="form-group">
         <label>Quantidade</label>
-        <select id="fCompraQtd" style="padding:10px 12px;font-size:14px;border-radius:8px;border:1px solid var(--bord);background:var(--card);color:var(--txt)">
-          <option value="1" selected>1 unidade</option>
-          <option value="2">2 unidades</option>
-          <option value="3">3 unidades</option>
-          <option value="4">4 unidades</option>
-          <option value="5">5 unidades</option>
-          <option value="6">6 unidades</option>
-          <option value="7">7 unidades</option>
-          <option value="8">8 unidades</option>
-          <option value="9">9 unidades</option>
-          <option value="10">10 unidades</option>
-        </select>
+        <input type="number" id="fCompraQtd" value="1" min="1" step="1" style="padding:10px 12px;font-size:14px;border-radius:8px;border:1px solid var(--bord);background:var(--card);color:var(--txt);width:120px">
       </div>
       <div class="form-group">
         <label>Fornecedor / Origem (opcional)</label>
