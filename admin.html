@@ -5877,9 +5877,10 @@ function renderCatalogo(){
       var prods=getProds();
       var prod=prods.find(function(p){return p.id===pid});
       if(!prod)return;
-      if(!confirm('Tem certeza que deseja EXCLUIR "'+prod.nome+'" permanentemente do sistema?\n\nEssa ação não pode ser desfeita.'))return;
+      if(!confirm('Tem certeza que deseja EXCLUIR "'+prod.nome+'" permanentemente do sistema e do Meta?\n\nEssa ação não pode ser desfeita.'))return;
       prods=prods.filter(function(p){return p.id!==pid});
       setProds(prods);
+      removeFromMetaCatalog(pid,prod.nome);
       showToast('🗑️ "'+prod.nome+'" excluído do sistema');
       renderCatalogo();
     });
